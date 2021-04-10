@@ -1,3 +1,6 @@
+<!--
+TODO: make it so size doesn't jump, and do the <big> thing
+-->
 <html>
  <head>
   <style>
@@ -45,10 +48,15 @@
        </table>
       <td>
        <table>
-         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonClicked()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
-         <tr><td><input class="undo" type="button" value="Undo" onclick="undoButtonClicked()">
-         <tr><td><input class="redo" type="button" value="Redo" onclick="redoButtonClicked()">
-        </table>
+        <tr>
+         <td><input type="button" value="Propagate singles" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+        <tr>
+         <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
+         <small><small><span class="undostacksize">0</span></small></small>
+        <tr>
+         <td><input class="redo" type="button" value="Redo" onmousedown="redoButtonMouseDown()" onmouseup="redoButtonMouseUp()">
+         <small><small><span class="redostacksize">0</span></small></small>
+       </table>
    <table>
 
 
@@ -221,12 +229,27 @@
    const redoStack = [];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
+   const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
+   const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
-   const updateUiFromState = () => {
+   // This must be separate from updateUiFromState: we do *not* want
+   // to do it on mousedown, since that will prevent recognizing mouseup!
+   const updateUndoRedoButtons = () => {
+     undoButton.disabled = (undoStack.length === 0);
+     redoButton.disabled = (redoStack.length === 0);
+     undoStackSizeSpan.innerHTML = ''+undoStack.length;
+     redoStackSizeSpan.innerHTML = ''+redoStack.length;
+   };
+   // Show common stuff in black, appearing stuff in green, disappearing stuff in red
+   const updateUiFromState = (state0,state1) => {
+     CHECK(Array.isArray(state0));
+     CHECK(Array.isArray(state1));
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
-         if (state[i][j].length === 1) {
-           const intvalue = state[i][j][0];
+         if (state0[i][j].length === 1 &&
+             state1[i][j].length === 1 &&
+             state0[i][j][0] == state1[i][j][0]) {
+           const intvalue = state0[i][j][0];
            const charvalue = intvalue2name(intvalue);
            cells[i*n*n+j].innerHTML = charvalue;
          } else {
@@ -237,8 +260,18 @@
              cell_inner_html += '<tr>'
              for (let subj = 0; subj < n; ++subj) {
                cell_inner_html += '<td class="pencil">'
-               if (state[i][j].includes(subi*n+subj+1)) {
-                 cell_inner_html += '' + intvalue2name(subi*n+subj+1);
+               const intvalue = subi*n+subj+1;
+               const includes0 = state0[i][j].includes(intvalue);
+               const includes1 = state1[i][j].includes(intvalue);
+               if (includes0 || includes1) {
+                 const color = !includes0 ? '#00c000' : !includes1 ? 'red' : 'black';
+                 const weight = !includes0 || !includes1 ? 'bold' : 'normal';
+                 cell_inner_html += '<span style="font-weight:'+weight+'; color:'+color+';">';
+                 // TODO: make it so size doesn't jump, and do this <big> thing!
+                 //if (!includes0 || !includes1) { cell_inner_html += '<big>'; }
+                 cell_inner_html += '' + intvalue2name(intvalue);
+                 //if (!includes0 || !includes1) { cell_inner_html += '</big>'; }
+                 cell_inner_html += '</span>';
                }
              }
            }
@@ -247,80 +280,76 @@
          }
        }
      }
-     undoButton.disabled = (undoStack.length === 0);
-     redoButton.disabled = (redoStack.length === 0);
-   }
+   };
 
    if (false) {
      // Just exercise it
      undoStack.push(deepCopy(state));
      state = undoStack.pop();
    }
-   updateUiFromState();
+   updateUiFromState(state,state);
+   updateUndoRedoButtons();
 
    const propagateSinglesButtonMouseDown = () => {
      console.log("    in propagateSinglesButtonMouseDown");
-     console.log("    out propagateSinglesButtonMouseDown");
-   };
-   const propagateSinglesButtonMouseUp = () => {
-     console.log("    in propagateSinglesButtonMouseUp");
-     console.log("    out propagateSinglesButtonMouseUp");
-   };
-   const propagateSinglesButtonClicked = () => {
-     console.log("    in propagateSinglesButtonClicked");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(deepCopy(state));
      propagateSingles(n, state);
-     updateUiFromState();
+     updateUiFromState(undoStack[undoStack.length-1],state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out propagateSinglesButtonClicked");
+     console.log("    out propagateSinglesButtonMouseDown");
+   };
+   const propagateSinglesButtonMouseUp = () => {
+     console.log("    in propagateSinglesButtonMouseUp");
+     updateUiFromState(state,state);
+     updateUndoRedoButtons();
+     console.log("    out propagateSinglesButtonMouseUp");
    };
    const undoButtonMouseDown = () => {
      console.log("    in undoButtonMouseDown");
-     console.log("    out undoButtonMouseDown");
-   };
-   const undoButtonMouseUp = () => {
-     console.log("    in undoButtonMouseUp");
-     console.log("    out undoButtonMouseUp");
-   };
-   const undoButtonClicked = () => {
-     console.log("    in undoButtonClicked");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      if (undoStack.length >= 1) {
        redoStack.push(state);
        state = undoStack.pop();
-       updateUiFromState();
+       // It seems to be less confusing if we show
+       // undos in the same color as the do's/redo's,
+       // even though they are doing the opposite thing.
+       updateUiFromState(state, redoStack[redoStack.length-1]);
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to undo.
        console.log("      nothing to undo!");
      }
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out undoButtonClicked");
+     console.log("    out undoButtonMouseDown");
+   };
+   const undoButtonMouseUp = () => {
+     console.log("    in undoButtonMouseUp");
+     updateUiFromState(state,state);
+     updateUndoRedoButtons();
+     console.log("    out undoButtonMouseUp");
    };
    const redoButtonMouseDown = () => {
      console.log("    in redoButtonMouseDown");
-     console.log("    out redoButtonMouseDown");
-   };
-   const redoButtonMouseUp = () => {
-     console.log("    in redoButtonMouseUp");
-     console.log("    out redoButtonMouseUp");
-   };
-   const redoButtonClicked = () => {
-     console.log("    in redoButtonClicked");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      if (redoStack.length >= 1) {
        undoStack.push(state);
        state = redoStack.pop();
-       updateUiFromState();
+       updateUiFromState(undoStack[undoStack.length-1], state);
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to redo.
        console.log("      nothing to redo!");
      }
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out redoButtonClicked");
+     console.log("    out redoButtonMouseDown");
+   };
+   const redoButtonMouseUp = () => {
+     console.log("    in redoButtonMouseUp");
+     updateUiFromState(state,state);
+     updateUndoRedoButtons();
+     console.log("    out redoButtonMouseUp");
    };
 
    console.log("out script");
