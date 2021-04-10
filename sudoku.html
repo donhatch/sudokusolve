@@ -45,8 +45,9 @@
        </table>
       <td>
        <table>
-         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonClicked()">
+         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonClicked()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
          <tr><td><input class="undo" type="button" value="Undo" onclick="undoButtonClicked()">
+         <tr><td><input class="redo" type="button" value="Redo" onclick="redoButtonClicked()">
         </table>
    <table>
 
@@ -217,9 +218,11 @@
    }
 
    const undoStack = [];
-   let undoButton = document.getElementsByClassName("undo")[0];
+   const redoStack = [];
+   const undoButton = document.getElementsByClassName("undo")[0];
+   const redoButton = document.getElementsByClassName("redo")[0];
 
-   const update = () => {
+   const updateUiFromState = () => {
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
          if (state[i][j].length === 1) {
@@ -244,37 +247,80 @@
          }
        }
      }
-     if (undoStack.length === 0) {
-       undoButton.disabled = true;
-     } else {
-       undoButton.disabled = false;
-     }
+     undoButton.disabled = (undoStack.length === 0);
+     redoButton.disabled = (redoStack.length === 0);
    }
 
-   if (true) {
+   if (false) {
      // Just exercise it
      undoStack.push(deepCopy(state));
      state = undoStack.pop();
    }
-   update();
+   updateUiFromState();
 
+   const propagateSinglesButtonMouseDown = () => {
+     console.log("    in propagateSinglesButtonMouseDown");
+     console.log("    out propagateSinglesButtonMouseDown");
+   };
+   const propagateSinglesButtonMouseUp = () => {
+     console.log("    in propagateSinglesButtonMouseUp");
+     console.log("    out propagateSinglesButtonMouseUp");
+   };
    const propagateSinglesButtonClicked = () => {
      console.log("    in propagateSinglesButtonClicked");
-     propagateSingles(n, state);
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
      undoStack.push(deepCopy(state));
-     update();
-     console.log("      undoStack.length = "+undoStack.length);
+     propagateSingles(n, state);
+     updateUiFromState();
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonClicked");
-   }
+   };
+   const undoButtonMouseDown = () => {
+     console.log("    in undoButtonMouseDown");
+     console.log("    out undoButtonMouseDown");
+   };
+   const undoButtonMouseUp = () => {
+     console.log("    in undoButtonMouseUp");
+     console.log("    out undoButtonMouseUp");
+   };
    const undoButtonClicked = () => {
      console.log("    in undoButtonClicked");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      if (undoStack.length >= 1) {
+       redoStack.push(state);
        state = undoStack.pop();
-       update();
+       updateUiFromState();
      } else {
+       // This shouldn't ever happen because the button should be disabled
+       // when there's nothing to undo.
        console.log("      nothing to undo!");
      }
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out undoButtonClicked");
+   };
+   const redoButtonMouseDown = () => {
+     console.log("    in redoButtonMouseDown");
+     console.log("    out redoButtonMouseDown");
+   };
+   const redoButtonMouseUp = () => {
+     console.log("    in redoButtonMouseUp");
+     console.log("    out redoButtonMouseUp");
+   };
+   const redoButtonClicked = () => {
+     console.log("    in redoButtonClicked");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     if (redoStack.length >= 1) {
+       undoStack.push(state);
+       state = redoStack.pop();
+       updateUiFromState();
+     } else {
+       // This shouldn't ever happen because the button should be disabled
+       // when there's nothing to redo.
+       console.log("      nothing to redo!");
+     }
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out redoButtonClicked");
    };
 
    console.log("out script");
