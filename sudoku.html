@@ -45,36 +45,34 @@
        </table>
       <td>
        <table>
-         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonCB()">
-         <tr><td><input class="undo" type="button" value="Undo" onclick="undoButtonCB()">
+         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonClicked()">
+         <tr><td><input class="undo" type="button" value="Undo" onclick="undoButtonClicked()">
         </table>
    <table>
 
 
  </body>
  <script>
-   const CHECK = function(cond) {
+   const CHECK = cond => {
      if (!cond) {
        console.log("CHECK FAILED!");
        document.body.innerHTML = "<big><big>CHECK FAILED!</big></big>";
        throw new Error("CHECK FAILED!");
      }
    };
-   const range = function(a,b) {
+   const range = (a,b) => {
      const answer = [];
      for (let i = a; i < b; ++i) {
        answer.push(i);
      }
      return answer;
    };
-   const ord = function(c) {
+   const ord = c => {
      CHECK(c.length === 1);
      return c.charCodeAt(0);
    }
-   const chr = function(o) {
-     return String.fromCharCode(o);
-   }
-   const name2intvalue = function(name) {
+   const chr = o => String.fromCharCode(o);
+   const name2intvalue = name => {
      CHECK(name.length === 1);
      if (name === '0') {
        return '';
@@ -90,10 +88,10 @@
      }
      CHECK(false);
    };
-   const intvalue2name = function(intvalue) {
+   const intvalue2name = intvalue =>  {
      return intvalue<=9 ? ''+intvalue : chr(ord('a') + intvalue-10);
    };
-   const removeIf = function(arr, f) {
+   const removeIf = (arr, f) => {
      for (let i = 0; i < arr.length; ++i) {
        if (f(arr[i])) {
          arr.splice(i, 1);
@@ -184,7 +182,7 @@
    console.log("  initial state = ",state);
 
    // Propagate singles to eliminate candidates.
-   const propagateSingles = function(n, state) {
+   const propagateSingles = (n, state) => {
      console.log("      propagating singles(n="+n+", state)");
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
@@ -252,31 +250,31 @@
        undoButton.disabled = false;
      }
    }
-   update();
 
-   if (false) {
+   if (true) {
      // Just exercise it
      undoStack.push(deepCopy(state));
      state = undoStack.pop();
-     undoStack.push(deepCopy(state));
-  }
+   }
+   update();
 
-   const propagateSinglesButtonCB = () => {
-     console.log("    in propagateSinglesButtonCB");
+   const propagateSinglesButtonClicked = () => {
+     console.log("    in propagateSinglesButtonClicked");
      propagateSingles(n, state);
      undoStack.push(deepCopy(state));
      update();
-     console.log("    out propagateSinglesButtonCB");
+     console.log("      undoStack.length = "+undoStack.length);
+     console.log("    out propagateSinglesButtonClicked");
    }
-   const undoButtonCB = () => {
-     console.log("    in undoButtonCB");
+   const undoButtonClicked = () => {
+     console.log("    in undoButtonClicked");
      if (undoStack.length >= 1) {
        state = undoStack.pop();
        update();
      } else {
        console.log("      nothing to undo!");
      }
-     console.log("    out undoButtonCB");
+     console.log("    out undoButtonClicked");
    };
 
    console.log("out script");
