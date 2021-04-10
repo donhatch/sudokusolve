@@ -1,5 +1,7 @@
 <!--
 TODO: make it so size doesn't jump, and do the <big> thing
+TODO: get mouse-up right (need to listen on window I think)
+TODO: disable buttons when they would do nothing
 -->
 <html>
  <head>
@@ -49,7 +51,9 @@ TODO: make it so size doesn't jump, and do the <big> thing
       <td>
        <table>
         <tr>
-         <td><input type="button" value="Propagate singles" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+         <td><input class="propagatesingles" type="button" value="Propagate singles" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+        <tr>
+         <td><input class="hiddensingles" type="button" value="Hidden singles" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
@@ -108,6 +112,19 @@ TODO: make it so size doesn't jump, and do the <big> thing
        }
      }
    };
+   const deepEquals = (a,b) => {
+     if (Array.isArray(a) && Array.isArray(b)) {
+       if (a.length != b.length) return false;
+       for (let i = 0; i < a.length; ++i) {
+         if (!deepEquals(a[i], b[i])) return false;
+       }
+       return true;
+     } else if (typeof(a) === "number" && typeof(b) === "number") {
+       return a === b;
+     } else {
+       CHECK(false);
+     }
+   };  // deepEquals
    const deepCopy = object => {
      if (Array.isArray(object)) {
        const answer = [];
@@ -120,7 +137,23 @@ TODO: make it so size doesn't jump, and do the <big> thing
      } else {
        CHECK(false);
      }
-   };
+   };  // deepCopy
+   const Stringify = object => {
+     if (Array.isArray(object)) {
+       let answer = '[';
+       for (let i = 0; i < object.length; ++i) {
+         if (i > 0) answer += ', ';
+         answer += Stringify(object[i]);
+       }
+       answer += ']';
+       return answer;
+     } else if (typeof(object) === "number") {
+       return ''+object;
+     } else {
+       CHECK(false);
+     }
+   };  // Stringify
+   const Top = arr => arr[arr.length-1];
 
 
    console.log("in script");
@@ -192,7 +225,7 @@ TODO: make it so size doesn't jump, and do the <big> thing
 
    // Propagate singles to eliminate candidates.
    const propagateSingles = (n, state) => {
-     console.log("      propagating singles(n="+n+", state)");
+     console.log("      in propagateSingles(n="+n+", state)");
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
          if (state[i][j].length == 1) {
@@ -218,30 +251,85 @@ TODO: make it so size doesn't jump, and do the <big> thing
          }
        }
      }
-     console.log("      propagated singles(n="+n+", state)");
-   }
+     console.log("      out propagateSingles(n="+n+", state)");
+   };  // propagateSingles
 
-   if (false) {
-     propagateSingles(n, state);
-   }
+   const doHiddenSingles = (n, state) => {
+     console.log("    in doHiddenSingles(n="+n+", state)");
+     // For each digit and house (i.e. row, column, or block),
+     // if there's only one place the digit can go
+     // in that house, then put it there
+     // (i.e. remove all other candidates in that cell).
+     const houses = [];
+     for (let i = 0; i < n*n; ++i) {
+       houses.push([]);
+       for (let j = 0; j < n*n; ++j) Top(houses).push([i,j]);
+     }
+     for (let j = 0; j < n*n; ++j) {
+       houses.push([]);
+       for (let i = 0; i < n*n; ++i) Top(houses).push([i,j]);
+     }
+     for (let ii = 0; ii < n; ++ii) {
+       for (let jj = 0; jj < n; ++jj) {
+         houses.push([]);
+         for (let iii = 0; iii < n; ++iii) {
+           for (let jjj = 0; jjj < n; ++jjj) {
+             Top(houses).push([ii*n+iii, jj*n+jjj]);
+           }
+         }
+       }
+     }
+     console.log("      houses = "+Stringify(houses));
+
+     for (let digit = 1; digit <= n*n; ++digit) {
+       for (let ihouse = 0; ihouse < houses.length; ++ihouse) {
+         const candidatePositionsInHouse = [];
+         for (let iinhouse = 0; iinhouse < houses[ihouse].length; ++iinhouse) {
+           const coords = houses[ihouse][iinhouse];
+           if (state[coords[0]][coords[1]].includes(digit)) {
+             candidatePositionsInHouse.push(iinhouse);
+           }
+         }
+         if (candidatePositionsInHouse.length == 1) {
+           console.log("          digit "+intvalue2name+" can go in only position "+candidatePositionsInHouse[0]+":"+houses[ihouse][candidatePositionsInHouse[0]]+" in some house!");
+           const coords = houses[ihouse][candidatePositionsInHouse[0]];
+           state[coords[0]][coords[1]].length = 1;
+           state[coords[0]][coords[1]][0] = digit;
+         }
+       }
+     }
+
+     console.log("    out doHiddenSingles(n="+n+", state)");
+   };  // doHiddenSingles
+
+
+
 
    const undoStack = [];
    const redoStack = [];
+   const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
+   const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
-   // This must be separate from updateUiFromState: we do *not* want
+   // This must be separate from updateUiFromStatePair: we do *not* want
    // to do it on mousedown, since that will prevent recognizing mouseup!
    const updateUndoRedoButtons = () => {
      undoButton.disabled = (undoStack.length === 0);
      redoButton.disabled = (redoStack.length === 0);
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
+     hiddenSinglesButton.disabled = (() => {
+       const scratchState = deepCopy(state);
+       doHiddenSingles(n, scratchState);
+       return deepEquals(state, scratchState);
+     })();
    };
+
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
-   const updateUiFromState = (state0,state1) => {
+   const updateUiFromStatePair = (state0,state1) => {
      CHECK(Array.isArray(state0));
      CHECK(Array.isArray(state1));
      for (let i = 0; i < n*n; ++i) {
@@ -280,14 +368,14 @@ TODO: make it so size doesn't jump, and do the <big> thing
          }
        }
      }
-   };
+   };  // updateUiFromStatePair
 
    if (false) {
      // Just exercise it
      undoStack.push(deepCopy(state));
      state = undoStack.pop();
    }
-   updateUiFromState(state,state);
+   updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
    const propagateSinglesButtonMouseDown = () => {
@@ -296,13 +384,29 @@ TODO: make it so size doesn't jump, and do the <big> thing
      redoStack.length = 0;  // clear
      undoStack.push(deepCopy(state));
      propagateSingles(n, state);
-     updateUiFromState(undoStack[undoStack.length-1],state);
+     updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonMouseDown");
    };
+   const hiddenSinglesButtonMouseUp = () => {
+     console.log("    in hiddenSinglesButtonMouseUp");
+     updateUiFromStatePair(state,state);
+     updateUndoRedoButtons();
+     console.log("    out hiddenSinglesButtonMouseUp");
+   };
+   const hiddenSinglesButtonMouseDown = () => {
+     console.log("    in hiddenSinglesButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doHiddenSingles(n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out hiddenSinglesButtonMouseDown");
+   };
    const propagateSinglesButtonMouseUp = () => {
      console.log("    in propagateSinglesButtonMouseUp");
-     updateUiFromState(state,state);
+     updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out propagateSinglesButtonMouseUp");
    };
@@ -315,7 +419,7 @@ TODO: make it so size doesn't jump, and do the <big> thing
        // It seems to be less confusing if we show
        // undos in the same color as the do's/redo's,
        // even though they are doing the opposite thing.
-       updateUiFromState(state, redoStack[redoStack.length-1]);
+       updateUiFromStatePair(state, Top(redoStack));
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to undo.
@@ -326,7 +430,7 @@ TODO: make it so size doesn't jump, and do the <big> thing
    };
    const undoButtonMouseUp = () => {
      console.log("    in undoButtonMouseUp");
-     updateUiFromState(state,state);
+     updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out undoButtonMouseUp");
    };
@@ -336,7 +440,7 @@ TODO: make it so size doesn't jump, and do the <big> thing
      if (redoStack.length >= 1) {
        undoStack.push(state);
        state = redoStack.pop();
-       updateUiFromState(undoStack[undoStack.length-1], state);
+       updateUiFromStatePair(Top(undoStack), state);
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to redo.
@@ -347,7 +451,7 @@ TODO: make it so size doesn't jump, and do the <big> thing
    };
    const redoButtonMouseUp = () => {
      console.log("    in redoButtonMouseUp");
-     updateUiFromState(state,state);
+     updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out redoButtonMouseUp");
    };
