@@ -1,0 +1,284 @@
+<html>
+ <head>
+  <style>
+   table.toplevel_table {
+    border:5px solid black;
+    border-collapse:collapse;
+    border-spacing:0px;
+   }
+   tr.after_divider {
+     border-top:3px solid gray;
+   }
+   td.cell.after_divider {
+     border-left:3px solid gray;
+   }
+   td.cell.prefilled {
+    background:#e6e6e6;  /* nytimes is #e6e6e6 */
+   }
+   td.cell { 
+    border:1px solid gray; 
+    padding:0px; 
+    margin:0px; 
+    /* 55 seems to be what is used by nytimes, maybe */
+    width:75px;
+    height:75px;
+    text-align:center;
+    font-size:200%;  /* XXX hack for now, should get something more principled */
+    font-weight:bold;
+   }
+   td.pencil {
+    text-align:center;
+    font-size:100%;  /* XXX hack for now, should get something more principled */
+    /* XXX this is very unprincipled; sizes don't add up, and it works for only n=3 */
+    width:20px;
+    height:20px;
+    color:black;
+   }
+  </style>
+ </head>
+ <body>
+  <table>
+    <tr>
+      <td>
+       <table class='toplevel_table'>
+        <!-- to be filled in by javascript -->
+       </table>
+      <td>
+       <table>
+         <tr><td><input type="button" value="Propagate singles" onclick="propagateSinglesButtonCB()">
+         <tr><td><input class="undo" type="button" value="Undo" onclick="undoButtonCB()">
+        </table>
+   <table>
+
+
+ </body>
+ <script>
+   const CHECK = function(cond) {
+     if (!cond) {
+       console.log("CHECK FAILED!");
+       document.body.innerHTML = "<big><big>CHECK FAILED!</big></big>";
+       throw new Error("CHECK FAILED!");
+     }
+   };
+   const range = function(a,b) {
+     const answer = [];
+     for (let i = a; i < b; ++i) {
+       answer.push(i);
+     }
+     return answer;
+   };
+   const ord = function(c) {
+     CHECK(c.length === 1);
+     return c.charCodeAt(0);
+   }
+   const chr = function(o) {
+     return String.fromCharCode(o);
+   }
+   const name2intvalue = function(name) {
+     CHECK(name.length === 1);
+     if (name === '0') {
+       return '';
+     }
+     if (ord(name) >= ord('0') && ord(name) <= ord('9')) {
+       return ord(name) - ord('0');
+     }
+     if (ord(name) >= ord('a') && ord(name) <= ord('z')) {
+       return ord(name) - ord('a') + 10;
+     }
+     if (ord(name) >= ord('A') && ord(name) <= ord('Z')) {
+       return ord(name) - ord('a') + 10;
+     }
+     CHECK(false);
+   };
+   const intvalue2name = function(intvalue) {
+     return intvalue<=9 ? ''+intvalue : chr(ord('a') + intvalue-10);
+   };
+   const removeIf = function(arr, f) {
+     for (let i = 0; i < arr.length; ++i) {
+       if (f(arr[i])) {
+         arr.splice(i, 1);
+         i--;
+       }
+     }
+   };
+   const deepCopy = object => {
+     if (Array.isArray(object)) {
+       const answer = [];
+       for (let i = 0; i < object.length; ++i) {
+         answer.push(deepCopy(object[i]));
+       }
+       return answer;
+     } else if (typeof(object) === "number") {
+       return object;
+     } else {
+       CHECK(false);
+     }
+   };
+
+
+   console.log("in script");
+   console.log("  window.location = ",window.location);
+   console.log("  window.location.href = ",window.location.href);
+
+   let n = 3;  // standard puzzle: 3x3x3x3
+
+   let prefill = undefined;
+   if (true) {
+     const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
+     //const url_param_prefill = '1000.0200.0030.0004';
+     const prefill_digits_only = url_param_prefill.replace(/[^0-9a-zA-Z]/g, '');
+     console.log("  prefill_digits_only = ",prefill_digits_only);
+
+     n = Math.round(Math.sqrt(Math.sqrt(prefill_digits_only.length)));
+     console.log("  n = ",n);
+     CHECK(prefill_digits_only.length == n*n*n*n);
+     prefill = [];
+     for (let i = 0; i < n*n*n*n; ++i) {
+       prefill.push(name2intvalue(prefill_digits_only[i]));
+     }
+     console.log("  prefill = ",prefill);
+   } else {
+     prefill = [];
+     for (let i = 0; i < n*n*n*n; ++i) {
+       prefill.push(0);
+     }
+   }
+
+
+   let the_table = document.getElementsByClassName("toplevel_table");
+   console.log("  the_table = ",the_table);
+   CHECK(the_table.length === 1);
+   the_table = the_table[0];
+   console.log("  the_table = ",the_table);
+
+   let table_inner_html = ''
+   for (let i = 0; i < n*n; ++i) {
+     const after_divider_maybe = i!=0 && i%n==0 ? " after_divider" : "";
+     table_inner_html += '<tr class="toplevel_row'+after_divider_maybe+'">'
+     for (let j = 0; j < n*n; ++j) {
+       const after_divider_maybe = j!=0 && j%n==0 ? " after_divider" : "";
+       const prefilled_maybe = prefill[i*n*n+j] != 0 ? " prefilled" : "";
+       table_inner_html += ' <td class="cell'+after_divider_maybe+prefilled_maybe+'">';
+     }
+   }
+
+   the_table.innerHTML = table_inner_html;
+
+   const cells = document.getElementsByClassName("cell");
+   CHECK(cells.length === n*n*n*n);
+
+
+   // State will be a list of candidates for each cell.
+   let state = [];
+   for (let i = 0; i < n*n; ++i) {
+     state.push([]);
+     for (let j = 0; j < n*n; ++j) {
+       if (prefill[i*n*n+j] == 0) {
+         state[i].push(range(1,n*n+1));
+         //console.log("  range(1,n*n+1) = ",range(1,n*n+1));
+       } else {
+         state[i].push([prefill[i*n*n+j]]);
+       }
+     }
+   }
+   console.log("  initial state = ",state);
+
+   // Propagate singles to eliminate candidates.
+   const propagateSingles = function(n, state) {
+     console.log("      propagating singles(n="+n+", state)");
+     for (let i = 0; i < n*n; ++i) {
+       for (let j = 0; j < n*n; ++j) {
+         if (state[i][j].length == 1) {
+           // same row
+           //console.log("      state["+i+"]["+j+"] is a singleton "+state[i][j][0]+"; lasering");
+           for (let k = 0; k < n*n; ++k) {
+             if (k != j) {
+               removeIf(state[i][k], x => x===state[i][j][0]);
+             }
+           }
+           for (let k = 0; k < n*n; ++k) {
+             if (k != i) {
+               removeIf(state[k][j], x => x===state[i][j][0]);
+             }
+           }
+           for (let ii = 0; ii < n; ++ii) {
+             for (let jj = 0; jj < n; ++jj) {
+               if (ii != i%n || jj != j%n) {
+                 removeIf(state[i-i%n+ii][j-j%n+jj], x=>x===state[i][j][0]);
+               }
+             }
+           }
+         }
+       }
+     }
+     console.log("      propagated singles(n="+n+", state)");
+   }
+
+   if (false) {
+     propagateSingles(n, state);
+   }
+
+   const undoStack = [];
+   let undoButton = document.getElementsByClassName("undo")[0];
+
+   const update = () => {
+     for (let i = 0; i < n*n; ++i) {
+       for (let j = 0; j < n*n; ++j) {
+         if (state[i][j].length === 1) {
+           const intvalue = state[i][j][0];
+           const charvalue = intvalue2name(intvalue);
+           cells[i*n*n+j].innerHTML = charvalue;
+         } else {
+           let cell_inner_html = '';
+           cell_inner_html += '<table>'
+
+           for (let subi = 0; subi < n; ++subi) {
+             cell_inner_html += '<tr>'
+             for (let subj = 0; subj < n; ++subj) {
+               cell_inner_html += '<td class="pencil">'
+               if (state[i][j].includes(subi*n+subj+1)) {
+                 cell_inner_html += '' + intvalue2name(subi*n+subj+1);
+               }
+             }
+           }
+           cell_inner_html += '</table>'
+           cells[i*n*n+j].innerHTML = cell_inner_html;
+         }
+       }
+     }
+     if (undoStack.length === 0) {
+       undoButton.disabled = true;
+     } else {
+       undoButton.disabled = false;
+     }
+   }
+   update();
+
+   if (false) {
+     // Just exercise it
+     undoStack.push(deepCopy(state));
+     state = undoStack.pop();
+     undoStack.push(deepCopy(state));
+  }
+
+   const propagateSinglesButtonCB = () => {
+     console.log("    in propagateSinglesButtonCB");
+     propagateSingles(n, state);
+     undoStack.push(deepCopy(state));
+     update();
+     console.log("    out propagateSinglesButtonCB");
+   }
+   const undoButtonCB = () => {
+     console.log("    in undoButtonCB");
+     if (undoStack.length >= 1) {
+       state = undoStack.pop();
+       update();
+     } else {
+       console.log("      nothing to undo!");
+     }
+     console.log("    out undoButtonCB");
+   };
+
+   console.log("out script");
+ </script>
+</html>
