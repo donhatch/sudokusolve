@@ -63,6 +63,9 @@ TODONE: disable buttons when they would do nothing
          <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="hiddenSinglesButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
          <small><small><span class="dohiddensinglescount"></span></small></small>
         <tr>
+         <td><input class="nakedpairs" type="button" value="Naked pairs" onmouseover="nakedPairsButtonMouseOver()" onmouseout="nakedPairsButtonMouseOut()" onmousedown="nakedPairsButtonMouseDown()" onmouseup="nakedPairsButtonMouseUp()">
+         <small><small><span class="donakedpairscount"></span></small></small>
+        <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
         <tr>
@@ -260,25 +263,26 @@ TODONE: disable buttons when they would do nothing
    // Propagate singles to eliminate candidates.
    const propagateSingles = (n, state) => {
      console.log("      in propagateSingles(n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
-         if (state[i][j].length == 1) {
+         if (originalState[i][j].length == 1) {
            // same row
-           //console.log("      state["+i+"]["+j+"] is a singleton "+state[i][j][0]+"; lasering");
+           //console.log("      state["+i+"]["+j+"] is a singleton "+originalState[i][j][0]+"; lasering");
            for (let k = 0; k < n*n; ++k) {
              if (k != j) {
-               removeIf(state[i][k], x => x===state[i][j][0]);
+               removeIf(state[i][k], x => x===originalState[i][j][0]);
              }
            }
            for (let k = 0; k < n*n; ++k) {
              if (k != i) {
-               removeIf(state[k][j], x => x===state[i][j][0]);
+               removeIf(state[k][j], x => x===originalState[i][j][0]);
              }
            }
            for (let ii = 0; ii < n; ++ii) {
              for (let jj = 0; jj < n; ++jj) {
                if (ii != i%n || jj != j%n) {
-                 removeIf(state[i-i%n+ii][j-j%n+jj], x=>x===state[i][j][0]);
+                 removeIf(state[i-i%n+ii][j-j%n+jj], x=>x===originalState[i][j][0]);
                }
              }
            }
@@ -288,6 +292,29 @@ TODONE: disable buttons when they would do nothing
      console.log("      out propagateSingles(n="+n+", state)");
    };  // propagateSingles
 
+   const all_houses = [];
+   {
+     for (let i = 0; i < n*n; ++i) {
+       all_houses.push([]);
+       for (let j = 0; j < n*n; ++j) Top(all_houses).push([i,j]);
+     }
+     for (let j = 0; j < n*n; ++j) {
+       all_houses.push([]);
+       for (let i = 0; i < n*n; ++i) Top(all_houses).push([i,j]);
+     }
+     for (let ii = 0; ii < n; ++ii) {
+       for (let jj = 0; jj < n; ++jj) {
+         all_houses.push([]);
+         for (let iii = 0; iii < n; ++iii) {
+           for (let jjj = 0; jjj < n; ++jjj) {
+             Top(all_houses).push([ii*n+iii, jj*n+jjj]);
+           }
+         }
+       }
+     }
+   }
+
+
    const doHiddenSingles = (n, state) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", state)");
@@ -296,41 +323,22 @@ TODONE: disable buttons when they would do nothing
      // if there's only one place the digit can go
      // in that house, then put it there
      // (i.e. remove all other candidates in that cell).
-     const houses = [];
-     for (let i = 0; i < n*n; ++i) {
-       houses.push([]);
-       for (let j = 0; j < n*n; ++j) Top(houses).push([i,j]);
-     }
-     for (let j = 0; j < n*n; ++j) {
-       houses.push([]);
-       for (let i = 0; i < n*n; ++i) Top(houses).push([i,j]);
-     }
-     for (let ii = 0; ii < n; ++ii) {
-       for (let jj = 0; jj < n; ++jj) {
-         houses.push([]);
-         for (let iii = 0; iii < n; ++iii) {
-           for (let jjj = 0; jjj < n; ++jjj) {
-             Top(houses).push([ii*n+iii, jj*n+jjj]);
-           }
-         }
-       }
-     }
-     if (verbose_level >= 2) console.log("          houses = "+Stringify(houses));
+     if (verbose_level >= 2) console.log("          all_houses = "+Stringify(all_houses));
 
      for (let digit = 1; digit <= n*n; ++digit) {
        if (verbose_level >= 2) console.log("              digit = "+digit);
-       for (let ihouse = 0; ihouse < houses.length; ++ihouse) {
+       for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
          const candidatePositionsInHouse = [];
          const XXXsuperdebug = digit==4 && ihouse == 19;
-         for (let iinhouse = 0; iinhouse < houses[ihouse].length; ++iinhouse) {
-           const coords = houses[ihouse][iinhouse];
+         for (let iinhouse = 0; iinhouse < all_houses[ihouse].length; ++iinhouse) {
+           const coords = all_houses[ihouse][iinhouse];
            if (originalState[coords[0]][coords[1]].includes(digit)) {
              candidatePositionsInHouse.push(iinhouse);
            }
          }
          if (candidatePositionsInHouse.length === 1) {
-           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+houses[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(houses[ihouse]));
-           const coords = houses[ihouse][candidatePositionsInHouse[0]];
+           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+all_houses[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
+           const coords = all_houses[ihouse][candidatePositionsInHouse[0]];
            state[coords[0]][coords[1]].length = 1;
            state[coords[0]][coords[1]][0] = digit;
          }
@@ -340,6 +348,15 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("            out doHiddenSingles(n="+n+", state)");
    };  // doHiddenSingles
 
+   const doNakedPairs = (n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doNakedPairs(n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+
+
+     if (verbose_level >= 1) console.log("            out doNakedPairs(n="+n+", state)");
+   };  // doNakedPairs
+
 
 
 
@@ -347,10 +364,12 @@ TODONE: disable buttons when they would do nothing
    const redoStack = [];
    const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
+   const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
    const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
+   const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -377,10 +396,13 @@ TODONE: disable buttons when they would do nothing
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState))
      const nDoHiddens = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
+     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddens===0;
+     nakedPairsButton.disabled = nDoNakedPairs===0;
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
      doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddens;
+     doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
    };
 
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
