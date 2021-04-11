@@ -127,7 +127,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
         <tr>
          <td>
            <input class="redo" type="button" value="Reset to outerHTML from 1sudoko.com:" onclick="resetButtonClicked()">
-           <input id="prefill"></input>
+           <input id="prefill" onkeydown="inputKeyDown(event)"></input>
 
         <tr>
          <td>
@@ -959,11 +959,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // updateUiFromStatePair
 
-   if (false) {
-     // Just exercise it
-     undoStack.push(deepCopy(state));
-     state = undoStack.pop();
-   }
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
@@ -1195,7 +1190,17 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out resetButtonClicked");
-   };
+   };  // resetButtonClicked
+
+   const inputKeyDown = (event) => {
+     console.log("    in inputKeyDown");
+     console.log("      event = ",event);
+     if (EQ(event.key, "Enter")) {
+       // hack
+       resetButtonClicked();
+     }
+     console.log("    out inputKeyDown");
+   };  // inputKeyDown
 
    //console.log("  file_contents = ",file_contents);
    console.log("out script");
