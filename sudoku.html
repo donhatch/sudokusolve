@@ -57,7 +57,7 @@ TODONE: disable buttons when they would do nothing
       <td>
        <table>
         <tr>
-         <td><input class="propagatesingles" type="button" value="Propagate singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="propagateSinglesButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+         <td><input class="propagatesingles" type="button" value="Naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="propagateSinglesButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
          <small><small><span class="propagatesinglescount"></span></small></small>
         <tr>
          <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="hiddenSinglesButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
@@ -65,6 +65,9 @@ TODONE: disable buttons when they would do nothing
         <tr>
          <td><input class="nakedpairs" type="button" value="Naked pairs" onmouseover="nakedPairsButtonMouseOver()" onmouseout="nakedPairsButtonMouseOut()" onmousedown="nakedPairsButtonMouseDown()" onmouseup="nakedPairsButtonMouseUp()">
          <small><small><span class="donakedpairscount"></span></small></small>
+        <tr>
+         <td><input class="hiddenpairs" type="button" value="Hidden pairs" onmouseover="hiddenPairsButtonMouseOver()" onmouseout="hiddenPairsButtonMouseOut()" onmousedown="hiddenPairsButtonMouseDown()" onmouseup="hiddenPairsButtonMouseUp()">
+         <small><small><span class="dohiddenpairscount"></span></small></small>
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
@@ -373,7 +376,7 @@ TODONE: disable buttons when they would do nothing
            map.get(key).push(iinhouse);
          }
        }
-       for (let [key,value] of map.entries()) {
+       for (const [key,value] of map.entries()) {
          if (value.length != 1) {
            if (verbose_level >= 2) console.log("                naked pair! key="+Stringify(key)+" value="+Stringify(value));
            CHECK(value.length == 2);
@@ -400,17 +403,68 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doNakedPairs(n="+n+", state)");
    };  // doNakedPairs
 
+   const doHiddenPairs = (n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doHiddenPairs(n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+
+     // For each house, look for pairs of digits such that each of
+     // them occurs only twice in the house, and in the same place.
+
+     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
+       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+       const digit2indicesInHouse = new Map();
+       for (let digit = 1; digit <= n*n; ++digit) {
+         const whereDigitResidesInHouse = [];
+         for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
+           const coords = all_houses[ihouse][iinhouse];
+           if (originalState[coords[0]][coords[1]].includes(digit)) {
+             whereDigitResidesInHouse.push(iinhouse);
+           }
+         }
+         digit2indicesInHouse.set(digit, whereDigitResidesInHouse);
+       }
+       const map = new Map();
+       for (const [digit,indices] of digit2indicesInHouse.entries()) {
+         if (indices.length === 2) {
+           const indiceskey = ''+indices;  // e.g. "4,7"
+           if (!map.has(indiceskey)) {
+             map.set(indiceskey, []);
+           }
+           map.get(indiceskey).push(digit);
+         }
+       }
+       for (const [indiceskey,digits] of map) {
+         if (digits.length != 1) {
+           CHECK(digits.length === 2);
+           if (verbose_level >= 1) console.log("          found a (maybe) hidden pair! digits="+Stringify(digits)+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
+           const indices = digit2indicesInHouse.get(digits[0]);
+           CHECK(deepEquals(indices, digit2indicesInHouse.get(digits[1])));
+           const coords0 = all_houses[ihouse][indices[0]];
+           const coords1 = all_houses[ihouse][indices[1]];
+           CHECK(!deepEquals(coords0, coords1));
+           removeIf(state[coords0[0]][coords0[1]], x => x!=digits[0] && x!=digits[1]);
+           removeIf(state[coords1[0]][coords1[1]], x => x!=digits[0] && x!=digits[1]);
+         }
+       }
+     }
+
+     if (verbose_level >= 1) console.log("        out doHiddenPairs(n="+n+", state)");
+   };  // doHiddenPairs
+
 
    const undoStack = [];
    const redoStack = [];
    const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
    const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
+   const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
    const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
    const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
+   const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -436,14 +490,17 @@ TODONE: disable buttons when they would do nothing
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState))
-     const nDoHiddens = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
+     const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
+     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenPairs(n,scratchState));
      propagateSinglesButton.disabled = nPropagates===0;
-     hiddenSinglesButton.disabled = nDoHiddens===0;
+     hiddenSinglesButton.disabled = nDoHiddenSingles===0;
      nakedPairsButton.disabled = nDoNakedPairs===0;
+     hiddenPairsButton.disabled = nDoHiddenPairs===0;
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
-     doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddens;
+     doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
      doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
+     doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
    };
 
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
@@ -524,6 +581,7 @@ TODONE: disable buttons when they would do nothing
      updateUndoRedoButtons();
      console.log("    out propagateSinglesButtonMouseUp");
    };
+
    const hiddenSinglesButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
      const scratchState = deepCopy(state);
@@ -552,6 +610,7 @@ TODONE: disable buttons when they would do nothing
      updateUndoRedoButtons();
      console.log("    out hiddenSinglesButtonMouseUp");
    };
+
    const nakedPairsButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
      const scratchState = deepCopy(state);
@@ -580,6 +639,36 @@ TODONE: disable buttons when they would do nothing
      updateUndoRedoButtons();
      console.log("    out nakedPairsButtonMouseUp");
    };
+
+   const hiddenPairsButtonMouseOver = () => {
+     console.log("    in propagateSinglesButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doHiddenPairs(n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out propagateSinglesButtonMouseOver");
+   };
+   const hiddenPairsButtonMouseOut = () => {
+     console.log("    in propagateSinglesButtonMouseOut");
+     updateUiFromStatePair(state,state);
+     console.log("    out propagateSinglesButtonMouseOut");
+   };
+   const hiddenPairsButtonMouseDown = () => {
+     console.log("    in hiddenPairsButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doHiddenPairs(n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out hiddenPairsButtonMouseDown");
+   };
+   const hiddenPairsButtonMouseUp = () => {
+     console.log("    in hiddenPairsButtonMouseUp");
+     updateUiFromStatePair(state,state);
+     updateUndoRedoButtons();
+     console.log("    out hiddenPairsButtonMouseUp");
+   };
+
    const undoButtonMouseDown = () => {
      console.log("    in undoButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
