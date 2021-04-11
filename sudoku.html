@@ -73,6 +73,7 @@ TODONE: disable buttons when they would do nothing
 
 
  </body>
+ <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script>
    const CHECK = cond => {
      if (!cond) {
@@ -171,9 +172,33 @@ TODONE: disable buttons when they would do nothing
    let n = 3;  // standard puzzle: 3x3x3x3
 
    let prefill = undefined;
+
    if (true) {
-     const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
+     //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
      //const url_param_prefill = '1000.0200.0030.0004';
+     let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
+     console.log("  url_param_prefill = ",url_param_prefill);
+
+     if (url_param_prefill[0] == 'p') {
+       // Get it out of file_contents
+       const found = url_param_prefill.match(/^.*[^0-9]([0-9]+)$/);
+       console.log("  found = ",found);
+       const puzzle_number = parseInt(found[1]);
+       console.log("  puzzle_number = ",puzzle_number);
+       const what_to_look_for = "Grid "+((puzzle_number-puzzle_number%10)/10)+(puzzle_number%10)+"\n";
+       console.log("  what_to_look_for = ",what_to_look_for);
+       const index = file_contents.indexOf(what_to_look_for);
+       console.log("  index = ",index);
+       CHECK(index >= 0);
+       url_param_prefill = ''
+       for (let i = index + what_to_look_for.length; i < file_contents.length && url_param_prefill.length < 81; ++i) {
+         if (file_contents[i] >= '0' && file_contents[i] <= '9') {
+           url_param_prefill += file_contents[i];
+         }
+       }
+       console.log("  url_param_prefill = ",url_param_prefill);
+     }
+
      const prefill_digits_only = url_param_prefill.replace(/[^0-9a-zA-Z]/g, '');
      console.log("  prefill_digits_only = ",prefill_digits_only);
 
@@ -191,6 +216,7 @@ TODONE: disable buttons when they would do nothing
        prefill.push(0);
      }
    }
+
 
 
    let the_table = document.getElementsByClassName("toplevel_table");
@@ -509,6 +535,7 @@ TODONE: disable buttons when they would do nothing
      console.log("    out redoButtonMouseUp");
    };
 
+   //console.log("  file_contents = ",file_contents);
    console.log("out script");
  </script>
 </html>
