@@ -83,6 +83,14 @@ TODONE: disable buttons when they would do nothing
          <small><small><span class="dohiddentriplescount"></span></small></small>
 
         <tr>
+         <td><input class="nakedquads" type="button" value="Naked quads" onmouseover="nakedQuadsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="nakedQuadsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <small><small><span class="donakedquadscount"></span></small></small>
+
+        <tr>
+         <td><input class="hiddenquads" type="button" value="Hidden quads" onmouseover="hiddenQuadsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="hiddenQuadsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <small><small><span class="dohiddenquadscount"></span></small></small>
+
+        <tr>
          <td><input class="omission" type="button" value="Omission/intersection/pointing/blocking/claiming" onmouseover="omissionButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="omissionButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="doomissionscount"></span></small></small>
 
@@ -282,7 +290,7 @@ TODONE: disable buttons when they would do nothing
        const answer = []
        for (let i0 = 0; i0 < n; ++i0)
        for (let i1 = i0+1; i1 < n; ++i1)
-       for (let i2 = i1+1; i2 < n; ++i1)
+       for (let i2 = i1+1; i2 < n; ++i2)
        for (let i3 = i2+1; i3 < n; ++i3)
          answer.push([i0,i1,i2,i3]);
        return answer;
@@ -516,7 +524,7 @@ TODONE: disable buttons when they would do nothing
    };  // doNakedTuples
 
    const doHiddenTuples = (tuplicity, n, state) => {
-     const verbose_level = 1;
+     const verbose_level = 3;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
@@ -698,6 +706,8 @@ TODONE: disable buttons when they would do nothing
    const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
    const nakedTriplesButton = document.getElementsByClassName("nakedtriples")[0];
    const hiddenTriplesButton = document.getElementsByClassName("hiddentriples")[0];
+   const nakedQuadsButton = document.getElementsByClassName("nakedquads")[0];
+   const hiddenQuadsButton = document.getElementsByClassName("hiddenquads")[0];
    const omissionButton = document.getElementsByClassName("omission")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
@@ -707,6 +717,8 @@ TODONE: disable buttons when they would do nothing
    const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
    const doNakedTriplesCountSpan = document.getElementsByClassName("donakedtriplescount")[0];
    const doHiddenTriplesCountSpan = document.getElementsByClassName("dohiddentriplescount")[0];
+   const doNakedQuadsCountSpan = document.getElementsByClassName("donakedquadscount")[0];
+   const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
    const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
@@ -738,6 +750,8 @@ TODONE: disable buttons when they would do nothing
      const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
      const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
      const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
+     const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
+     const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
 
      propagateSinglesButton.disabled = nPropagates===0;
@@ -746,6 +760,8 @@ TODONE: disable buttons when they would do nothing
      hiddenPairsButton.disabled = nDoHiddenPairs===0;
      nakedTriplesButton.disabled = nDoNakedTriples===0;
      hiddenTriplesButton.disabled = nDoHiddenTriples===0;
+     nakedQuadsButton.disabled = nDoNakedQuads===0;
+     hiddenQuadsButton.disabled = nDoHiddenQuads===0;
      omissionButton.disabled = nDoOmissions===0;
 
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
@@ -754,6 +770,8 @@ TODONE: disable buttons when they would do nothing
      doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
      doNakedTriplesCountSpan.innerHTML = ''+nDoNakedTriples;
      doHiddenTriplesCountSpan.innerHTML = ''+nDoHiddenTriples;
+     doNakedQuadsCountSpan.innerHTML = ''+nDoNakedQuads;
+     doHiddenQuadsCountSpan.innerHTML = ''+nDoHiddenQuads;
      doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
    };
 
@@ -895,6 +913,42 @@ TODONE: disable buttons when they would do nothing
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenTriplesButtonMouseDown");
+   };
+
+   const nakedQuadsButtonMouseOver = () => {
+     console.log("    in nakedQuadsButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doNakedTuples(4, n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out nakedQuadsButtonMouseOver");
+   };
+   const nakedQuadsButtonMouseDown = () => {
+     console.log("    in nakedQuadsButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doNakedTuples(4, n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out nakedQuadsButtonMouseDown");
+   };
+
+   const hiddenQuadsButtonMouseOver = () => {
+     console.log("    in hiddenQuadsButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doHiddenTuples(4, n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out hiddenQuadsButtonMouseOver");
+   };
+   const hiddenQuadsButtonMouseDown = () => {
+     console.log("    in hiddenQuadsButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doHiddenTuples(4, n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out hiddenQuadsButtonMouseDown");
    };
 
    const hiddenPairsButtonMouseOver = () => {
