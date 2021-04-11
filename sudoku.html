@@ -84,6 +84,11 @@ TODONE: disable buttons when they would do nothing
  </body>
  <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script>
+   const EQ = (a,b) => {
+     if (a === b) return true;
+     CHECK(typeof(a) == typeof(b));
+     return false;
+   };
    const CHECK = cond => {
      if (!cond) {
        console.log("CHECK FAILED!");
@@ -91,6 +96,23 @@ TODONE: disable buttons when they would do nothing
        throw new Error("CHECK FAILED!");
      }
    };
+   const CHECK_EQ = (a,b) => {
+     if (!(a === b)) {
+       // CBB: dup code except for "EQ" vs etc
+       console.log("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_EQ FAILED!</big></big>";
+       throw new Error("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
+     }
+   };
+   const CHECK_GE = (a,b) => {
+     if (!(a >= b)) {
+       // CBB: dup code except for "EQ" vs etc
+       console.log("CHECK_GE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_GE FAILED!</big></big>";
+       throw new Error("CHECK_GE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+     }
+   };
+
    const range = (a,b) => {
      const answer = [];
      for (let i = a; i < b; ++i) {
@@ -99,12 +121,12 @@ TODONE: disable buttons when they would do nothing
      return answer;
    };
    const ord = c => {
-     CHECK(c.length === 1);
+     CHECK_EQ(c.length, 1);
      return c.charCodeAt(0);
    }
    const chr = o => String.fromCharCode(o);
    const name2intvalue = name => {
-     CHECK(name.length === 1);
+     CHECK_EQ(name.length, 1);
      if (name === '0') {
        return '';
      }
@@ -224,7 +246,7 @@ TODONE: disable buttons when they would do nothing
        console.log("  what_to_look_for = ",what_to_look_for);
        const index = file_contents.indexOf(what_to_look_for);
        console.log("  index = ",index);
-       CHECK(index >= 0);
+       CHECK_GE(index, 0);
        url_param_prefill = ''
        for (let i = index + what_to_look_for.length; i < file_contents.length && url_param_prefill.length < 81; ++i) {
          if (file_contents[i] >= '0' && file_contents[i] <= '9') {
@@ -253,7 +275,7 @@ TODONE: disable buttons when they would do nothing
 
      n = Math.round(Math.sqrt(Math.sqrt(prefill_digits_only.length)));
      console.log("  n = ",n);
-     CHECK(prefill_digits_only.length == n*n*n*n);
+     CHECK_EQ(prefill_digits_only.length, n*n*n*n);
      prefill = [];
      for (let i = 0; i < n*n*n*n; ++i) {
        prefill.push(name2intvalue(prefill_digits_only[i]));
@@ -270,7 +292,7 @@ TODONE: disable buttons when they would do nothing
 
    let the_table = document.getElementsByClassName("toplevel_table");
    console.log("  the_table = ",the_table);
-   CHECK(the_table.length === 1);
+   CHECK_EQ(the_table.length, 1);
    the_table = the_table[0];
    console.log("  the_table = ",the_table);
 
@@ -288,7 +310,7 @@ TODONE: disable buttons when they would do nothing
    the_table.innerHTML = table_inner_html;
 
    const cells = document.getElementsByClassName("cell");
-   CHECK(cells.length === n*n*n*n);
+   CHECK_EQ(cells.length, n*n*n*n);
 
 
    // State will be a list of candidates for each cell.
@@ -419,7 +441,40 @@ TODONE: disable buttons when they would do nothing
        // What exactly is a naked triple?
        // Well, it's 3 different digits
        // whose union spans only 3 different cells in a particular house.
+
+       // CBB: should be array indexed by digit, but the 1-basing makes it awkward
        const digit2indicesInHouse = new Map();
+       for (let digit = 1; digit <= n*n; ++digit) {
+         digit2indicesInHouse.set(digit, []);
+       }
+       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
+         const coords = all_houses[ihouse][iinhouse];
+         for (const digit of originalState[coords[0]][coords[1]]) {
+           digit2indicesInHouse.get(digit).push(iinhouse);
+         }
+       }
+
+       const interesting_digits = [];
+       for (let digit = 1; digit <= n*n; ++digit) {
+         if (digit2indicesInHouse.get(digit).size >= 1 &&
+             digit2indicesInHouse.get(digit).size <= tuplicity) {
+           interesting_digits.push(digit);
+         }
+       }
+
+       if (tuplicity === 3) {
+         // TODO: dont hard code. this is just to get an initial implementation
+         // working for triples, so I can use it for reference
+         for (const digit0 of interesting_digits) {
+           for (const digit1 of interesting_digits) {
+             if (digit1 <= digit0) continue;
+             for (const digit2 of interesting_digits) {
+               if (digit2 <= digit1) continue;
+               if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+             }
+           }
+         }
+       }
 
      }
      if (verbose_level >= 1) console.log("        out doNaketTuples(tuplicity="+tuplicity+", n="+n+", state)");
@@ -447,7 +502,7 @@ TODONE: disable buttons when they would do nothing
        for (const [key,value] of map.entries()) {
          if (value.length != 1) {
            if (verbose_level >= 2) console.log("                naked pair! key="+Stringify(key)+" value="+Stringify(value));
-           CHECK(value.length == 2);
+           CHECK_EQ(value.length, 2);
            const ii0inhouse = value[0];
            const ii1inhouse = value[1];
            const coords0 = all_houses[ihouse][ii0inhouse];
@@ -505,7 +560,7 @@ TODONE: disable buttons when they would do nothing
        }
        for (const [indiceskey,digits] of map) {
          if (digits.length != 1) {
-           CHECK(digits.length === 2);
+           CHECK_EQ(digits.length, 2);
            if (verbose_level >= 2) console.log("          found a (maybe) hidden pair! digits="+Stringify(digits)+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
            const indices = digit2indicesInHouse.get(digits[0]);
            CHECK(deepEquals(indices, digit2indicesInHouse.get(digits[1])));
