@@ -519,9 +519,9 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", state)");
    };  // doHiddenSingles
 
-   const doNakedPairs = (n, state) => {
+   const doNakedPairsOLD = (n, state) => {
      const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doNakedPairs(n="+n+", state)");
+     if (verbose_level >= 1) console.log("        in doNakedPairsOLD(n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
 
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
@@ -563,11 +563,27 @@ TODONE: disable buttons when they would do nothing
        }
      }
 
+     if (verbose_level >= 1) console.log("        out doNakedPairsOLD(n="+n+", state)");
+   };  // doNakedPairsOLD
+
+   const doNakedPairs = (n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doNakedPairs(n="+n+", state)");
+     const stateOLD = deepCopy(state);
+     doNakedPairsOLD(n, stateOLD);
+     const stateNEW = deepCopy(state);
+     doNakedTuples(2, n, stateNEW);
+     CHECK(deepEquals(stateOLD, stateNEW));
+
+
+     doNakedPairsOLD(n, state);
+
      if (verbose_level >= 1) console.log("        out doNakedPairs(n="+n+", state)");
    };  // doNakedPairs
 
+
    const doNakedTuples = (tuplicity, n, state) => {
-     const verbose_level = 3;
+     const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
 
@@ -619,8 +635,6 @@ TODONE: disable buttons when they would do nothing
        }
 
       }
-
-     if (verbose_level >= 1) console.log("          UNIMPLEMENTED");
      if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
    };  // doNakedTuples
 
