@@ -1,4 +1,12 @@
 <!--
+TODO: think about whether it makes sense to auto-update candidates
+      (i.e. the naked single thing).
+      hover: show result of move
+      down: do move, show result of updating candidates
+      up: update the candidates
+      That might work nicely!
+      Idea: when down, i.e. move done and showing result of updating candidates, maybe use 2 different colors for about-to-remove and remove? hmm.
+
 TODO: layout flashing at beginning because no table.  can I fix that??
 TODO: refactor to make the states immutable
 TODO: make it so size doesn't jump, and do the <big> thing
@@ -11,6 +19,12 @@ TODO: get prefill from url param  (hmm, maybe not useful? not sure)
 
 TODONE: make easy way to get prefills from the projecteuler file (hard coded)
 TODONE: disable buttons when they would do nothing
+
+TODO: research more advanced strategies?
+      e.g. referred to on https://krazydad.com/hexsudoku/ :
+      X-Wing, XY-Wing, Swordfish
+
+TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-variants/super-sudoku-16x16
 
 -->
 <html>
@@ -178,7 +192,7 @@ TODONE: disable buttons when they would do nothing
      CHECK(false);
    };
    const intvalue2name = intvalue =>  {
-     return intvalue<=9 ? ''+intvalue : chr(ord('a') + intvalue-10);
+     return intvalue<=9 ? ''+intvalue : chr(ord('A') + intvalue-10);
    };
    const removeIf = (arr, f) => {
      for (let i = 0; i < arr.length; ++i) {
@@ -316,9 +330,36 @@ TODONE: disable buttons when they would do nothing
 
    if (true) {
      //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
-     //const url_param_prefill = '1000.0200.0030.0004';
+     //
+     // An "easy" 16x16 puzzle from https://1sudoku.com/sudoku-variants/super-sudoku-16x16
+     //
+     const url_param_prefill = (
+       '_EG3_F9__24_da7_' +
+       'DB_6A______CE_F2' +
+       '_28_74e1db5a_6G_' +
+       '__a____dg____B__' +
+       '3______79______g' +
+       '_A61_GC__8F_42D_' +
+       '_854________6EA_' +
+       '____BA_45_6E____' +
+       '____29_84_c7____' +
+       '_518________2g9_' +
+       '_3fd_cg__51_87e_' +
+       '4______3e______5' +
+       '__d____23____5__' +
+       '_62_g34EFAD5_C1_' +
+       '_c35_8F__72_gd6_' +
+       'a1_F5______87_23' +
+       ''
+     ).replace(/_/g, '0').toLowerCase();
 
-     let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
+     //const url_param_prefill = '1000.0200.0030.0004';  // unsolvable
+     //const url_param_prefill = '1300.0200.0030.0004';  // solvable
+     //const url_param_prefill = '1300.0200.0030.0000';  // unsolvable
+     //const url_param_prefill = '1300.0000.0032.0000';  // solvable
+
+     //let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
+
      console.log("  url_param_prefill = ",url_param_prefill);
 
      if (url_param_prefill[0] == 'p') {

@@ -37,6 +37,14 @@ My reviews:
     It has an accessible archive, but it shows a long
     ad before each puzzle.
 
+  https://1sudoku.com
+    Nice!
+    - Seems like a very polished interface
+    - has cool variants like kids 6x6.
+    - Hides the board when mouse isn't over the page,
+      which makes for a reasonable timer experience.
+    - hmm, have to explicitly press button to update candidates
+
   http://sudoklue.com
     - https://www.learn-sudoku.com/hidden-singles.html
       points out that pressing ctrl-<number> highlights
