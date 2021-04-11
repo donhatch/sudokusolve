@@ -137,6 +137,13 @@ TODONE: disable buttons when they would do nothing
          if (!deepEquals(a[i], b[i])) return false;
        }
        return true;
+     } else if (a instanceof Map && b instanceof Map)  {
+       if (a.size != b.size) return false;
+       for (const [akey,avalue] of a.entries()) {
+         if (!b.has(akey)) return false;
+         if (!deepEquals(b.get(akey), avalue)) return false;
+       }
+       return true;
      } else if (typeof(a) === "string" && typeof(b) === "string") {
        return a === b;
      } else if (typeof(a) === "number" && typeof(b) === "number") {
@@ -403,6 +410,21 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", state)");
    };  // doHiddenSingles
 
+   const doNakedTuples = (tuplicity, n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doNaketTuples(tuplicity="+tuplicity+", n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
+       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+       // What exactly is a naked triple?
+       // Well, it's 3 different digits
+       // whose union spans only 3 different cells in a particular house.
+       const digit2indicesInHouse = new Map();
+
+     }
+     if (verbose_level >= 1) console.log("        out doNaketTuples(tuplicity="+tuplicity+", n="+n+", state)");
+   };  // doNakedTuples
+
    const doNakedPairs = (n, state) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedPairs(n="+n+", state)");
@@ -459,17 +481,18 @@ TODONE: disable buttons when they would do nothing
 
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
        if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+       // CBB: should be array indexed by digit, but the 1-basing makes it awkward
        const digit2indicesInHouse = new Map();
        for (let digit = 1; digit <= n*n; ++digit) {
-         const whereDigitResidesInHouse = [];
-         for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-           const coords = all_houses[ihouse][iinhouse];
-           if (originalState[coords[0]][coords[1]].includes(digit)) {
-             whereDigitResidesInHouse.push(iinhouse);
-           }
-         }
-         digit2indicesInHouse.set(digit, whereDigitResidesInHouse);
+         digit2indicesInHouse.set(digit, []);
        }
+       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
+         const coords = all_houses[ihouse][iinhouse];
+         for (const digit of originalState[coords[0]][coords[1]]) {
+           digit2indicesInHouse.get(digit).push(iinhouse);
+         }
+       }
+
        const map = new Map();
        for (const [digit,indices] of digit2indicesInHouse.entries()) {
          if (indices.length === 2) {
