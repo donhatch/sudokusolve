@@ -516,7 +516,7 @@ TODONE: disable buttons when they would do nothing
    };  // doNakedTuples
 
    const doHiddenTuples = (tuplicity, n, state) => {
-     const verbose_level = 2;
+     const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
@@ -635,76 +635,6 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doNakedPairs(n="+n+", state)");
    };  // doNakedPairs
 
-   const doHiddenPairsNEW = (n, state) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doHiddenPairsNEW(n="+n+", state)");
-     doHiddenTuples(2, n, state);
-     if (verbose_level >= 1) console.log("        out doHiddenPairsNEW(n="+n+", state)");
-   };  // doHiddenPairs
-
-   const doHiddenPairs= (n, state) => {
-     const answerOLD = deepCopy(state);
-     doHiddenPairsOLD(n, answerOLD);
-     const answerNEW = deepCopy(state);
-     doHiddenPairsNEW(n, answerNEW);
-     CHECK(deepEquals(answerOLD, answerNEW));
-     for (let i = 0; i < state.length; ++i) {
-       for (let j = 0; j < state[i].length; ++j) {
-         state[i][j] = deepCopy(answerNEW[i][j]);
-       }
-     }
-   };  // doHiddenPairs
-
-   const doHiddenPairsOLD = (n, state) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doHiddenPairsOLD(n="+n+", state)");
-     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
-
-     // For each house, look for pairs of digits such that each of
-     // them occurs only twice in the house, and in the same place.
-
-     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
-       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
-       // CBB: should be array indexed by digit, but the 1-basing makes it awkward
-       const digit2indicesInHouse = new Map();
-       for (let digit = 1; digit <= n*n; ++digit) {
-         digit2indicesInHouse.set(digit, []);
-       }
-       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-         const coords = all_houses[ihouse][iinhouse];
-         for (const digit of originalState[coords[0]][coords[1]]) {
-           digit2indicesInHouse.get(digit).push(iinhouse);
-         }
-       }
-
-       const map = new Map();
-       for (const [digit,indices] of digit2indicesInHouse.entries()) {
-         if (indices.length === 2) {
-           const indiceskey = ''+indices;  // e.g. "4,7"
-           if (!map.has(indiceskey)) {
-             map.set(indiceskey, []);
-           }
-           map.get(indiceskey).push(digit);
-         }
-       }
-       for (const [indiceskey,digits] of map) {
-         if (digits.length != 1) {
-           CHECK_EQ(digits.length, 2);
-           if (verbose_level >= 2) console.log("          found a (maybe) hidden pair! digits="+Stringify(digits)+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
-           const indices = digit2indicesInHouse.get(digits[0]);
-           CHECK(deepEquals(indices, digit2indicesInHouse.get(digits[1])));
-           const coords0 = all_houses[ihouse][indices[0]];
-           const coords1 = all_houses[ihouse][indices[1]];
-           CHECK(!deepEquals(coords0, coords1));
-           removeIf(state[coords0[0]][coords0[1]], x => x!=digits[0] && x!=digits[1]);
-           removeIf(state[coords1[0]][coords1[1]], x => x!=digits[0] && x!=digits[1]);
-         }
-       }
-     }
-
-     if (verbose_level >= 1) console.log("        out doHiddenPairsOLD(n="+n+", state)");
-   };  // doHiddenPairs
-
    const doOmissions = (n, state) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
@@ -805,7 +735,7 @@ TODONE: disable buttons when they would do nothing
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState))
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
-     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenPairs(n,scratchState));
+     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
      const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
      const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
@@ -970,7 +900,7 @@ TODONE: disable buttons when they would do nothing
    const hiddenPairsButtonMouseOver = () => {
      console.log("    in hiddenPairsButtonMouseOver");
      const scratchState = deepCopy(state);
-     doHiddenPairs(n, scratchState);
+     doHiddenTuples(2, n, scratchState);
      updateUiFromStatePair(state,scratchState);
      console.log("    out hiddenPairsButtonMouseOver");
    };
@@ -979,7 +909,7 @@ TODONE: disable buttons when they would do nothing
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(deepCopy(state));
-     doHiddenPairs(n, state);
+     doHiddenTuples(2, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenPairsButtonMouseDown");
