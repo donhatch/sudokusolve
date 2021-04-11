@@ -1,7 +1,13 @@
 <!--
 TODO: make it so size doesn't jump, and do the <big> thing
 TODO: get mouse-up right (need to listen on window I think)
-TODO: disable buttons when they would do nothing
+TODO: show the red/green on hover?  (then maybe don't need down/up)
+TODO: get prefill from url param
+TODO: make easy way to get prefills from the projecteuler file
+TODO: show how many button presses of each type will succeed?
+
+TODONE: disable buttons when they would do nothing
+
 -->
 <html>
  <head>
@@ -51,9 +57,11 @@ TODO: disable buttons when they would do nothing
       <td>
        <table>
         <tr>
-         <td><input class="propagatesingles" type="button" value="Propagate singles" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+         <td><input class="propagatesingles" type="button" value="Propagate singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="propagateSinglesButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+         <small><small><span class="propagatesinglescount"></span></small></small>
         <tr>
-         <td><input class="hiddensingles" type="button" value="Hidden singles" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
+         <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="hiddenSinglesButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
+         <small><small><span class="dohiddensinglescount"></span></small></small>
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
@@ -255,7 +263,9 @@ TODO: disable buttons when they would do nothing
    };  // propagateSingles
 
    const doHiddenSingles = (n, state) => {
-     console.log("    in doHiddenSingles(n="+n+", state)");
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      // For each digit and house (i.e. row, column, or block),
      // if there's only one place the digit can go
      // in that house, then put it there
@@ -279,19 +289,21 @@ TODO: disable buttons when they would do nothing
          }
        }
      }
-     console.log("      houses = "+Stringify(houses));
+     if (verbose_level >= 2) console.log("          houses = "+Stringify(houses));
 
      for (let digit = 1; digit <= n*n; ++digit) {
+       if (verbose_level >= 2) console.log("              digit = "+digit);
        for (let ihouse = 0; ihouse < houses.length; ++ihouse) {
          const candidatePositionsInHouse = [];
+         const XXXsuperdebug = digit==4 && ihouse == 19;
          for (let iinhouse = 0; iinhouse < houses[ihouse].length; ++iinhouse) {
            const coords = houses[ihouse][iinhouse];
-           if (state[coords[0]][coords[1]].includes(digit)) {
+           if (originalState[coords[0]][coords[1]].includes(digit)) {
              candidatePositionsInHouse.push(iinhouse);
            }
          }
-         if (candidatePositionsInHouse.length == 1) {
-           console.log("          digit "+intvalue2name+" can go in only position "+candidatePositionsInHouse[0]+":"+houses[ihouse][candidatePositionsInHouse[0]]+" in some house!");
+         if (candidatePositionsInHouse.length === 1) {
+           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+houses[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(houses[ihouse]));
            const coords = houses[ihouse][candidatePositionsInHouse[0]];
            state[coords[0]][coords[1]].length = 1;
            state[coords[0]][coords[1]][0] = digit;
@@ -299,7 +311,7 @@ TODO: disable buttons when they would do nothing
        }
      }
 
-     console.log("    out doHiddenSingles(n="+n+", state)");
+     if (verbose_level >= 1) console.log("            out doHiddenSingles(n="+n+", state)");
    };  // doHiddenSingles
 
 
@@ -311,8 +323,24 @@ TODO: disable buttons when they would do nothing
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
+   const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
+   const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
+
+   const howManyTimesStateWillChange = (state,changeState) => {
+     let answer = 0;
+     while (true) {
+       const newState = deepCopy(state);
+       changeState(newState);
+       if (deepEquals(state, newState)) {
+         break;
+       }
+       ++answer;
+       state = newState;
+     }
+     return answer;
+   };  // howManyTimesStateWillChange
 
    // This must be separate from updateUiFromStatePair: we do *not* want
    // to do it on mousedown, since that will prevent recognizing mouseup!
@@ -321,11 +349,12 @@ TODO: disable buttons when they would do nothing
      redoButton.disabled = (redoStack.length === 0);
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
-     hiddenSinglesButton.disabled = (() => {
-       const scratchState = deepCopy(state);
-       doHiddenSingles(n, scratchState);
-       return deepEquals(state, scratchState);
-     })();
+     const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState))
+     const nDoHiddens = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
+     propagateSinglesButton.disabled = nPropagates===0;
+     hiddenSinglesButton.disabled = nDoHiddens===0;
+     propagateSinglesCountSpan.innerHTML = ''+nPropagates;
+     doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddens;
    };
 
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
@@ -378,6 +407,18 @@ TODO: disable buttons when they would do nothing
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
+   const propagateSinglesButtonMouseOver = () => {
+     console.log("    in propagateSinglesButtonMouseOver");
+     const scratchState = deepCopy(state);
+     propagateSingles(n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out propagateSinglesButtonMouseOver");
+   };
+   const propagateSinglesButtonMouseOut = () => {
+     console.log("    in propagateSinglesButtonMouseOut");
+     updateUiFromStatePair(state,state);
+     console.log("    out propagateSinglesButtonMouseOut");
+   };
    const propagateSinglesButtonMouseDown = () => {
      console.log("    in propagateSinglesButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
@@ -388,11 +429,23 @@ TODO: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonMouseDown");
    };
-   const hiddenSinglesButtonMouseUp = () => {
-     console.log("    in hiddenSinglesButtonMouseUp");
+   const propagateSinglesButtonMouseUp = () => {
+     console.log("    in propagateSinglesButtonMouseUp");
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
-     console.log("    out hiddenSinglesButtonMouseUp");
+     console.log("    out propagateSinglesButtonMouseUp");
+   };
+   const hiddenSinglesButtonMouseOver = () => {
+     console.log("    in propagateSinglesButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doHiddenSingles(n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out propagateSinglesButtonMouseOver");
+   };
+   const hiddenSinglesButtonMouseOut = () => {
+     console.log("    in propagateSinglesButtonMouseOut");
+     updateUiFromStatePair(state,state);
+     console.log("    out propagateSinglesButtonMouseOut");
    };
    const hiddenSinglesButtonMouseDown = () => {
      console.log("    in hiddenSinglesButtonMouseDown");
@@ -404,11 +457,11 @@ TODO: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenSinglesButtonMouseDown");
    };
-   const propagateSinglesButtonMouseUp = () => {
-     console.log("    in propagateSinglesButtonMouseUp");
+   const hiddenSinglesButtonMouseUp = () => {
+     console.log("    in hiddenSinglesButtonMouseUp");
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
-     console.log("    out propagateSinglesButtonMouseUp");
+     console.log("    out hiddenSinglesButtonMouseUp");
    };
    const undoButtonMouseDown = () => {
      console.log("    in undoButtonMouseDown");
