@@ -52,51 +52,35 @@ Wish list in a solver:
  - arbitrary size (2x2, 3x3, 4x4, etc)
 
 Logic:
- - Nailing down a digit in a cell removes that digit
-   as candidate from the rest of that row,column,block
- - "naked single" or "lone single": When only one candidate left in a cell, that's the answer for the cell
+ - "naked single" or "lone single": When only one candidate left in a cell, that's the answer for the cell, and that digit can be removed from the rest of all 3 houses containing that cell
  - "hidden single": When only one place left in a row/column/block
    for a given digit to go, it goes there.
    (most or all of the latimes hints and nytimes hints
    are of this form)
-   Q: is there always such a hint? no way,
-      but maybe yes when in easy mode.
-      I wonder what kinds of hints it gives in expert mode?
-   PA: well, I'm doing an latimes expert one,
-      and it always seems to have a hint of this form...
-      oh wait!  There's a different kind of hint,
-      in which it highlights and entire row/column,
-      to express that there's only one candidate left
-      in the cell
-      Oh, and there is yet another kind of hint...
-      not even sure what this one is expressing yet;
-      it's highlighting an intersecting row and block
 
- - Higher-order versions of all of the above
-
- - "naked pair": when two cells
+ DONE: "naked pair": when two cells
    in same row/column/block have same two candidates,
    that rules out those candidates for the rest of
    that row/column/block.  Very strong if sharing the same
    block and row-or-column simultaneously; this is called
    a "locked pair".
- - "naked triple", "naked quad".  probably increasingly
+ TODO: "naked triple", "naked quad".  probably increasingly
    hard to spot.
 
  - "visual elimination" of a digit - supposedly powerful,
    but I don't totally get it yet. https://www.learn-sudoku.com/visual-elimination.html
    "Most Sudoku puzzles printed in newspapers and magazines, even those rated with high levels of difficulty, are in fact quite easy to solve — at least from the perspective of someone who has mastered this technique."
 
-  - "hidden pairs" - https://www.learn-sudoku.com/hidden-pairs.html
+  DONE: "hidden pairs" - https://www.learn-sudoku.com/hidden-pairs.html
     This is a hidden naked pair: 
     if two digits occur in only two cells in a block
     (or row or column), then erase everything else
     in those two cells, making it a naked pair.
-  - "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html  analogous to hidden pairs.
+  TODO: "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html  analogous to hidden pairs.
     need to go back and review this
 
 
-  - "omission"/"intersection"/"pointing"/"blocking"/"claiming" https://www.learn-sudoku.com/omission.html
+  DONE: "omission"/"intersection"/"pointing"/"blocking"/"claiming" https://www.learn-sudoku.com/omission.html
   - when a given digit's occurrances
     in block is limited to a given row or column,
     then that digit can be eliminated from the rest

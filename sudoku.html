@@ -201,6 +201,7 @@ TODONE: disable buttons when they would do nothing
    if (true) {
      //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
      //const url_param_prefill = '1000.0200.0030.0004';
+
      let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
      console.log("  url_param_prefill = ",url_param_prefill);
 
@@ -210,7 +211,9 @@ TODONE: disable buttons when they would do nothing
        console.log("  found = ",found);
        const puzzle_number = parseInt(found[1]);
        console.log("  puzzle_number = ",puzzle_number);
-       const what_to_look_for = "Grid "+((puzzle_number-puzzle_number%10)/10)+(puzzle_number%10)+"\n";
+       const puzzle_numeral = ''+((puzzle_number-puzzle_number%10)/10)+(puzzle_number%10);
+
+       const what_to_look_for = "Grid "+puzzle_numeral+"\n";
        console.log("  what_to_look_for = ",what_to_look_for);
        const index = file_contents.indexOf(what_to_look_for);
        console.log("  index = ",index);
@@ -222,6 +225,20 @@ TODONE: disable buttons when they would do nothing
          }
        }
        console.log("  url_param_prefill = ",url_param_prefill);
+
+       if (true) {
+         // Make "prev" and "next" links
+         if (puzzle_number > 1) {
+           const scratch = new URL(window.location.href);
+           scratch.searchParams.set("prefill", "p"+(puzzle_number-1));
+           document.body.innerHTML += '<a href="'+scratch.href+'">prev</a>';
+         }
+         if (puzzle_number < 50) {
+           const scratch = new URL(window.location.href);
+           scratch.searchParams.set("prefill", "p"+(puzzle_number+1));
+           document.body.innerHTML += ' <a href="'+scratch.href+'">next</a>';
+         }
+       }
      }
 
      const prefill_digits_only = url_param_prefill.replace(/[^0-9a-zA-Z]/g, '');
