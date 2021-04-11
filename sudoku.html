@@ -1,6 +1,6 @@
 <!--
-TODO: refactor to make the states immutable
 TODO: implement naked tuples (triples and quads)
+TODO: refactor to make the states immutable
 TODO: make it so size doesn't jump, and do the <big> thing
 TODO: get mouse-up right (need to listen on window I think)
 TODO: show the red/green on hover?  (then maybe don't need down/up)
@@ -526,6 +526,7 @@ TODONE: disable buttons when they would do nothing
 
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
        if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+       // map from digit set to positions in house with exactly that digit set.
        const map = new Map();
        for (let iinhouse = 0; iinhouse < all_houses[ihouse].length; ++iinhouse) {
          const coords = all_houses[ihouse][iinhouse];
@@ -566,15 +567,65 @@ TODONE: disable buttons when they would do nothing
    };  // doNakedPairs
 
    const doNakedTuples = (tuplicity, n, state) => {
-     const verbose_level = 2;
+     const verbose_level = 3;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+
+     // What is a naked pair?  It's when two cells in a house
+     // have the exact same candidates.  In this case we can eliminate
+     // those two candidates from the rest of the house.
+
+     // What is a naked triple?  It's when three cells in a house
+     // have the same three candidates, although it may be that only
+     // two of them occur at a time.  E.g.
+     //   123 123 12
+     //   12 13 23
+     // In that case we can eliminate these three candidates from
+     // the rest of the house.
+
+     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
+       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+
+       const iindicesOfNonSingles = [];
+       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
+         const coords = all_houses[ihouse][iinhouse];
+         if (originalState[coords[0]][coords[1]].length >= 2) {
+          iindicesOfNonSingles.push(iinhouse);
+         }
+       }
+       // CBB: probably very inefficient, especially when no naked singles
+       // in the house
+       const ksets = KSets(iindicesOfNonSingles.length, tuplicity);
+       for (const kset of ksets) {
+         const union = new Set();
+         for (const i of kset) {
+           const iinhouse = iindicesOfNonSingles[i];
+           const coords = all_houses[ihouse][iinhouse];
+           for (const digit of originalState[coords[0]][coords[1]]) {
+             union.add(digit);
+           }
+         }
+         if (union.size == tuplicity) {
+           if (verbose_level >= 2) console.log("                    found naked "+tuplicity+"-tuple "+Stringify(union)+" in house "+ihouse+" non-single positions "+Stringify(kset));
+           // remove the digits in the union from the rest of this house.
+           for (let i = 0; i < iindicesOfNonSingles.length; ++i) {
+             if (!kset.includes(i)) {
+               const iinhouse = iindicesOfNonSingles[i];
+               const coords = all_houses[ihouse][iinhouse];
+               removeIf(state[coords[0]][coords[1]], x => union.has(x));
+             }
+           }
+         }
+       }
+
+      }
+
      if (verbose_level >= 1) console.log("          UNIMPLEMENTED");
      if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
    };  // doNakedTuples
 
    const doHiddenTuples = (tuplicity, n, state) => {
-     const verbose_level = 3;
+     const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
