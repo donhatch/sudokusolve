@@ -56,27 +56,39 @@ TODONE: disable buttons when they would do nothing
        </table>
       <td>
        <table>
+
         <tr>
          <td><input class="propagatesingles" type="button" value="Naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="propagatesinglescount"></span></small></small>
+
         <tr>
          <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dohiddensinglescount"></span></small></small>
+
         <tr>
          <td><input class="nakedpairs" type="button" value="Naked pairs" onmouseover="nakedPairsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="nakedPairsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="donakedpairscount"></span></small></small>
+
         <tr>
          <td><input class="hiddenpairs" type="button" value="Hidden pairs" onmouseover="hiddenPairsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="hiddenPairsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dohiddenpairscount"></span></small></small>
+
+        <tr>
+         <td><input class="nakedtriples" type="button" value="Naked triples" onmouseover="nakedTriplesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="nakedTriplesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <small><small><span class="donakedtriplescount"></span></small></small>
+
         <tr>
          <td><input class="omission" type="button" value="Omission/intersection/pointing/blocking/claiming" onmouseover="omissionButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="omissionButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="doomissionscount"></span></small></small>
+
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
+
         <tr>
          <td><input class="redo" type="button" value="Redo" onmousedown="redoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="redostacksize">0</span></small></small>
+
        </table>
    <table>
 
@@ -639,6 +651,7 @@ TODONE: disable buttons when they would do nothing
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
    const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
    const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
+   const nakedTriplesButton = document.getElementsByClassName("nakedtriples")[0];
    const omissionButton = document.getElementsByClassName("omission")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
@@ -646,6 +659,7 @@ TODONE: disable buttons when they would do nothing
    const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
    const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
    const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
+   const doNakedTriplesCountSpan = document.getElementsByClassName("donakedtriplescount")[0];
    const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
@@ -675,18 +689,21 @@ TODONE: disable buttons when they would do nothing
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
      const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenPairs(n,scratchState));
+     const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
      nakedPairsButton.disabled = nDoNakedPairs===0;
      hiddenPairsButton.disabled = nDoHiddenPairs===0;
+     nakedTriplesButton.disabled = nDoNakedTriples===0;
      omissionButton.disabled = nDoOmissions===0;
 
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
      doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
      doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
      doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
+     doNakedTriplesCountSpan.innerHTML = ''+nDoNakedTriples;
      doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
    };
 
