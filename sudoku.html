@@ -57,25 +57,25 @@ TODONE: disable buttons when they would do nothing
       <td>
        <table>
         <tr>
-         <td><input class="propagatesingles" type="button" value="Naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="propagateSinglesButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="propagateSinglesButtonMouseUp()">
+         <td><input class="propagatesingles" type="button" value="Naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="propagatesinglescount"></span></small></small>
         <tr>
-         <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="hiddenSinglesButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="hiddenSinglesButtonMouseUp()">
+         <td><input class="hiddensingles" type="button" value="Hidden singles" onmouseover="hiddenSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="hiddenSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dohiddensinglescount"></span></small></small>
         <tr>
-         <td><input class="nakedpairs" type="button" value="Naked pairs" onmouseover="nakedPairsButtonMouseOver()" onmouseout="nakedPairsButtonMouseOut()" onmousedown="nakedPairsButtonMouseDown()" onmouseup="nakedPairsButtonMouseUp()">
+         <td><input class="nakedpairs" type="button" value="Naked pairs" onmouseover="nakedPairsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="nakedPairsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="donakedpairscount"></span></small></small>
         <tr>
-         <td><input class="hiddenpairs" type="button" value="Hidden pairs" onmouseover="hiddenPairsButtonMouseOver()" onmouseout="hiddenPairsButtonMouseOut()" onmousedown="hiddenPairsButtonMouseDown()" onmouseup="hiddenPairsButtonMouseUp()">
+         <td><input class="hiddenpairs" type="button" value="Hidden pairs" onmouseover="hiddenPairsButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="hiddenPairsButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dohiddenpairscount"></span></small></small>
         <tr>
-         <td><input class="omission" type="button" value="Omission/intersection/pointing/blocking/claiming" onmouseover="omissionButtonMouseOver()" onmouseout="omissionButtonMouseOut()" onmousedown="omissionButtonMouseDown()" onmouseup="omissionButtonMouseUp()">
+         <td><input class="omission" type="button" value="Omission/intersection/pointing/blocking/claiming" onmouseover="omissionButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="omissionButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="doomissionscount"></span></small></small>
         <tr>
-         <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
+         <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
         <tr>
-         <td><input class="redo" type="button" value="Redo" onmousedown="redoButtonMouseDown()" onmouseup="redoButtonMouseUp()">
+         <td><input class="redo" type="button" value="Redo" onmousedown="redoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="redostacksize">0</span></small></small>
        </table>
    <table>
@@ -99,6 +99,7 @@ TODONE: disable buttons when they would do nothing
    const CHECK_EQ = (a,b) => {
      if (!(a === b)) {
        // CBB: dup code except for "EQ" vs etc
+       // CBB: sometimes it would be better to use `,` instead of `+` to take advantage of console's stringification.  but sometimes not.
        console.log("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
        document.body.innerHTML = "<big><big>CHECK_EQ FAILED!</big></big>";
        throw new Error("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
@@ -127,7 +128,7 @@ TODONE: disable buttons when they would do nothing
    const chr = o => String.fromCharCode(o);
    const name2intvalue = name => {
      CHECK_EQ(name.length, 1);
-     if (name === '0') {
+     if (EQ(name, '0')) {
        return '';
      }
      if (ord(name) >= ord('0') && ord(name) <= ord('9')) {
@@ -153,6 +154,9 @@ TODONE: disable buttons when they would do nothing
      }
    };
    const deepEquals = (a,b) => {
+     if (a === b) return true;
+     const type = typeof(a);
+     CHECK(type === typeof(b));
      if (Array.isArray(a) && Array.isArray(b)) {
        if (a.length != b.length) return false;
        for (let i = 0; i < a.length; ++i) {
@@ -166,10 +170,8 @@ TODONE: disable buttons when they would do nothing
          if (!deepEquals(b.get(akey), avalue)) return false;
        }
        return true;
-     } else if (typeof(a) === "string" && typeof(b) === "string") {
-       return a === b;
-     } else if (typeof(a) === "number" && typeof(b) === "number") {
-       return a === b;
+     } else if (type === "string" || type === "number") {
+       return false;
      } else {
        CHECK(false);
      }
@@ -470,7 +472,7 @@ TODONE: disable buttons when they would do nothing
              if (digit1 <= digit0) continue;
              for (const digit2 of interesting_digits) {
                if (digit2 <= digit1) continue;
-               if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
+               if (verbose_level >= 2) console.log("                considering triple of digits "+digit0+" "+digit1+" "+digit2);
              }
            }
          }
@@ -745,11 +747,6 @@ TODONE: disable buttons when they would do nothing
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
    };
-   const propagateSinglesButtonMouseOut = () => {
-     console.log("    in propagateSinglesButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out propagateSinglesButtonMouseOut");
-   };
    const propagateSinglesButtonMouseDown = () => {
      console.log("    in propagateSinglesButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
@@ -760,12 +757,6 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonMouseDown");
    };
-   const propagateSinglesButtonMouseUp = () => {
-     console.log("    in propagateSinglesButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out propagateSinglesButtonMouseUp");
-   };
 
    const hiddenSinglesButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
@@ -773,11 +764,6 @@ TODONE: disable buttons when they would do nothing
      doHiddenSingles(n, scratchState);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const hiddenSinglesButtonMouseOut = () => {
-     console.log("    in propagateSinglesButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out propagateSinglesButtonMouseOut");
    };
    const hiddenSinglesButtonMouseDown = () => {
      console.log("    in hiddenSinglesButtonMouseDown");
@@ -789,24 +775,13 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenSinglesButtonMouseDown");
    };
-   const hiddenSinglesButtonMouseUp = () => {
-     console.log("    in hiddenSinglesButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out hiddenSinglesButtonMouseUp");
-   };
 
    const nakedPairsButtonMouseOver = () => {
-     console.log("    in propagateSinglesButtonMouseOver");
+     console.log("    in nakedPairsButtonMouseOver");
      const scratchState = deepCopy(state);
      doNakedPairs(n, scratchState);
      updateUiFromStatePair(state,scratchState);
-     console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const nakedPairsButtonMouseOut = () => {
-     console.log("    in propagateSinglesButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out propagateSinglesButtonMouseOut");
+     console.log("    out nakedPairsButtonMouseOver");
    };
    const nakedPairsButtonMouseDown = () => {
      console.log("    in nakedPairsButtonMouseDown");
@@ -818,24 +793,31 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedPairsButtonMouseDown");
    };
-   const nakedPairsButtonMouseUp = () => {
-     console.log("    in nakedPairsButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out nakedPairsButtonMouseUp");
+
+   const nakedTriplesButtonMouseOver = () => {
+     console.log("    in nakedTriplesButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doNakedTuples(3, n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out nakedTriplesButtonMouseOver");
+   };
+   const nakedTriplesButtonMouseDown = () => {
+     console.log("    in nakedTriplesButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doNakedTuples(3, n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out nakedTriplesButtonMouseDown");
    };
 
    const hiddenPairsButtonMouseOver = () => {
-     console.log("    in propagateSinglesButtonMouseOver");
+     console.log("    in hiddenPairsButtonMouseOver");
      const scratchState = deepCopy(state);
      doHiddenPairs(n, scratchState);
      updateUiFromStatePair(state,scratchState);
-     console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const hiddenPairsButtonMouseOut = () => {
-     console.log("    in propagateSinglesButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out propagateSinglesButtonMouseOut");
+     console.log("    out hiddenPairsButtonMouseOver");
    };
    const hiddenPairsButtonMouseDown = () => {
      console.log("    in hiddenPairsButtonMouseDown");
@@ -847,12 +829,6 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenPairsButtonMouseDown");
    };
-   const hiddenPairsButtonMouseUp = () => {
-     console.log("    in hiddenPairsButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out hiddenPairsButtonMouseUp");
-   };
 
    const omissionButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
@@ -860,11 +836,6 @@ TODONE: disable buttons when they would do nothing
      doOmissions(n, scratchState);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const omissionButtonMouseOut = () => {
-     console.log("    in propagateSinglesButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out propagateSinglesButtonMouseOut");
    };
    const omissionButtonMouseDown = () => {
      console.log("    in omissionButtonMouseDown");
@@ -875,12 +846,6 @@ TODONE: disable buttons when they would do nothing
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out omissionButtonMouseDown");
-   };
-   const omissionButtonMouseUp = () => {
-     console.log("    in omissionButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out omissionButtonMouseUp");
    };
 
    const undoButtonMouseDown = () => {
@@ -901,12 +866,6 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out undoButtonMouseDown");
    };
-   const undoButtonMouseUp = () => {
-     console.log("    in undoButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out undoButtonMouseUp");
-   };
    const redoButtonMouseDown = () => {
      console.log("    in redoButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
@@ -922,11 +881,17 @@ TODONE: disable buttons when they would do nothing
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out redoButtonMouseDown");
    };
-   const redoButtonMouseUp = () => {
-     console.log("    in redoButtonMouseUp");
+
+   const anyButtonMouseOut = () => {
+     console.log("    in anyButtonMouseOut");
+     updateUiFromStatePair(state,state);
+     console.log("    out anyButtonMouseOut");
+   };
+   const anyButtonMouseUp = () => {
+     console.log("    in anyButtonMouseUp");
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
-     console.log("    out redoButtonMouseUp");
+     console.log("    out anyButtonMouseUp");
    };
 
    //console.log("  file_contents = ",file_contents);
