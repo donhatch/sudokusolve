@@ -69,6 +69,9 @@ TODONE: disable buttons when they would do nothing
          <td><input class="hiddenpairs" type="button" value="Hidden pairs" onmouseover="hiddenPairsButtonMouseOver()" onmouseout="hiddenPairsButtonMouseOut()" onmousedown="hiddenPairsButtonMouseDown()" onmouseup="hiddenPairsButtonMouseUp()">
          <small><small><span class="dohiddenpairscount"></span></small></small>
         <tr>
+         <td><input class="omission" type="button" value="Omission/intersection/pointing/blocking/claiming" onmouseover="omissionButtonMouseOver()" onmouseout="omissionButtonMouseOut()" onmousedown="omissionButtonMouseDown()" onmouseup="omissionButtonMouseUp()">
+         <small><small><span class="doomissionscount"></span></small></small>
+        <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="undoButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
         <tr>
@@ -175,6 +178,16 @@ TODONE: disable buttons when they would do nothing
      }
    };  // Stringify
    const Top = arr => arr[arr.length-1];
+
+   const IsSubsetOf = (a,b) => {
+     // TODO: check that a and b are both sets.  How?
+     for (const x of a) {
+       if (!b.has(x)) {
+         return false;
+       }
+     }
+     return true;
+   };
 
 
    console.log("in script");
@@ -322,6 +335,22 @@ TODONE: disable buttons when they would do nothing
        }
      }
    }
+   const coords2houses = [];
+   {
+     for (let i = 0; i < n*n; ++i) {
+       coords2houses.push([]);
+       for (let j = 0; j < n*n; ++j) {
+         Top(coords2houses).push([]);
+       }
+     }
+     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
+       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
+         const coord = all_houses[ihouse][iinhouse];
+         coords2houses[coord[0]][coord[1]].push(ihouse);
+       }
+     }
+   }
+
 
 
    const doHiddenSingles = (n, state) => {
@@ -437,7 +466,7 @@ TODONE: disable buttons when they would do nothing
        for (const [indiceskey,digits] of map) {
          if (digits.length != 1) {
            CHECK(digits.length === 2);
-           if (verbose_level >= 1) console.log("          found a (maybe) hidden pair! digits="+Stringify(digits)+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
+           if (verbose_level >= 2) console.log("          found a (maybe) hidden pair! digits="+Stringify(digits)+" in house "+ihouse+" = "+Stringify(all_houses[ihouse]));
            const indices = digit2indicesInHouse.get(digits[0]);
            CHECK(deepEquals(indices, digit2indicesInHouse.get(digits[1])));
            const coords0 = all_houses[ihouse][indices[0]];
@@ -452,6 +481,60 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doHiddenPairs(n="+n+", state)");
    };  // doHiddenPairs
 
+   const doOmissions = (n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
+     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+
+     // When a given digit's occurrances (candidacies) in house A
+     // is limited to an intersecting house B,
+     // then that digit can be eliminated from the rest of house B.
+     // (one of A or B will be a block, the other will be a row or
+     // column)
+
+     for (let digit = 1; digit <= n*n; ++digit) {
+       if (verbose_level >= 1) console.log("          digit = "+digit);
+       const house2coordKeysContainingDigit = new Map();
+       {
+         for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
+           for (let iinhouse = 0; iinhouse < all_houses[ihouse].length; ++iinhouse) {
+             const coords = all_houses[ihouse][iinhouse];
+             if (originalState[coords[0]][coords[1]].includes(digit)) {
+               coordKey = ''+coords;
+               if (!house2coordKeysContainingDigit.has(ihouse)) house2coordKeysContainingDigit.set(ihouse, new Set());
+               house2coordKeysContainingDigit.get(ihouse).add(coordKey);
+             }
+           }
+         }
+       }
+
+       for (const [ihouse0,coordKeys0] of house2coordKeysContainingDigit.entries()) {
+         for (const [ihouse1,coordKeys1] of house2coordKeysContainingDigit.entries()) {
+           if (ihouse0 == ihouse1) continue;
+           if (coordKeys0.size == 1) continue;  // this is already covered under lone single or something
+
+           // Are all occurrances of digit in house0 also in house1?
+           if (IsSubsetOf(coordKeys0, coordKeys1)) {
+             if (verbose_level >= 1) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
+             if (verbose_level >= 1) console.log("                  coordKeys0 = "+Array.from(coordKeys0));
+             if (verbose_level >= 1) console.log("                  coordKeys1 = "+Array.from(coordKeys1));
+             // Remove all other occurrances of digit in house1.
+             for (let iinhouse1 = 0; iinhouse1 < all_houses[ihouse1].length; ++iinhouse1) {
+               const coords = all_houses[ihouse1][iinhouse1];
+               if (originalState[coords[0]][coords[1]].includes(digit) &&
+                   !coords2houses[coords[0]][coords[1]].includes(ihouse0)) {
+                 if (verbose_level >= 1) console.log("                      so can remove the "+digit+" at "+Stringify(coords));
+                 removeIf(state[coords[0]][coords[1]], x => x===digit);
+               }
+             }
+           }
+         }
+       }
+     }
+
+     if (verbose_level >= 1) console.log("        out doOmissions(n="+n+", state)");
+   };  // doOmissions
+
 
    const undoStack = [];
    const redoStack = [];
@@ -459,12 +542,14 @@ TODONE: disable buttons when they would do nothing
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
    const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
    const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
+   const omissionButton = document.getElementsByClassName("omission")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
    const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
    const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
    const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
+   const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -493,14 +578,19 @@ TODONE: disable buttons when they would do nothing
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
      const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenPairs(n,scratchState));
+     const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
+
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
      nakedPairsButton.disabled = nDoNakedPairs===0;
      hiddenPairsButton.disabled = nDoHiddenPairs===0;
+     omissionButton.disabled = nDoOmissions===0;
+
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
      doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
      doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
      doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
+     doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
    };
 
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
@@ -667,6 +757,35 @@ TODONE: disable buttons when they would do nothing
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out hiddenPairsButtonMouseUp");
+   };
+
+   const omissionButtonMouseOver = () => {
+     console.log("    in propagateSinglesButtonMouseOver");
+     const scratchState = deepCopy(state);
+     doOmissions(n, scratchState);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out propagateSinglesButtonMouseOver");
+   };
+   const omissionButtonMouseOut = () => {
+     console.log("    in propagateSinglesButtonMouseOut");
+     updateUiFromStatePair(state,state);
+     console.log("    out propagateSinglesButtonMouseOut");
+   };
+   const omissionButtonMouseDown = () => {
+     console.log("    in omissionButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(deepCopy(state));
+     doOmissions(n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out omissionButtonMouseDown");
+   };
+   const omissionButtonMouseUp = () => {
+     console.log("    in omissionButtonMouseUp");
+     updateUiFromStatePair(state,state);
+     updateUndoRedoButtons();
+     console.log("    out omissionButtonMouseUp");
    };
 
    const undoButtonMouseDown = () => {

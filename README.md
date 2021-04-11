@@ -92,7 +92,7 @@ Logic:
     if two digits occur in only two cells in a block
     (or row or column), then erase everything else
     in those two cells, making it a naked pair.
-  - "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html
+  - "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html  analogous to hidden pairs.
     need to go back and review this
 
 
