@@ -1,5 +1,5 @@
 <!--
-TODO: implement naked tuples (triples and quads)
+TODO: layout flashing at beginning because no table.  can I fix that??
 TODO: refactor to make the states immutable
 TODO: make it so size doesn't jump, and do the <big> thing
 TODO: get mouse-up right (need to listen on window I think)
@@ -519,69 +519,6 @@ TODONE: disable buttons when they would do nothing
      if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", state)");
    };  // doHiddenSingles
 
-   const doNakedPairsOLD = (n, state) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doNakedPairsOLD(n="+n+", state)");
-     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
-
-     for (let ihouse = 0; ihouse < all_houses.length; ++ihouse) {
-       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_houses[ihouse]));
-       // map from digit set to positions in house with exactly that digit set.
-       const map = new Map();
-       for (let iinhouse = 0; iinhouse < all_houses[ihouse].length; ++iinhouse) {
-         const coords = all_houses[ihouse][iinhouse];
-         const stateCell = originalState[coords[0]][coords[1]];
-         if (stateCell.length == 2) {
-           const key = ''+stateCell;  // e.g. "4,5"
-           if (!map.has(key)) {
-             map.set(key, []);
-           }
-           map.get(key).push(iinhouse);
-         }
-       }
-       for (const [key,value] of map.entries()) {
-         if (value.length != 1) {
-           if (verbose_level >= 2) console.log("                naked pair! key="+Stringify(key)+" value="+Stringify(value));
-           CHECK_EQ(value.length, 2);
-           const ii0inhouse = value[0];
-           const ii1inhouse = value[1];
-           const coords0 = all_houses[ihouse][ii0inhouse];
-           const coords1 = all_houses[ihouse][ii1inhouse];
-           CHECK(!deepEquals(coords0,coords1));
-           const the_pair0 = originalState[coords0[0]][coords0[1]];
-           const the_pair1 = originalState[coords0[0]][coords0[1]];
-           CHECK(deepEquals(the_pair0, the_pair1));
-           if (verbose_level >= 2) console.log("                    the_pair = "+Stringify(the_pair0));
-
-           for (let jinhouse = 0; jinhouse < all_houses[ihouse].length; ++jinhouse) {
-             if (jinhouse != ii0inhouse && jinhouse != ii1inhouse) {
-               const coords = all_houses[ihouse][jinhouse];
-               removeIf(state[coords[0]][coords[1]], x => x===the_pair0[0] || x===the_pair0[1]);
-             }
-           }
-         }
-       }
-     }
-
-     if (verbose_level >= 1) console.log("        out doNakedPairsOLD(n="+n+", state)");
-   };  // doNakedPairsOLD
-
-   const doNakedPairs = (n, state) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doNakedPairs(n="+n+", state)");
-     const stateOLD = deepCopy(state);
-     doNakedPairsOLD(n, stateOLD);
-     const stateNEW = deepCopy(state);
-     doNakedTuples(2, n, stateNEW);
-     CHECK(deepEquals(stateOLD, stateNEW));
-
-
-     doNakedPairsOLD(n, state);
-
-     if (verbose_level >= 1) console.log("        out doNakedPairs(n="+n+", state)");
-   };  // doNakedPairs
-
-
    const doNakedTuples = (tuplicity, n, state) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
@@ -815,7 +752,7 @@ TODONE: disable buttons when they would do nothing
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState))
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
-     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedPairs(n,scratchState));
+     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
      const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
      const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
      const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
@@ -933,7 +870,7 @@ TODONE: disable buttons when they would do nothing
    const nakedPairsButtonMouseOver = () => {
      console.log("    in nakedPairsButtonMouseOver");
      const scratchState = deepCopy(state);
-     doNakedPairs(n, scratchState);
+     doNakedTuples(2, n, scratchState);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedPairsButtonMouseOver");
    };
@@ -942,7 +879,7 @@ TODONE: disable buttons when they would do nothing
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(deepCopy(state));
-     doNakedPairs(n, state);
+     doNakedTuples(2, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedPairsButtonMouseDown");
