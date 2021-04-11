@@ -72,7 +72,7 @@ Logic:
    that row/column/block.  Very strong if sharing the same
    block and row-or-column simultaneously; this is called
    a "locked pair".
- TODO: "naked triple", "naked quad".  probably increasingly
+ DONE: "naked triple", "naked quad".  probably increasingly
    hard to spot.
 
  - "visual elimination" of a digit - supposedly powerful,
@@ -84,9 +84,8 @@ Logic:
     if two digits occur in only two cells in a block
     (or row or column), then erase everything else
     in those two cells, making it a naked pair.
-  TODO: "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html  analogous to hidden pairs.
+  DONE: "hidden triples", "hidden quads" - https://www.learn-sudoku.com/hidden-triplets.html  analogous to hidden pairs.
     need to go back and review this
-
 
   DONE: "omission"/"intersection"/"pointing"/"blocking"/"claiming" https://www.learn-sudoku.com/omission.html
   - when a given digit's occurrances
@@ -102,6 +101,10 @@ Logic:
     can be eliminated from the rest of that second house.
     Supposedly lighting up a given number
     can help find these.
+
+  TODO: x-wing.
+    references:
+      https://www.youtube.com/watch?v=gVT786t1Kjk "This Sudoku Actually Teaches The X-Wing Technique!"
 
 ==================================
 Ideas for concise puzzle in url.
