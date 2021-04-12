@@ -1,5 +1,15 @@
 <!--
 
+TODO: is there yet another xwing type thing that interacts between all three of row,col,block?  yes, I think so.  Hmm!
+                1.. .1.
+                .1. .1.
+                ... ...
+
+TODO: I think I have xwing logic screwed up- it assumes things are in one order, but can be swapped, when blocks are involved.
+TODO: lots more xwing options
+TODO: split up xwing button according to type, so its less confusing. it's really hard to tell what it's thinking currently.
+TODO: try to figure out how to draw the xwings on hover-over!
+
 TODO: better way to input nytimes puzzle----  it's too long and the input text thing chokes!  (maybe it's because editing history?)
 
 TODO: distinguish between naked single pencilled, and penned.
@@ -661,6 +671,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const cell2houses = [];
      const house2cells = [];
      const houseNames = [];
+     const row2cells = [];
+     const col2cells = [];
+     const block2cells = [];
+     for (let i = 0; i < n*n; ++i) {
+       row2cells.push([]);
+       col2cells.push([]);
+       block2cells.push([]);
+     }
      for (let house = 0; house < 3*n*n; ++house) {
        house2cells.push([]);
        houseNames.push(house < n*n ? "Row "+house :
@@ -691,17 +709,23 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        house2cells[rowhouse].push(cell);
        house2cells[colhouse].push(cell);
        house2cells[blockhouse].push(cell);
+       row2cells[row].push(cell);
+       col2cells[col].push(cell);
+       block2cells[block].push(cell);
      }
 
      console.log("  initial state = ",state);
      return [n,state,cells,[],[],
-             cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames];
+             cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+             row2cells,col2cells,block2cells];
    };  // PopulateIt
 
    let [state,cells,undoStack,redoStack,
-        cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames] = [undefined];
+        cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+        row2cells,col2cells,block2cells] = [undefined];
    [n, state,cells,undoStack,redoStack,
-    cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames] = PopulateIt(prefill);
+    cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+    row2cells,col2cells,block2cells] = PopulateIt(prefill);
    console.log("state = ",state);
 
    // Propagate singles to eliminate candidates.
@@ -904,7 +928,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    };  // doHiddenTuples
 
    const doOmissions = (n, oldState) => {
-     const verbose_level = 2;
+     const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
      const newState = deepCopy(oldState);
 
@@ -1003,15 +1027,77 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              // both houses are rows.
              if (cell2col[cell00] === cell2col[cell10] &&
                  cell2col[cell01] === cell2col[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...col2cells[cell2col[cell00]],
+                                   ...col2cells[cell2col[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             if (cell2block[cell00] === cell2block[cell10] &&
+                 cell2block[cell01] === cell2block[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...block2cells[cell2block[cell00]],
+                                   ...block2cells[cell2block[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
              }
            } else if (ihouse0 >= n*n && ihouse0 < 2*(n*n) &&
                       ihouse1 >= n*n && ihouse1 < 2*(n*n)) {
              // both houses are columns.
              if (cell2row[cell00] === cell2row[cell10] &&
                  cell2row[cell01] === cell2row[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...row2cells[cell2row[cell00]],
+                                   ...row2cells[cell2row[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
              }
+             if (cell2block[cell00] === cell2block[cell10] &&
+                 cell2block[cell01] === cell2block[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...block2cells[cell2block[cell00]],
+                                   ...block2cells[cell2block[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+           } else if (ihouse0 >= 2*(n*n) &&
+                      ihouse1 >= 2*(n*n)) {
+             // both houses are blocks.
+             if (cell2row[cell00] === cell2row[cell10] &&
+                 cell2row[cell01] === cell2row[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...row2cells[cell2row[cell00]],
+                                   ...row2cells[cell2row[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             if (cell2col[cell00] === cell2col[cell10] &&
+                 cell2col[cell01] === cell2col[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               for (const cell of [...col2cells[cell2col[cell00]],
+                                   ...col2cells[cell2col[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+
            }
          }
        }
