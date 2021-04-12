@@ -1,4 +1,7 @@
 <!--
+
+TODO: better way to input nytimes puzzle----  it's too long and the input text thing chokes!  (maybe it's because editing history?)
+
 TODO: distinguish between naked single pencilled, and penned.
 TODO: think about whether it makes sense to auto-update candidates
       (i.e. the naked single thing).
@@ -174,6 +177,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        throw new Error("CHECK_GE FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
+   const CHECK_LE = (a,b) => {
+     if (!(a <= b)) {
+       // CBB: dup code except for "EQ" vs etc
+       console.log("CHECK_LE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_LE FAILED!</big></big>";
+       throw new Error("CHECK_LE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+     }
+   };
 
    const range = (a,b) => {
      const answer = [];
@@ -332,7 +343,38 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // KSets
 
-   // Right-click on the `<div id="grilleJeu">`
+   const ExtractPrefillStringFromNYTimesOuterHTML = (outerHTML) => {
+     console.log("        in ExtractPrefillStringFromNYTimesOuterHTML");
+     // We use svg as a helper container,
+     // because it has a getElementById method (unlike div,
+     // for some strange reason).
+     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+     svg.innerHTML = outerHTML;
+     console.log("  svg = ",svg);
+
+     const cells = svg.getElementsByClassName('su-cell');
+     console.log("          cells = ",cells);
+     console.log("          cells.length = ",cells.length);
+     const n = Math.round(Math.sqrt(Math.sqrt(cells.length)));
+     CHECK_EQ(n*n*n*n, cells.length);
+
+     let answer = '';
+     for (const cell of cells) {
+       const label = cell.getAttribute("aria-label");
+       console.log("              label = "+Stringify(label));
+       if (EQ(label, "empty")) {
+         answer += "0";
+       } else {
+         CHECK_EQ(label.length, 1);
+         answer += label;
+       }
+     }
+
+     console.log("        out ExtractPrefillStringFromNYTimesOuterHTML");
+     return answer;
+   };  // ExtractPrefillStringFromNYTimesOuterHTML
+
+   // Right-click on the `<div class="grid">`
    // or anything containing it, and choose Copy -> Outer HTML,
    // then save the string and feed it to this thing.
    const ExtractPrefillStringFromCrackingTheCrypticOuterHTML = (outerHTML) => {
@@ -343,8 +385,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
      svg.innerHTML = outerHTML;
      console.log("  svg = ",svg);
-     const cells = svg.getElementsByClassName('cell');
 
+     const cells = svg.getElementsByClassName('cell');
      console.log("          cells = ",cells);
      console.log("          cells.length = ",cells.length);
      const n = Math.round(Math.sqrt(Math.sqrt(cells.length)));
@@ -358,6 +400,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const cell_givens = svg.getElementsByClassName('cell-given');
      console.log("          cell_givens = ",cell_givens);
      console.log("          cell_givens.length = ",cell_givens.length);
+     CHECK_LE(cell_givens.length, cells.length);
 
      let answer = ''
      for (const cell_given of cell_givens) {
@@ -389,6 +432,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return answer;
    };  // ExtractPrefillStringFromCrackingTheCrypticOuterHTML
 
+   // Right-click on the `<div id="grilleJeu">`
+   // or anything containing it, and choose Copy -> Outer HTML,
+   // then save the string and feed it to this thing.
    const ExtractPrefillStringFrom1SudokoOuterHTML = (outerHTML) => {
      // We use svg as a helper container,
      // because it has a getElementById method (unlike div,
@@ -683,9 +729,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const doHiddenSingles = (n, state) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", state)");
-     if (verbose_level >= 1) console.log("          state = "+Stringify(state));
+     if (verbose_level >= 2) console.log("          state = "+Stringify(state));
      const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
-     if (verbose_level >= 1) console.log("          originalState = "+Stringify(originalState));
+     if (verbose_level >= 2) console.log("          originalState = "+Stringify(originalState));
      // For each digit and house (i.e. row, column, or block),
      // if there's only one place the digit can go
      // in that house, then put it there
@@ -1241,10 +1287,25 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      const outerHTML = prefill_input.value;
 
-
-     const prefill_string = outerHTML.indexOf('grilleJeu') != -1
-       ? ExtractPrefillStringFrom1SudokoOuterHTML(outerHTML)
-       : ExtractPrefillStringFromCrackingTheCrypticOuterHTML(outerHTML);
+     let prefill_string;
+     if (outerHTML.indexOf('grilleJeu') != -1) {
+       prefill_string = ExtractPrefillStringFrom1SudokoOuterHTML(outerHTML)
+     } else if (outerHTML.indexOf('div class="grid"') != -1 &&
+                outerHTML.indexOf('div class="cells"') != -1 &&
+                outerHTML.indexOf('id="cell-givens"') != -1) {
+       prefill_string = ExtractPrefillStringFromCrackingTheCrypticOuterHTML(outerHTML);
+     } else if (outerHTML.indexOf('div role="grid" class="su-board"') != -1 ||
+                outerHTML.indexOf('class="su-cell') != -1) {
+       // reason for checking for su-cell
+       // is in case someone grepped for that in the output
+       // before pasting: if they paste the whole grid thing,
+       // it's too huge :-(
+       prefill_string = ExtractPrefillStringFromNYTimesOuterHTML(outerHTML);
+     } else {
+       // TODO: more graceful rejection than this!
+       // Actually validate and color green/red accordingly!
+       CHECK(false);
+     }
 
      [n,prefill] = PrefillString2Prefill(prefill_string);
      console.log("      prefill = ",prefill);
