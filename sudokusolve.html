@@ -12,6 +12,9 @@ TODO: huh! doesn't solve this one: https://app.crackingthecryptic.com/sudoku/94Q
     At 14:30, he's got as far as my solver gets.  So, after that,
     he needs to do something very clever.
     Yes, it's a swordfish!  Which I haven't learned yet.
+  - wait, or maybe this is mark's favorite?
+      https://www.youtube.com/watch?v=IFHOtse62Jo
+      https://app.crackingthecryptic.com/sudoku/B42dn4M8pn
 
 TODO: is there yet another xwing type thing that interacts between all three of row,col,block?  yes, I think so.  Hmm!
                 1.. .1.
@@ -998,217 +1001,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
 
-   const doXwingsOLD = (n, oldState) => {
-     const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
-     if (verbose_level >= 1) console.log("        in doXwingsOLD(n="+n+", state)");
-     const newState = deepCopy(oldState);
-
-     // One kind of x-wing is when, for a given digit,
-     // that digit has only 2 possibilities on one row,
-     // and 2 possibilities on another row,
-     // and they are in the same two columns.
-     // In that case, we can remove that digit from elsewhere on those
-     // two rows and columns.
-
-     for (let digit = 1; digit <= n*n; ++digit) {
-       if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2cellsContainingDigit = [];
-       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-         house2cellsContainingDigit.push([]);
-         for (const cell of house2cells[ihouse]) {
-           if (oldState[cell].includes(digit)) {
-             Top(house2cellsContainingDigit).push(cell);
-           }
-         }
-       }
-       // Which houses have exactly two possible positions for this digit?
-       const housesContainingDigitTwice = [];
-       for (let ihouse = 0; ihouse < house2cellsContainingDigit.length; ++ihouse) {
-         if (house2cellsContainingDigit[ihouse].length === 2) {
-           housesContainingDigitTwice.push(ihouse);
-         }
-       }
-
-       if (verbose_level >= 2) console.log("              housesContainingDigitTwice = "+Stringify(housesContainingDigitTwice.map(i=>houseNames[i])));
-
-       // For starters, look for simple xwing like in the cracking-the-cryptic
-       // video.
-       // That is, just two rows having the digit twice,
-       // in the same columns, or two cols having the digit twice, in the same rows.
-       for (const ihouse0 of housesContainingDigitTwice) {
-         for (const ihouse1 of housesContainingDigitTwice) {
-           if (ihouse1 <= ihouse0) continue;
-           const [cell00,cell01] = house2cellsContainingDigit[ihouse0];
-           const [cell10,cell11] = house2cellsContainingDigit[ihouse1];
-           if (Div(ihouse0,n*n) === 0 && Div(ihouse1,n*n) === 0) {
-             // both houses are rows.
-             if (cell2col[cell00] === cell2col[cell10] &&
-                 cell2col[cell01] === cell2col[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit?  yes!
-               for (const cell of [...col2cells[cell2col[cell00]],
-                                   ...col2cells[cell2col[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             // backwards.  I think this is not possible.
-             if (cell2col[cell00] === cell2col[cell11] &&
-                 cell2col[cell01] === cell2col[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS, BACKWARDS, IMPOSSIBLE!!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               CHECK(false);  // I think this is not possible
-               for (const cell of [...col2cells[cell2col[cell00]],
-                                   ...col2cells[cell2col[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-
-             if (cell2block[cell00] === cell2block[cell10] &&
-                 cell2block[cell01] === cell2block[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit? yes!
-               for (const cell of [...block2cells[cell2block[cell00]],
-                                   ...block2cells[cell2block[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-
-             if (verbose_level >= 2) console.log("              checking cell00="+cell00+" cell01="+cell01+"  cell10="+cell10+" cell11="+cell11+" backwards");
-             if (verbose_level >= 2) console.log("                  cell00="+cell00+" = "+Cell2Description(cell00));
-             if (verbose_level >= 2) console.log("                  cell01="+cell01+" = "+Cell2Description(cell01));
-             if (verbose_level >= 2) console.log("                  cell10="+cell10+" = "+Cell2Description(cell10));
-             if (verbose_level >= 2) console.log("                  cell11="+cell11+" = "+Cell2Description(cell11));
-
-             if (cell2block[cell00] === cell2block[cell11] &&
-                 cell2block[cell01] === cell2block[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               CHECK(false);  // coverage.  is it hit?
-               for (const cell of [...block2cells[cell2block[cell00]],
-                                   ...block2cells[cell2block[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-           } else if (Div(ihouse0,n*n) === 1 && Div(ihouse1,n*n) === 1) {
-             // both houses are columns.
-             if (cell2row[cell00] === cell2row[cell10] &&
-                 cell2row[cell01] === cell2row[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit?  yes!
-               for (const cell of [...row2cells[cell2row[cell00]],
-                                   ...row2cells[cell2row[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             // backwards.  I think this is not possible.
-             if (cell2row[cell00] === cell2row[cell11] &&
-                 cell2row[cell01] === cell2row[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS, BACKWARDS! IMPOSSIBLE!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               CHECK(false);  // coverage.  is it hit?
-               for (const cell of [...row2cells[cell2row[cell00]],
-                                   ...row2cells[cell2row[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             if (cell2block[cell00] === cell2block[cell10] &&
-                 cell2block[cell01] === cell2block[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit?  yes!
-               for (const cell of [...block2cells[cell2block[cell00]],
-                                   ...block2cells[cell2block[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             if (cell2block[cell00] === cell2block[cell11] &&
-                 cell2block[cell01] === cell2block[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING BLOCKS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               CHECK(false);  // coverage.  is it hit?
-               for (const cell of [...block2cells[cell2block[cell00]],
-                                   ...block2cells[cell2block[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-           } else if (Div(ihouse0,n*n) === 2 && Div(ihouse1,n*n) === 2) {
-             // both houses are blocks.
-             if (cell2row[cell00] === cell2row[cell10] &&
-                 cell2row[cell01] === cell2row[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit?  yes!
-               for (const cell of [...row2cells[cell2row[cell00]],
-                                   ...row2cells[cell2row[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             if (cell2row[cell00] === cell2row[cell11] &&
-                 cell2row[cell01] === cell2row[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING ROWS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               CHECK(false);  // coverage.  is it hit?
-               for (const cell of [...row2cells[cell2row[cell00]],
-                                   ...row2cells[cell2row[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             if (cell2col[cell00] === cell2col[cell10] &&
-                 cell2col[cell01] === cell2col[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false);  // coverage.  is it hit?  yes!
-               for (const cell of [...col2cells[cell2col[cell00]],
-                                   ...col2cells[cell2col[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-             if (cell2col[cell00] === cell2col[cell11] &&
-                 cell2col[cell01] === cell2col[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING COLS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
-               //CHECK(false); // coverage.  is it hit? yes! not surprised
-               for (const cell of [...col2cells[cell2col[cell00]],
-                                   ...col2cells[cell2col[cell01]]]) {
-                 if (cell != cell00 && cell != cell10
-                  && cell != cell01 && cell != cell11) {
-                   removeIf(newState[cell], x => x==digit);
-                 }
-               }
-             }
-           }
-         }
-       }
-     }
-
-     if (verbose_level >= 1) console.log("        out doXwingsOLD(n="+n+", state)");
-     return newState;
-   };  // doXwingsOLD
-
    // Hopefully simpler characterization of xwings.
    const doXwingsNEW = (n, oldState) => {
      const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
@@ -1324,14 +1116,15 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doXwingsNEW
 
+   // Keeping this around in case I need to do another overhaul and test it.
    const doXwings = (n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
-     const answerOLD = doXwingsOLD(n, oldState);
+     //const answerOLD = doXwingsOLD(n, oldState);
      const answerNEW = doXwingsNEW(n, oldState);
-     CHECK(deepEquals(answerOLD, answerNEW));
+     //CHECK(deepEquals(answerOLD, answerNEW));
      if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
-     return answerOLD;
+     return answerNEW;
    };  // doXwings
 
    const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
