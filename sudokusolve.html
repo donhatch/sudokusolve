@@ -996,6 +996,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doOmissions
 
+   const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
+
    const doXwingsOLD = (n, oldState) => {
      const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
      if (verbose_level >= 1) console.log("        in doXwingsOLD(n="+n+", state)");
@@ -1078,6 +1080,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  }
                }
              }
+
+             if (verbose_level >= 2) console.log("              checking cell00="+cell00+" cell01="+cell01+"  cell10="+cell10+" cell11="+cell11+" backwards");
+             if (verbose_level >= 2) console.log("                  cell00="+cell00+" = "+Cell2Description(cell00));
+             if (verbose_level >= 2) console.log("                  cell01="+cell01+" = "+Cell2Description(cell01));
+             if (verbose_level >= 2) console.log("                  cell10="+cell10+" = "+Cell2Description(cell10));
+             if (verbose_level >= 2) console.log("                  cell11="+cell11+" = "+Cell2Description(cell11));
+
              if (cell2block[cell00] === cell2block[cell11] &&
                  cell2block[cell01] === cell2block[cell10]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
@@ -1239,12 +1248,48 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        for (let housetype0 = 0; housetype0 < 3; ++housetype0) {
          for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
            if (housetype1 == housetype0) continue;
-           if (verbose_level >= 3) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
+           if (verbose_level >= 2) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
            // one of the the two types must be blocks.
            if (housetype0 != 2 && housetype1 != 2) continue;
            for (const ihouse00 of housesOfTypeContainingDigitTwice[housetype0]) {
+             if (verbose_level >= 2) console.log("                  ihouse00 = "+ihouse00);
+             {
+               const ihouse00_spannedHousesOfType1 = new Set();
+               for (const cell of house2cellsContainingDigit[ihouse00]) {
+                   ihouse00_spannedHousesOfType1.add(housetype1*(n*n) +
+                                                     (housetype1===0 ? cell2row[cell] :
+                                                      housetype1===1 ? cell2col[cell] : cell2block[cell]));
+               }
+               if (verbose_level >= 2) console.log("                      ihouse00_spannedHousesOfType1.size = "+ihouse00_spannedHousesOfType1.size);
+               if (ihouse00_spannedHousesOfType1.size == 1) {
+                 // Both cells are in the same house of type 1.
+                 // This is caught under a simpler analysis ("omission").
+                 continue;
+               }
+               CHECK_EQ(ihouse00_spannedHousesOfType1.size, 2);
+             }
+
              for (const ihouse01 of housesOfTypeContainingDigitTwice[housetype0]) {
-               if (ihouse01 <= ihouse00) continue;
+               if (ihouse01 <= ihouse00) continue;  // do them only in canonical order ihouse00<ihouse01
+               if (verbose_level >= 2) console.log("                      ihouse01 = "+ihouse01);
+               {
+                 const ihouse01_spannedHousesOfType1 = new Set();
+                 for (const cell of house2cellsContainingDigit[ihouse01]) {
+                     ihouse01_spannedHousesOfType1.add(housetype1*(n*n) +
+                                                       (housetype1===0 ? cell2row[cell] :
+                                                        housetype1===1 ? cell2col[cell] : cell2block[cell]));
+                 }
+                 if (verbose_level >= 2) console.log("                      ihouse01_spannedHousesOfType1.size = "+ihouse01_spannedHousesOfType1.size);
+                 if (ihouse01_spannedHousesOfType1.size == 1) {
+                   // Both cells are in the same house of type 1.
+                   // This is caught under a simpler analysis ("omission").
+                   continue;
+                 }
+                 CHECK_EQ(ihouse01_spannedHousesOfType1.size, 2);
+               }
+
+
+
                if (verbose_level >= 3) console.log("                  "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse]));
                const the4cells = new Set([...house2cellsContainingDigit[ihouse00],
                                           ...house2cellsContainingDigit[ihouse01]]);
@@ -1260,6 +1305,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                CHECK_GE(spannedHousesOfType1.size, 2);
                if (EQ(spannedHousesOfType1.size, 2)) {
                  if (verbose_level >= 2) console.log("              FOUND AN XWING ON "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse])+" AFFECTING "+[...spannedHousesOfType1].map(ihouse=>houseNames[ihouse])+"!");
+                 if (verbose_level >= 2) console.log("                the4cells="+Stringify(the4cells)+" = "+Stringify([...the4cells].map(cell=>Cell2Description(cell))));
                  // Remove digit from the two houses of type 1,
                  // except for the 4 cells in question.
                  for (const ihouse1 of spannedHousesOfType1) {
