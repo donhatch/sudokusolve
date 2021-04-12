@@ -119,6 +119,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          <small><small><span class="doomissionscount"></span></small></small>
 
         <tr>
+         <td><input class="xwing" type="button" value="X-wing and similar" onmouseover="xwingButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="xwingButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <small><small><span class="doxwingscount"></span></small></small>
+
+        <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="undostacksize">0</span></small></small>
 
@@ -903,30 +907,29 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      for (let digit = 1; digit <= n*n; ++digit) {
        if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2coordKeysContainingDigit = new Map();
+       const house2cellsContainingDigit = new Map();
        {
          for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
            for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
              const cell = house2cells[ihouse][iinhouse];
              if (oldState[cell].includes(digit)) {
-               const coordKey = ''+cell;  // TODO: call it something else
-               if (!house2coordKeysContainingDigit.has(ihouse)) house2coordKeysContainingDigit.set(ihouse, new Set());
-               house2coordKeysContainingDigit.get(ihouse).add(coordKey);
+               if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
+               house2cellsContainingDigit.get(ihouse).add(cell);
              }
            }
          }
        }
 
-       for (const [ihouse0,coordKeys0] of house2coordKeysContainingDigit.entries()) {
-         for (const [ihouse1,coordKeys1] of house2coordKeysContainingDigit.entries()) {
+       for (const [ihouse0,cells0] of house2cellsContainingDigit.entries()) {
+         for (const [ihouse1,cells1] of house2cellsContainingDigit.entries()) {
            if (ihouse0 == ihouse1) continue;
-           if (coordKeys0.size == 1) continue;  // this is already covered under lone single or something
+           if (cells0.size == 1) continue;  // this is already covered under lone single or something
 
            // Are all occurrances of digit in house0 also in house1?
-           if (IsSubsetOf(coordKeys0, coordKeys1)) {
+           if (IsSubsetOf(cells0, cells1)) {
              if (verbose_level >= 2) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
-             if (verbose_level >= 2) console.log("                  coordKeys0 = "+Array.from(coordKeys0));
-             if (verbose_level >= 2) console.log("                  coordKeys1 = "+Array.from(coordKeys1));
+             if (verbose_level >= 2) console.log("                  cells0 = "+Array.from(cells0));
+             if (verbose_level >= 2) console.log("                  cells1 = "+Array.from(cells1));
              // Remove all other occurrances of digit in house1.
              for (let iinhouse1 = 0; iinhouse1 < house2cells[ihouse1].length; ++iinhouse1) {
                const cell = house2cells[ihouse1][iinhouse1];
@@ -945,6 +948,41 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doOmissions
 
+   const doXwings = (n, oldState) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
+     const newState = deepCopy(oldState);
+
+     // One kind of x-wing is when, for a given digit,
+     // that digit has only 2 possibilities on one row,
+     // and 2 possibilities on another row,
+     // and they are in the same two columns.
+     // In that case, we can remove that digit from elsewhere on those
+     // two rows and columns.
+
+     for (let digit = 1; digit <= n*n; ++digit) {
+       if (verbose_level >= 2) console.log("          digit = "+digit);
+       const house2cellsContainingDigit = new Map();
+       {
+         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+           for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
+             const cell = house2cells[ihouse][iinhouse];
+             if (oldState[cell].includes(digit)) {
+               if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
+               house2cellsContainingDigit.get(ihouse).add(cell);
+             }
+           }
+         }
+       }
+
+       // XXX YOU ARE HERE
+
+     }
+
+     if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
+     return newState;
+   };  // doXwings
+
 
    const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
@@ -955,6 +993,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const nakedQuadsButton = document.getElementsByClassName("nakedquads")[0];
    const hiddenQuadsButton = document.getElementsByClassName("hiddenquads")[0];
    const omissionButton = document.getElementsByClassName("omission")[0];
+   const xwingButton = document.getElementsByClassName("xwing")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
@@ -966,6 +1005,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const doNakedQuadsCountSpan = document.getElementsByClassName("donakedquadscount")[0];
    const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
    const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
+   const doXwingsCountSpan = document.getElementsByClassName("doxwingscount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -998,6 +1038,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
      const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
+     const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1008,6 +1049,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      nakedQuadsButton.disabled = nDoNakedQuads===0;
      hiddenQuadsButton.disabled = nDoHiddenQuads===0;
      omissionButton.disabled = nDoOmissions===0;
+     xwingButton.disabled = nDoXwings===0;
 
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
      doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
@@ -1018,6 +1060,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      doNakedQuadsCountSpan.innerHTML = ''+nDoNakedQuads;
      doHiddenQuadsCountSpan.innerHTML = ''+nDoHiddenQuads;
      doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
+     doXwingsCountSpan.innerHTML = ''+nDoXwings;
    };
 
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
@@ -1216,6 +1259,23 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out omissionButtonMouseDown");
+   };
+
+   const xwingButtonMouseOver = () => {
+     console.log("    in xwingButtonMouseOver");
+     const scratchState = doXwings(n, state);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out xwingButtonMouseOver");
+   };
+   const xwingButtonMouseDown = () => {
+     console.log("    in xwingButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(state);
+     state = doXwings(n, state);
+     updateUiFromStatePair(Top(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out xwingButtonMouseDown");
    };
 
    const undoButtonMouseDown = () => {
