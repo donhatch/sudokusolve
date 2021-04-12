@@ -892,7 +892,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            if (verbose_level >= 2) console.log("                    found hidden (or maybe already naked) "+tuplicity+"-tuple "+Stringify(tuple)+" in house "+ihouse+" positions "+Stringify(union));
            // Make this tuple naked, by removing everything except
            // the specific digits.
-           for (const cell of house2cells[ihouse]) {
+           for (const iinhouse of union) {
+             const cell = house2cells[ihouse][iinhouse];
              removeIf(newState[cell], x => !tuple.includes(x));
            }
          }
