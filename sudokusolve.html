@@ -175,6 +175,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
  <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script>
    "use strict";
+   // strict equality, but enforce that they are the same type
+   // (instead of just returning false if they aren't).
    const EQ = (a,b) => {
      if (a === b) return true;
      CHECK(typeof(a) == typeof(b));
@@ -191,25 +193,25 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      if (!(a === b)) {
        // CBB: dup code except for "EQ" vs etc
        // CBB: sometimes it would be better to use `,` instead of `+` to take advantage of console's stringification.  but sometimes not.
-       console.log("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
-       document.body.innerHTML = "<big><big>CHECK_EQ FAILED!</big></big>";
-       throw new Error("CHECK_EQ FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       console.log("CHECK_EQ a===b FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_EQ a===b FAILED!</big></big>";
+       throw new Error("CHECK_EQ a===b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
    const CHECK_GE = (a,b) => {
      if (!(a >= b)) {
        // CBB: dup code except for "EQ" vs etc
-       console.log("CHECK_GE FAILED! a="+Stringify(a)+" b="+Stringify(b));
-       document.body.innerHTML = "<big><big>CHECK_GE FAILED!</big></big>";
-       throw new Error("CHECK_GE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       console.log("CHECK_GE a>=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_GE a>=b FAILED!</big></big>";
+       throw new Error("CHECK_GE a>=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
    const CHECK_LE = (a,b) => {
      if (!(a <= b)) {
        // CBB: dup code except for "EQ" vs etc
-       console.log("CHECK_LE FAILED! a="+Stringify(a)+" b="+Stringify(b));
-       document.body.innerHTML = "<big><big>CHECK_LE FAILED!</big></big>";
-       throw new Error("CHECK_LE FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       console.log("CHECK_LE a<=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_LE a<=b FAILED!</big></big>";
+       throw new Error("CHECK_LE a<=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
 
@@ -994,9 +996,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doOmissions
 
-   const doXwings = (n, oldState) => {
-     const verbose_level = 2;
-     if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
+   const doXwingsOLD = (n, oldState) => {
+     const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
+     if (verbose_level >= 1) console.log("        in doXwingsOLD(n="+n+", state)");
      const newState = deepCopy(oldState);
 
      // One kind of x-wing is when, for a given digit,
@@ -1036,7 +1038,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            if (ihouse1 <= ihouse0) continue;
            const [cell00,cell01] = house2cellsContainingDigit[ihouse0];
            const [cell10,cell11] = house2cellsContainingDigit[ihouse1];
-           if (ihouse0 < n*n && ihouse1 < n*n) {
+           if (Div(ihouse0,n*n) === 0 && Div(ihouse1,n*n) === 0) {
              // both houses are rows.
              if (cell2col[cell00] === cell2col[cell10] &&
                  cell2col[cell01] === cell2col[cell11]) {
@@ -1088,8 +1090,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  }
                }
              }
-           } else if (ihouse0 >= n*n && ihouse0 < 2*(n*n) &&
-                      ihouse1 >= n*n && ihouse1 < 2*(n*n)) {
+           } else if (Div(ihouse0,n*n) === 1 && Div(ihouse1,n*n) === 1) {
              // both houses are columns.
              if (cell2row[cell00] === cell2row[cell10] &&
                  cell2row[cell01] === cell2row[cell11]) {
@@ -1140,12 +1141,11 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  }
                }
              }
-           } else if (ihouse0 >= 2*(n*n) &&
-                      ihouse1 >= 2*(n*n)) {
+           } else if (Div(ihouse0,n*n) === 2 && Div(ihouse1,n*n) === 2) {
              // both houses are blocks.
              if (cell2row[cell00] === cell2row[cell10] &&
                  cell2row[cell01] === cell2row[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
                //CHECK(false);  // coverage.  is it hit?  yes!
                for (const cell of [...row2cells[cell2row[cell00]],
                                    ...row2cells[cell2row[cell01]]]) {
@@ -1157,7 +1157,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              }
              if (cell2row[cell00] === cell2row[cell11] &&
                  cell2row[cell01] === cell2row[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING ROWS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
                CHECK(false);  // coverage.  is it hit?
                for (const cell of [...row2cells[cell2row[cell00]],
                                    ...row2cells[cell2row[cell01]]]) {
@@ -1169,7 +1169,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              }
              if (cell2col[cell00] === cell2col[cell10] &&
                  cell2col[cell01] === cell2col[cell11]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
                //CHECK(false);  // coverage.  is it hit?  yes!
                for (const cell of [...col2cells[cell2col[cell00]],
                                    ...col2cells[cell2col[cell01]]]) {
@@ -1181,7 +1181,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              }
              if (cell2col[cell00] === cell2col[cell11] &&
                  cell2col[cell01] === cell2col[cell10]) {
-               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO BLOCKS, AFFECTING COLS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
                //CHECK(false); // coverage.  is it hit? yes! not surprised
                for (const cell of [...col2cells[cell2col[cell00]],
                                    ...col2cells[cell2col[cell01]]]) {
@@ -1194,15 +1194,101 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            }
          }
        }
-
-
-
      }
 
-     if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
+     if (verbose_level >= 1) console.log("        out doXwingsOLD(n="+n+", state)");
      return newState;
-   };  // doXwings
+   };  // doXwingsOLD
 
+   // Hopefully simpler characterization of xwings.
+   const doXwingsNEW = (n, oldState) => {
+     const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
+     if (verbose_level >= 1) console.log("        in doXwingsNEW(n="+n+", state)");
+     const newState = deepCopy(oldState);
+     // And x-wing is when, for a given digit,
+     // there is a pair of houses (say, rows) such that
+     // all the occurrances of this digit
+     // on these two houses
+     // span only two houses of some different type (say, cols).
+     for (let digit = 1; digit <= n*n; ++digit) {
+       if (verbose_level >= 2) console.log("          digit = "+digit);
+       const house2cellsContainingDigit = [];
+       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+         house2cellsContainingDigit.push([]);
+         for (const cell of house2cells[ihouse]) {
+           if (oldState[cell].includes(digit)) {
+             Top(house2cellsContainingDigit).push(cell);
+           }
+         }
+       }
+       // Which houses have exactly two possible positions for this digit?
+       const housesContainingDigitTwice = [];
+       for (let ihouse = 0; ihouse < house2cellsContainingDigit.length; ++ihouse) {
+         if (house2cellsContainingDigit[ihouse].length === 2) {
+           housesContainingDigitTwice.push(ihouse);
+         }
+       }
+       if (verbose_level >= 3) console.log("              housesContainingDigitTwice = "+Stringify(housesContainingDigitTwice.map(i=>houseNames[i])));
+       const housesOfTypeContainingDigitTwice = [[],[],[]];
+       for (const house of housesContainingDigitTwice) {
+         const houseType = Div(house, n*n);
+         housesOfTypeContainingDigitTwice[houseType].push(house);
+       }
+       if (verbose_level >= 2) console.log("              housesOfTypeContainingDigitTwice = "+Stringify(housesOfTypeContainingDigitTwice.map(is=>is.map(i=>houseNames[i]))));
+
+       for (let housetype0 = 0; housetype0 < 3; ++housetype0) {
+         for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
+           if (housetype1 == housetype0) continue;
+           if (verbose_level >= 3) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
+           // one of the the two types must be blocks.
+           if (housetype0 != 2 && housetype1 != 2) continue;
+           for (const ihouse00 of housesOfTypeContainingDigitTwice[housetype0]) {
+             for (const ihouse01 of housesOfTypeContainingDigitTwice[housetype0]) {
+               if (ihouse01 <= ihouse00) continue;
+               if (verbose_level >= 3) console.log("                  "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse]));
+               const the4cells = new Set([...house2cellsContainingDigit[ihouse00],
+                                          ...house2cellsContainingDigit[ihouse01]]);
+               CHECK_EQ(the4cells.size, 4);  // two distinct on one row and two distinct on another
+               const spannedHousesOfType1 = new Set();
+               for (const cell of the4cells) {
+                 spannedHousesOfType1.add(housetype1*(n*n) +
+                                          (housetype1===0 ? cell2row[cell] :
+                                           housetype1===1 ? cell2col[cell] : cell2block[cell]));
+               }
+               // CBB: this can fail if theres no solution;
+               // should do something more graceful in that case
+               CHECK_GE(spannedHousesOfType1.size, 2);
+               if (EQ(spannedHousesOfType1.size, 2)) {
+                 if (verbose_level >= 2) console.log("              FOUND AN XWING ON "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse])+" AFFECTING "+[...spannedHousesOfType1].map(ihouse=>houseNames[ihouse])+"!");
+                 // Remove digit from the two houses of type 1,
+                 // except for the 4 cells in question.
+                 for (const ihouse1 of spannedHousesOfType1) {
+                   for (const cell of house2cells[ihouse1]) {
+                     if (!the4cells.has(cell)) {
+                       removeIf(newState[cell], x => x===digit);
+                     }
+                   }
+                 }
+               }
+             }
+           }
+         }
+       }
+     }
+
+     if (verbose_level >= 1) console.log("        out doXwingsNEW(n="+n+", state)");
+     return newState;
+   };  // doXwingsNEW
+
+   const doXwings = (n, oldState) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
+     const answerOLD = doXwingsOLD(n, oldState);
+     const answerNEW = doXwingsNEW(n, oldState);
+     CHECK(deepEquals(answerOLD, answerNEW));
+     if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
+     return answerOLD;
+   };  // doXwings
 
    const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
    const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
@@ -1259,6 +1345,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
      const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
+     const nDoXwingsNEW = howManyTimesStateWillChange(state, scratchState=>doXwingsNEW(n,scratchState));
+     //CHECK_EQ(nDoXwingsNEW, nDoXwings);  // XXX should work, need to debug
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
