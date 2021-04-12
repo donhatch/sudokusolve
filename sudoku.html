@@ -800,10 +800,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doHiddenSingles
 
-   const doNakedTuples = (tuplicity, n, state) => {
+   const doNakedTuples = (tuplicity, n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
+     const newState = deepCopy(oldState);
 
      // What is a naked pair?  It's when two cells in a house
      // have the exact same candidates.  In this case we can eliminate
@@ -823,7 +823,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        const iindicesOfNonSingles = [];
        for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
          const coords = all_housesOLD[ihouse][iinhouse];
-         if (originalState[coords[0]][coords[1]].length >= 2) {
+         if (oldState[coords[0]][coords[1]].length >= 2) {
           iindicesOfNonSingles.push(iinhouse);
          }
        }
@@ -835,7 +835,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          for (const i of kset) {
            const iinhouse = iindicesOfNonSingles[i];
            const coords = all_housesOLD[ihouse][iinhouse];
-           for (const digit of originalState[coords[0]][coords[1]]) {
+           for (const digit of oldState[coords[0]][coords[1]]) {
              union.add(digit);
            }
          }
@@ -846,7 +846,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (!kset.includes(i)) {
                const iinhouse = iindicesOfNonSingles[i];
                const coords = all_housesOLD[ihouse][iinhouse];
-               removeIf(state[coords[0]][coords[1]], x => union.has(x));
+               removeIf(newState[coords[0]][coords[1]], x => union.has(x));
              }
            }
          }
@@ -854,6 +854,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
       }
      if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
+     return newState;
    };  // doNakedTuples
 
    const doHiddenTuples = (tuplicity, n, state) => {
@@ -1044,11 +1045,11 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState));
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
-     const nDoNakedPairs = howManyTimesStateWillChangeOld(state, scratchState=>doNakedTuples(2,n,scratchState));
+     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
      const nDoHiddenPairs = howManyTimesStateWillChangeOld(state, scratchState=>doHiddenTuples(2,n,scratchState));
-     const nDoNakedTriples = howManyTimesStateWillChangeOld(state, scratchState=>doNakedTuples(3,n,scratchState));
+     const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
      const nDoHiddenTriples = howManyTimesStateWillChangeOld(state, scratchState=>doHiddenTuples(3,n,scratchState));
-     const nDoNakedQuads = howManyTimesStateWillChangeOld(state, scratchState=>doNakedTuples(4,n,scratchState));
+     const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
      const nDoHiddenQuads = howManyTimesStateWillChangeOld(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChangeOld(state, scratchState=>doOmissions(n,scratchState));
 
@@ -1154,8 +1155,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedPairsButtonMouseOver = () => {
      console.log("    in nakedPairsButtonMouseOver");
-     const scratchState = deepCopy(state);
-     doNakedTuples(2, n, scratchState);
+     const scratchState = doNakedTuples(2, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedPairsButtonMouseOver");
    };
@@ -1163,8 +1163,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    in nakedPairsButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
-     undoStack.push(deepCopy(state));
-     doNakedTuples(2, n, state);
+     undoStack.push(state);
+     state = doNakedTuples(2, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedPairsButtonMouseDown");
@@ -1172,8 +1172,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedTriplesButtonMouseOver = () => {
      console.log("    in nakedTriplesButtonMouseOver");
-     const scratchState = deepCopy(state);
-     doNakedTuples(3, n, scratchState);
+     const scratchState = doNakedTuples(3, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedTriplesButtonMouseOver");
    };
@@ -1181,8 +1180,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    in nakedTriplesButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
-     undoStack.push(deepCopy(state));
-     doNakedTuples(3, n, state);
+     undoStack.push(state);
+     state = doNakedTuples(3, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedTriplesButtonMouseDown");
@@ -1208,8 +1207,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedQuadsButtonMouseOver = () => {
      console.log("    in nakedQuadsButtonMouseOver");
-     const scratchState = deepCopy(state);
-     doNakedTuples(4, n, scratchState);
+     const scratchState = doNakedTuples(4, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedQuadsButtonMouseOver");
    };
@@ -1217,8 +1215,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    in nakedQuadsButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
-     undoStack.push(deepCopy(state));
-     doNakedTuples(4, n, state);
+     undoStack.push(state);
+     state = doNakedTuples(4, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedQuadsButtonMouseDown");
