@@ -1,12 +1,25 @@
 <!--
 
+TODO: huh! doesn't solve this one: https://app.crackingthecryptic.com/sudoku/94Qq6qGjh2  ("classic sudoku") (mark's favorite sudoku ever).  why does he say the 8's are not an x-wing?  they sure seem like one.
+  - he used something interesting at 6:30- 
+    Q: is it covered by the techniques I
+    have coded so far?
+    What's happening is:
+      6,3,8 all have only 3 left in a block, and it's the *same* 3
+      in that block.  that's a hidden triple, or something?  think
+      about it.
+    A: yes, it's a hidden triple.
+    At 14:30, he's got as far as my solver gets.  So, after that,
+    he needs to do something very clever.
+    Yes, it's a swordfish!  Which I haven't learned yet.
+
 TODO: is there yet another xwing type thing that interacts between all three of row,col,block?  yes, I think so.  Hmm!
                 1.. .1.
                 .1. .1.
                 ... ...
 
-TODO: I think I have xwing logic screwed up- it assumes things are in one order, but can be swapped, when blocks are involved.
-TODO: lots more xwing options
+TODO: simplify xwing if possible- - too many cases with similar looking code, currently
+TODO: longer xwing chains
 TODO: split up xwing button according to type, so its less confusing. it's really hard to tell what it's thinking currently.
 TODO: try to figure out how to draw the xwings on hover-over!
 
@@ -1028,6 +1041,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (cell2col[cell00] === cell2col[cell10] &&
                  cell2col[cell01] === cell2col[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit?  yes!
                for (const cell of [...col2cells[cell2col[cell00]],
                                    ...col2cells[cell2col[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1036,9 +1050,36 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  }
                }
              }
+             // backwards.  I think this is not possible.
+             if (cell2col[cell00] === cell2col[cell11] &&
+                 cell2col[cell01] === cell2col[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS, BACKWARDS, IMPOSSIBLE!!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               CHECK(false);  // I think this is not possible
+               for (const cell of [...col2cells[cell2col[cell00]],
+                                   ...col2cells[cell2col[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+
              if (cell2block[cell00] === cell2block[cell10] &&
                  cell2block[cell01] === cell2block[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit? yes!
+               for (const cell of [...block2cells[cell2block[cell00]],
+                                   ...block2cells[cell2block[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             if (cell2block[cell00] === cell2block[cell11] &&
+                 cell2block[cell01] === cell2block[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING BLOCKS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               CHECK(false);  // coverage.  is it hit?
                for (const cell of [...block2cells[cell2block[cell00]],
                                    ...block2cells[cell2block[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1053,6 +1094,20 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (cell2row[cell00] === cell2row[cell10] &&
                  cell2row[cell01] === cell2row[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit?  yes!
+               for (const cell of [...row2cells[cell2row[cell00]],
+                                   ...row2cells[cell2row[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             // backwards.  I think this is not possible.
+             if (cell2row[cell00] === cell2row[cell11] &&
+                 cell2row[cell01] === cell2row[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS, BACKWARDS! IMPOSSIBLE!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               CHECK(false);  // coverage.  is it hit?
                for (const cell of [...row2cells[cell2row[cell00]],
                                    ...row2cells[cell2row[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1064,6 +1119,19 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (cell2block[cell00] === cell2block[cell10] &&
                  cell2block[cell01] === cell2block[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING BLOCKS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit?  yes!
+               for (const cell of [...block2cells[cell2block[cell00]],
+                                   ...block2cells[cell2block[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             if (cell2block[cell00] === cell2block[cell11] &&
+                 cell2block[cell01] === cell2block[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING BLOCKS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               CHECK(false);  // coverage.  is it hit?
                for (const cell of [...block2cells[cell2block[cell00]],
                                    ...block2cells[cell2block[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1078,6 +1146,19 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (cell2row[cell00] === cell2row[cell10] &&
                  cell2row[cell01] === cell2row[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit?  yes!
+               for (const cell of [...row2cells[cell2row[cell00]],
+                                   ...row2cells[cell2row[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
+             if (cell2row[cell00] === cell2row[cell11] &&
+                 cell2row[cell01] === cell2row[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS, AFFECTING ROWS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               CHECK(false);  // coverage.  is it hit?
                for (const cell of [...row2cells[cell2row[cell00]],
                                    ...row2cells[cell2row[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1089,6 +1170,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (cell2col[cell00] === cell2col[cell10] &&
                  cell2col[cell01] === cell2col[cell11]) {
                if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false);  // coverage.  is it hit?  yes!
                for (const cell of [...col2cells[cell2col[cell00]],
                                    ...col2cells[cell2col[cell01]]]) {
                  if (cell != cell00 && cell != cell10
@@ -1097,7 +1179,18 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  }
                }
              }
-
+             if (cell2col[cell00] === cell2col[cell11] &&
+                 cell2col[cell01] === cell2col[cell10]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS, AFFECTING COLS, BACKWARDS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+               //CHECK(false); // coverage.  is it hit? yes! not surprised
+               for (const cell of [...col2cells[cell2col[cell00]],
+                                   ...col2cells[cell2col[cell01]]]) {
+                 if (cell != cell00 && cell != cell10
+                  && cell != cell01 && cell != cell11) {
+                   removeIf(newState[cell], x => x==digit);
+                 }
+               }
+             }
            }
          }
        }
