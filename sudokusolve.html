@@ -696,28 +696,29 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
 
    // Propagate singles to eliminate candidates.
-   const propagateSingles = (n, oldState) => {
+   const propagateSingles = (n, oldBumpyState) => {
      console.log("      in propagateSingles(n="+n+", state)");
-     const newState = deepCopy(state);
+     const oldState = FlattenStateXXX(oldBumpyState);
+     const newState = deepCopy(oldState);
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
-         if (oldState[i][j].length == 1) {
+         if (oldState[i*(n*n)+j].length == 1) {
            // same row
            //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i][j][0]+"; lasering");
            for (let k = 0; k < n*n; ++k) {
              if (k != j) {
-               removeIf(newState[i][k], x => x===oldState[i][j][0]);
+               removeIf(newState[i*(n*n)+k], x => x===oldState[i*(n*n)+j][0]);
              }
            }
            for (let k = 0; k < n*n; ++k) {
              if (k != i) {
-               removeIf(newState[k][j], x => x===oldState[i][j][0]);
+               removeIf(newState[k*(n*n)+j], x => x===oldState[i*(n*n)+j][0]);
              }
            }
            for (let ii = 0; ii < n; ++ii) {
              for (let jj = 0; jj < n; ++jj) {
                if (ii != i%n || jj != j%n) {
-                 removeIf(newState[i-i%n+ii][j-j%n+jj], x=>x===oldState[i][j][0]);
+                 removeIf(newState[(i-i%n+ii)*(n*n)+(j-j%n+jj)], x=>x===oldState[i*(n*n)+j][0]);
                }
              }
            }
@@ -725,14 +726,15 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        }
      }
      console.log("      out propagateSingles(n="+n+", state)");
-     return newState;
+     return UnflattenStateXXX(newState);
    };  // propagateSingles
 
-   const doHiddenSingles = (n, oldState) => {
+   const doHiddenSingles = (n, oldBumpyState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", oldState)");
      if (verbose_level >= 2) console.log("          oldState = "+Stringify(oldState));
-     const newState = deepCopy(state);
+     const oldState = FlattenStateXXX(oldBumpyState);
+     const newState = deepCopy(oldState);
      // For each digit and house (i.e. row, column, or block),
      // if there's only one place the digit can go
      // in that house, then put it there
@@ -745,26 +747,27 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          const candidatePositionsInHouse = [];
          for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
            const cell = house2cells[ihouse][iinhouse];
-           if (oldState[cell2row[cell]][cell2col[cell]].includes(digit)) {
+           if (oldState[cell].includes(digit)) {
              candidatePositionsInHouse.push(iinhouse);
            }
          }
          if (candidatePositionsInHouse.length === 1) {
            if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+house2cells[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(house2cells[ihouse]));
            const cell = house2cells[ihouse][candidatePositionsInHouse[0]];
-           newState[cell2row[cell]][cell2col[cell]].length = 1;
-           newState[cell2row[cell]][cell2col[cell]][0] = digit;
+           newState[cell].length = 1;
+           newState[cell][0] = digit;
          }
        }
      }
 
      if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", oldState)");
-     return newState;
+     return UnflattenStateXXX(newState);
    };  // doHiddenSingles
 
-   const doNakedTuples = (tuplicity, n, oldState) => {
+   const doNakedTuples = (tuplicity, n, oldBumpyState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
+     const oldState = FlattenStateXXX(oldBumpyState);
      const newState = deepCopy(oldState);
 
      // What is a naked pair?  It's when two cells in a house
@@ -785,7 +788,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        const iindicesOfNonSingles = [];
        for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
          const cell = house2cells[ihouse][iinhouse];
-         if (oldState[cell2row[cell]][cell2col[cell]].length >= 2) {
+         if (oldState[cell].length >= 2) {
           iindicesOfNonSingles.push(iinhouse);
          }
        }
@@ -797,7 +800,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          for (const i of kset) {
            const iinhouse = iindicesOfNonSingles[i];
            const cell = house2cells[ihouse][iinhouse];
-           for (const digit of oldState[cell2row[cell]][cell2col[cell]]) {
+           for (const digit of oldState[cell]) {
              union.add(digit);
            }
          }
@@ -808,7 +811,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (!kset.includes(i)) {
                const iinhouse = iindicesOfNonSingles[i];
                const cell = house2cells[ihouse][iinhouse];
-               removeIf(newState[cell2row[cell]][cell2col[cell]], x => union.has(x));
+               removeIf(newState[cell], x => union.has(x));
              }
            }
          }
@@ -816,12 +819,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
       }
      if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     return newState;
+     return UnflattenStateXXX(newState);
    };  // doNakedTuples
 
-   const doHiddenTuples = (tuplicity, n, oldState) => {
+   const doHiddenTuples = (tuplicity, n, oldBumpyState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
+     const oldState = FlattenStateXXX(oldBumpyState);
      const newState = deepCopy(oldState);
      for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
        if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
@@ -837,7 +841,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
        const definitelyUninterestingDigits = new Set();
        for (let cell of house2cells[ihouse]) {
-         const oldStateCell = oldState[cell2row[cell]][cell2col[cell]];
+         const oldStateCell = oldState[cell];
          if (oldStateCell.length == 1) {
            definitelyUninterestingDigits.add(oldStateCell[0]);
          }
@@ -851,7 +855,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        }
        for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
          const cell = house2cells[ihouse][iinhouse];
-         for (const digit of oldState[cell2row[cell]][cell2col[cell]]) {
+         for (const digit of oldState[cell]) {
            if (definitelyUninterestingDigits.has(digit)) continue;
            digit2indicesInHouse.get(digit).push(iinhouse);
          }
@@ -885,18 +889,41 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            // the specific digits.
            for (const iinhouse of union) {
              const cell = house2cells[ihouse][iinhouse];
-             removeIf(newState[cell2row[cell]][cell2col[cell]], x => !tuple.includes(x));
+             removeIf(newState[cell], x => !tuple.includes(x));
            }
          }
        }
      }
      if (verbose_level >= 1) console.log("        out doHiddenTuples(tuplicity="+tuplicity+", n="+n+", newState)");
-     return newState;
+     return UnflattenStateXXX(newState);
    };  // doHiddenTuples
 
-   const doOmissions = (n, oldState) => {
+   const FlattenStateXXX = bumpyState => {
+     const flatState = [];
+     for (let i = 0; i < bumpyState.length; ++i) {
+       for (let j = 0; j < bumpyState[i].length; ++j) {
+         flatState.push(bumpyState[i][j]);
+       }
+     }
+     return flatState;
+   };
+   const UnflattenStateXXX = flatState => {
+     const n = Math.round(Math.sqrt(Math.sqrt(flatState.length)));
+     CHECK_EQ(n*n*n*n, flatState.length);
+     const bumpyState = [];
+     for (let i = 0; i < n*n; ++i) {
+       bumpyState.push([]);
+       for (let j = 0; j < n*n; ++j) {
+         Top(bumpyState).push(flatState[i*(n*n) + j]);
+       }
+     }
+     return bumpyState;
+   };
+
+   const doOmissions = (n, oldBumpyState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
+     const oldState = FlattenStateXXX(oldBumpyState);
      const newState = deepCopy(oldState);
 
      // When a given digit's occurrances (candidacies) in house A
@@ -912,7 +939,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
            for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
              const cell = house2cells[ihouse][iinhouse];
-             if (oldState[cell2row[cell]][cell2col[cell]].includes(digit)) {
+             if (oldState[cell].includes(digit)) {
                const coordKey = ''+cell;  // TODO: call it something else
                if (!house2coordKeysContainingDigit.has(ihouse)) house2coordKeysContainingDigit.set(ihouse, new Set());
                house2coordKeysContainingDigit.get(ihouse).add(coordKey);
@@ -934,10 +961,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              // Remove all other occurrances of digit in house1.
              for (let iinhouse1 = 0; iinhouse1 < house2cells[ihouse1].length; ++iinhouse1) {
                const cell = house2cells[ihouse1][iinhouse1];
-               if (oldState[cell2row[cell]][cell2col[cell]].includes(digit) &&
+               if (oldState[cell].includes(digit) &&
                    !cell2houses[cell].includes(ihouse0)) {
-                 if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at "+Stringify(coords));
-                 removeIf(newState[cell2row[cell]][cell2col[cell]], x => x===digit);
+                 if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at position "+Stringify(cell));
+                 removeIf(newState[cell], x => x===digit);
                }
              }
            }
@@ -946,7 +973,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
 
      if (verbose_level >= 1) console.log("        out doOmissions(n="+n+", state)");
-     return newState;
+     return UnflattenStateXXX(newState);
    };  // doOmissions
 
 
