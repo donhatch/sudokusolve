@@ -9,6 +9,9 @@ in auto candidate mode.
 References:
   https://www.learn-sudoku.com/omission.html
 My reviews:
+  Cracking the cryptic -
+    hard to find a good hub page!
+
   https://www.nytimes.com/puzzles/sudoku
     Most usable interface, due to the auto candidate mode.
     Drawbacks:

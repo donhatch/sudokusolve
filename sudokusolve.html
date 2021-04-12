@@ -1,6 +1,16 @@
 <!--
 
-TODO: huh! doesn't solve this one: https://app.crackingthecryptic.com/sudoku/94Qq6qGjh2  ("classic sudoku") (mark's favorite sudoku ever).  why does he say the 8's are not an x-wing?  they sure seem like one.
+TODO: T-Rex by Macrovius
+  https://www.youtube.com/watch?v=12lPDRFXhYs
+  Also talks about Tatooine sunset
+  - ey used 8 different swordfishes?
+    but could have used a new technique called MSLS (multi sector locked sets)
+    which is the one being shown here
+
+TODO: huh! doesn't solve this one:
+    https://app.crackingthecryptic.com/sudoku/94Qq6qGjh2
+    ("classic sudoku") (mark's favorite sudoku ever).  why does he say the 8's are not an x-wing?  they sure seem like one.
+
   - he used something interesting at 6:30- 
     Q: is it covered by the techniques I
     have coded so far?
@@ -12,9 +22,12 @@ TODO: huh! doesn't solve this one: https://app.crackingthecryptic.com/sudoku/94Q
     At 14:30, he's got as far as my solver gets.  So, after that,
     he needs to do something very clever.
     Yes, it's a swordfish!  Which I haven't learned yet.
+
   - wait, or maybe this is mark's favorite?
       https://www.youtube.com/watch?v=IFHOtse62Jo
       https://app.crackingthecryptic.com/sudoku/B42dn4M8pn
+      - at 13:30 or so, he mentions that you should do two things
+        with a hidden pair.  am I doing them both?
 
 TODO: is there yet another xwing type thing that interacts between all three of row,col,block?  yes, I think so.  Hmm!
                 1.. .1.
@@ -188,7 +201,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const CHECK = cond => {
      if (!cond) {
        console.log("CHECK FAILED!");
-       document.body.innerHTML = "<big><big>CHECK FAILED!</big></big>";
+       document.body.innerHTML = "<big><big>CHECK FAILED! See javascript console for details.</big></big>";
        throw new Error("CHECK FAILED!");
      }
    };
@@ -197,7 +210,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        // CBB: dup code except for "EQ" vs etc
        // CBB: sometimes it would be better to use `,` instead of `+` to take advantage of console's stringification.  but sometimes not.
        console.log("CHECK_EQ a===b FAILED! a="+Stringify(a)+" b="+Stringify(b));
-       document.body.innerHTML = "<big><big>CHECK_EQ a===b FAILED!</big></big>";
+       document.body.innerHTML = "<big><big>CHECK_EQ FAILED! See javascript console for details.</big></big>";
        throw new Error("CHECK_EQ a===b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
@@ -205,14 +218,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      if (!(a >= b)) {
        // CBB: dup code except for "EQ" vs etc
        console.log("CHECK_GE a>=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
-       document.body.innerHTML = "<big><big>CHECK_GE a>=b FAILED!</big></big>";
+       document.body.innerHTML = "<big><big>CHECK_GE FAILED! See javascript console for details.</big></big>";
        throw new Error("CHECK_GE a>=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
    };
    const CHECK_LE = (a,b) => {
      if (!(a <= b)) {
        // CBB: dup code except for "EQ" vs etc
-       console.log("CHECK_LE a<=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
+       document.body.innerHTML = "<big><big>CHECK_LE FAILED! See javascript console for details.</big></big>";
        document.body.innerHTML = "<big><big>CHECK_LE a<=b FAILED!</big></big>";
        throw new Error("CHECK_LE a<=b FAILED! a="+Stringify(a)+" b="+Stringify(b));
      }
@@ -464,7 +477,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        while (answer.length < index) answer += '0';
        answer += innerHTML;
      }
-     while (answer.length < n*n) answer += '0';
+     while (answer.length < n*n*n*n) answer += '0';
 
      console.log("        out ExtractPrefillStringFromCrackingTheCrypticOuterHTML");
      return answer;
@@ -561,32 +574,16 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    let prefill = undefined;
 
    if (true) {
+
+     // Whoa, this one gets *no* progress other than the initial naked single projection (although I haven't implemented swordfish yet)
+     // https://www.telegraph.co.uk/news/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
+     //const url_param_prefill = '800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400';
+     //  file:///home/donhatch/gitrepos/sudokusolve/sudokusolve.html?prefill=800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400
+
      //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
      //
      // An "easy" 16x16 puzzle from https://1sudoku.com/sudoku-variants/super-sudoku-16x16
-     //
-
-       /*
-       const url_param_prefill = (
-         '_EG3_F9__24_da7_' +
-         'DB_6A______CE_F2' +
-         '_28_74e1db5a_6G_' +
-         '__a____dg____B__' +
-         '3______79______g' +
-         '_A61_GC__8F_42D_' +
-         '_854________6EA_' +
-         '____BA_45_6E____' +
-         '____29_84_c7____' +
-         '_518________2g9_' +
-         '_3fd_cg__51_87e_' +
-         '4______3e______5' +
-         '__d____23____5__' +
-         '_62_g34EFAD5_C1_' +
-         '_c35_8F__72_gd6_' +
-         'a1_F5______87_23' +
-         ''
-       ).replace(/_/g, '0').toLowerCase();
-       */
+     //const url_param_prefill = ('_EG3_F9__24_da7_' + 'DB_6A______CE_F2' + '_28_74e1db5a_6G_' + '__a____dg____B__' + '3______79______g' + '_A61_GC__8F_42D_' + '_854________6EA_' + '____BA_45_6E____' + '____29_84_c7____' + '_518________2g9_' + '_3fd_cg__51_87e_' + '4______3e______5' + '__d____23____5__' + '_62_g34EFAD5_C1_' + '_c35_8F__72_gd6_' + 'a1_F5______87_23').replace(/_/g, '0').toLowerCase();
 
      //const url_param_prefill = '1000.0200.0030.0004';  // unsolvable
      //const url_param_prefill = '1300.0200.0030.0004';  // solvable
@@ -1001,7 +998,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
 
-   // Hopefully simpler characterization of xwings.
    const doXwingsNEW = (n, oldState) => {
      const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
      if (verbose_level >= 1) console.log("        in doXwingsNEW(n="+n+", state)");
@@ -1054,6 +1050,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                if (ihouse00_spannedHousesOfType1.size == 1) {
                  // Both cells are in the same house of type 1.
                  // This is caught under a simpler analysis ("omission").
+                 // It can happen only if one of the two types is block.
+                 CHECK(housetype0 == 2 || housetype1 == 2);
+                 //CHECK(false);  // coverage: yes, hit
                  continue;
                }
                CHECK_EQ(ihouse00_spannedHousesOfType1.size, 2);
@@ -1073,6 +1072,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
                  if (ihouse01_spannedHousesOfType1.size == 1) {
                    // Both cells are in the same house of type 1.
                    // This is caught under a simpler analysis ("omission").
+                   // It can happen only if one of the two types is block.
+                   CHECK(housetype0 == 2 || housetype1 == 2);
+                   //CHECK(false);  // coverage: yes, hit
                    continue;
                  }
                  CHECK_EQ(ihouse01_spannedHousesOfType1.size, 2);
