@@ -734,29 +734,28 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
 
    // Propagate singles to eliminate candidates.
-   const propagateSingles = (n, state) => {
+   const propagateSingles = (n, oldState) => {
      console.log("      in propagateSingles(n="+n+", state)");
-     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
      const newState = deepCopy(state);
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
-         if (originalState[i][j].length == 1) {
+         if (oldState[i][j].length == 1) {
            // same row
-           //console.log("      state["+i+"]["+j+"] is a singleton "+originalState[i][j][0]+"; lasering");
+           //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i][j][0]+"; lasering");
            for (let k = 0; k < n*n; ++k) {
              if (k != j) {
-               removeIf(newState[i][k], x => x===originalState[i][j][0]);
+               removeIf(newState[i][k], x => x===oldState[i][j][0]);
              }
            }
            for (let k = 0; k < n*n; ++k) {
              if (k != i) {
-               removeIf(newState[k][j], x => x===originalState[i][j][0]);
+               removeIf(newState[k][j], x => x===oldState[i][j][0]);
              }
            }
            for (let ii = 0; ii < n; ++ii) {
              for (let jj = 0; jj < n; ++jj) {
                if (ii != i%n || jj != j%n) {
-                 removeIf(newState[i-i%n+ii][j-j%n+jj], x=>x===originalState[i][j][0]);
+                 removeIf(newState[i-i%n+ii][j-j%n+jj], x=>x===oldState[i][j][0]);
                }
              }
            }
@@ -767,12 +766,11 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // propagateSingles
 
-   const doHiddenSingles = (n, state) => {
+   const doHiddenSingles = (n, oldState) => {
      const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", state)");
-     if (verbose_level >= 2) console.log("          state = "+Stringify(state));
-     const originalState = deepCopy(state);  // TODO: this is silly. make states unmutable instead
-     if (verbose_level >= 2) console.log("          originalState = "+Stringify(originalState));
+     if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", oldState)");
+     if (verbose_level >= 2) console.log("          oldState = "+Stringify(oldState));
+     const newState = deepCopy(state);
      // For each digit and house (i.e. row, column, or block),
      // if there's only one place the digit can go
      // in that house, then put it there
@@ -783,23 +781,23 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        if (verbose_level >= 2) console.log("              digit = "+digit);
        for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
          const candidatePositionsInHouse = [];
-         const XXXsuperdebug = digit==4 && ihouse == 19;
          for (let iinhouse = 0; iinhouse < all_housesOLD[ihouse].length; ++iinhouse) {
            const coords = all_housesOLD[ihouse][iinhouse];
-           if (originalState[coords[0]][coords[1]].includes(digit)) {
+           if (oldState[coords[0]][coords[1]].includes(digit)) {
              candidatePositionsInHouse.push(iinhouse);
            }
          }
          if (candidatePositionsInHouse.length === 1) {
            if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+all_housesOLD[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(all_housesOLD[ihouse]));
            const coords = all_housesOLD[ihouse][candidatePositionsInHouse[0]];
-           state[coords[0]][coords[1]].length = 1;
-           state[coords[0]][coords[1]][0] = digit;
+           newState[coords[0]][coords[1]].length = 1;
+           newState[coords[0]][coords[1]][0] = digit;
          }
        }
      }
 
-     if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", state)");
+     if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", oldState)");
+     return newState;
    };  // doHiddenSingles
 
    const doNakedTuples = (tuplicity, n, state) => {
@@ -1045,7 +1043,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>propagateSingles(n,scratchState));
-     const nDoHiddenSingles = howManyTimesStateWillChangeOld(state, scratchState=>doHiddenSingles(n,scratchState));
+     const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChangeOld(state, scratchState=>doNakedTuples(2,n,scratchState));
      const nDoHiddenPairs = howManyTimesStateWillChangeOld(state, scratchState=>doHiddenTuples(2,n,scratchState));
      const nDoNakedTriples = howManyTimesStateWillChangeOld(state, scratchState=>doNakedTuples(3,n,scratchState));
@@ -1130,7 +1128,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    in propagateSinglesButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
-     undoStack.push(deepCopy(state));
+     undoStack.push(state);
      state = propagateSingles(n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
@@ -1139,8 +1137,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenSinglesButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
-     const scratchState = deepCopy(state);
-     doHiddenSingles(n, scratchState);
+     const scratchState = doHiddenSingles(n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
    };
@@ -1148,8 +1145,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    in hiddenSinglesButtonMouseDown");
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
-     undoStack.push(deepCopy(state));
-     doHiddenSingles(n, state);
+     undoStack.push(state);
+     state = doHiddenSingles(n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenSinglesButtonMouseDown");
