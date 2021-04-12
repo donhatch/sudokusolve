@@ -724,13 +724,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
      console.log("  initial state = ",state);
      return [n,state,cells,[],[],
-             all_housesOLD,coords2housesOLD,
+             coords2housesOLD,
              cell2row,cell2col,cell2block,cell2houses,house2cells];
    };  // PopulateIt
 
-   let [state,cells,undoStack,redoStack,all_housesOLD,coords2housesOLD,
+   let [state,cells,undoStack,redoStack,coords2housesOLD,
         cell2row,cell2col,cell2block,cell2houses,house2cells] = [undefined];
-   [n, state,cells,undoStack,redoStack,all_housesOLD,coords2housesOLD,
+   [n, state,cells,undoStack,redoStack,coords2housesOLD,
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
 
    // Propagate singles to eliminate candidates.
@@ -817,13 +817,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      // In that case we can eliminate these three candidates from
      // the rest of the house.
 
-     for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
-       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(all_housesOLD[ihouse]));
+     for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
 
        const iindicesOfNonSingles = [];
        for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-         const coords = all_housesOLD[ihouse][iinhouse];
-         if (oldState[coords[0]][coords[1]].length >= 2) {
+         const cell = house2cells[ihouse][iinhouse];
+         if (oldState[cell2row[cell]][cell2col[cell]].length >= 2) {
           iindicesOfNonSingles.push(iinhouse);
          }
        }
@@ -834,8 +834,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          const union = new Set();
          for (const i of kset) {
            const iinhouse = iindicesOfNonSingles[i];
-           const coords = all_housesOLD[ihouse][iinhouse];
-           for (const digit of oldState[coords[0]][coords[1]]) {
+           const cell = house2cells[ihouse][iinhouse];
+           for (const digit of oldState[cell2row[cell]][cell2col[cell]]) {
              union.add(digit);
            }
          }
@@ -845,8 +845,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            for (let i = 0; i < iindicesOfNonSingles.length; ++i) {
              if (!kset.includes(i)) {
                const iinhouse = iindicesOfNonSingles[i];
-               const coords = all_housesOLD[ihouse][iinhouse];
-               removeIf(newState[coords[0]][coords[1]], x => union.has(x));
+               const cell = house2cells[ihouse][iinhouse];
+               removeIf(newState[cell2row[cell]][cell2col[cell]], x => union.has(x));
              }
            }
          }
@@ -861,8 +861,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
      const newState = deepCopy(oldState);
-     for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
-       if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(all_housesOLD[ihouse]));
+     for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+       if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
 
        // What exactly is a hidden pair?
        // It's a pair of digits such that each of them occurs only twice
@@ -874,8 +874,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        // (and none of them should be naked singles)
 
        const definitelyUninterestingDigits = new Set();
-       for (let coords of all_housesOLD[ihouse]) {
-         const oldStateCell = oldState[coords[0]][coords[1]];
+       for (let cell of house2cells[ihouse]) {
+         const oldStateCell = oldState[cell2row[cell]][cell2col[cell]];
          if (oldStateCell.length == 1) {
            definitelyUninterestingDigits.add(oldStateCell[0]);
          }
@@ -888,8 +888,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          digit2indicesInHouse.set(digit, []);
        }
        for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-         const coords = all_housesOLD[ihouse][iinhouse];
-         for (const digit of oldState[coords[0]][coords[1]]) {
+         const cell = house2cells[ihouse][iinhouse];
+         for (const digit of oldState[cell2row[cell]][cell2col[cell]]) {
            if (definitelyUninterestingDigits.has(digit)) continue;
            digit2indicesInHouse.get(digit).push(iinhouse);
          }
@@ -922,8 +922,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            // Make this tuple naked, by removing everything except
            // the specific digits.
            for (const iinhouse of union) {
-             const coords = all_housesOLD[ihouse][iinhouse];
-             removeIf(newState[coords[0]][coords[1]], x => !tuple.includes(x));
+             const cell = house2cells[ihouse][iinhouse];
+             removeIf(newState[cell2row[cell]][cell2col[cell]], x => !tuple.includes(x));
            }
          }
        }
@@ -947,11 +947,11 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        if (verbose_level >= 2) console.log("          digit = "+digit);
        const house2coordKeysContainingDigit = new Map();
        {
-         for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
-           for (let iinhouse = 0; iinhouse < all_housesOLD[ihouse].length; ++iinhouse) {
-             const coords = all_housesOLD[ihouse][iinhouse];
-             if (oldState[coords[0]][coords[1]].includes(digit)) {
-               const coordKey = ''+coords;
+         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+           for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
+             const cell = house2cells[ihouse][iinhouse];
+             if (oldState[cell2row[cell]][cell2col[cell]].includes(digit)) {
+               const coordKey = ''+cell;  // TODO: call it something else
                if (!house2coordKeysContainingDigit.has(ihouse)) house2coordKeysContainingDigit.set(ihouse, new Set());
                house2coordKeysContainingDigit.get(ihouse).add(coordKey);
              }
@@ -970,12 +970,12 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (verbose_level >= 2) console.log("                  coordKeys0 = "+Array.from(coordKeys0));
              if (verbose_level >= 2) console.log("                  coordKeys1 = "+Array.from(coordKeys1));
              // Remove all other occurrances of digit in house1.
-             for (let iinhouse1 = 0; iinhouse1 < all_housesOLD[ihouse1].length; ++iinhouse1) {
-               const coords = all_housesOLD[ihouse1][iinhouse1];
-               if (oldState[coords[0]][coords[1]].includes(digit) &&
-                   !coords2housesOLD[coords[0]][coords[1]].includes(ihouse0)) {
+             for (let iinhouse1 = 0; iinhouse1 < house2cells[ihouse1].length; ++iinhouse1) {
+               const cell = house2cells[ihouse1][iinhouse1];
+               if (oldState[cell2row[cell]][cell2col[cell]].includes(digit) &&
+                   !coords2housesOLD[cell2row[cell]][cell2col[cell]].includes(ihouse0)) {
                  if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at "+Stringify(coords));
-                 removeIf(newState[coords[0]][coords[1]], x => x===digit);
+                 removeIf(newState[cell2row[cell]][cell2col[cell]], x => x===digit);
                }
              }
            }
@@ -1177,7 +1177,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenTriplesButtonMouseOver = () => {
      console.log("    in hiddenTriplesButtonMouseOver");
-     const scratchState = doHiddenTuples(3, n, scratchState);
+     const scratchState = doHiddenTuples(3, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out hiddenTriplesButtonMouseOver");
    };
@@ -1245,7 +1245,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const omissionButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
-     const scratchState = doOmissions(n, scratchState);
+     const scratchState = doOmissions(n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
    };
@@ -1344,7 +1344,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      [n,prefill] = PrefillString2Prefill(prefill_string);
      console.log("      prefill = ",prefill);
-     [n,state,cells,undoStack,redoStack,all_housesOLD,coords2housesOLD,
+     [n,state,cells,undoStack,redoStack,coords2housesOLD,
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
