@@ -649,18 +649,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      // State will be a list of candidates for each cell.
      const state = [];
-     for (let i = 0; i < n*n; ++i) {
-       state.push([]);
-       for (let j = 0; j < n*n; ++j) {
-         if (prefill[i*n*n+j] == 0) {
-           state[i].push(range(1,n*n+1));
-           //console.log("  range(1,n*n+1) = ",range(1,n*n+1));
-         } else {
-           state[i].push([prefill[i*n*n+j]]);
-         }
+     for (let i = 0; i < n*n*n*n; ++i) {
+       if (EQ(prefill[i], 0)) {
+         state.push(range(1,n*n+1));
+       } else {
+         state.push([prefill[i]]);
        }
      }
-
 
      const cell2row = [];
      const cell2col = [];
@@ -697,7 +692,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
 
      console.log("  initial state = ",state);
-     CheckIsBumpy(state);
+     CheckIsFlat(state);
      return [n,state,cells,[],[],
              cell2row,cell2col,cell2block,cell2houses,house2cells];
    };  // PopulateIt
@@ -707,7 +702,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    [n, state,cells,undoStack,redoStack,
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
    console.log("state = ",state);
-   CheckIsBumpy(state);
+   CheckIsFlat(state);
 
    // Propagate singles to eliminate candidates.
    const doPropagateSingles = (n, oldState) => {
@@ -718,7 +713,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        for (let j = 0; j < n*n; ++j) {
          if (oldState[i*(n*n)+j].length == 1) {
            // same row
-           //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i][j][0]+"; lasering");
+           //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i*(n*n)+j][0]+"; lasering");
            for (let k = 0; k < n*n; ++k) {
              if (k != j) {
                removeIf(newState[i*(n*n)+k], x => x===oldState[i*(n*n)+j][0]);
@@ -1017,17 +1012,17 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
    const howManyTimesStateWillChange= (state,state2changedState) => {
-     CheckIsBumpy(state);
+     CheckIsFlat(state);
      let answer = 0;
      while (true) {
        const newState = state2changedState(state);
-       CheckIsBumpy(newState);
+       CheckIsFlat(newState);
        if (deepEquals(newState, state)) {
          break;
        }
        ++answer;
        state = newState;
-       CheckIsBumpy(state);
+       CheckIsFlat(state);
      }
      return answer;
    };  // howManyTimesStateWillChange
@@ -1039,17 +1034,17 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      redoButton.disabled = (redoStack.length === 0);
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
-     CheckIsBumpy(state);
-     const nPropagates = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doPropagateSingles(n,FlattenStateXXX(scratchState))));
-     const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doHiddenSingles(n,FlattenStateXXX(scratchState))));
-     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doNakedTuples(2,n,FlattenStateXXX(scratchState))));
-     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doHiddenTuples(2,n,FlattenStateXXX(scratchState))));
-     const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doNakedTuples(3,n,FlattenStateXXX(scratchState))));
-     const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doHiddenTuples(3,n,FlattenStateXXX(scratchState))));
-     const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doNakedTuples(4,n,FlattenStateXXX(scratchState))));
-     const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doHiddenTuples(4,n,FlattenStateXXX(scratchState))));
-     const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>UnflattenStateXXX(doOmissions(n,FlattenStateXXX(scratchState))));
-     CheckIsBumpy(state);
+     CheckIsFlat(state);
+     const nPropagates = howManyTimesStateWillChange(state, scratchState=>doPropagateSingles(n,scratchState));
+     const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
+     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
+     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
+     const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
+     const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
+     const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
+     const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
+     const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
+     CheckIsFlat(state);
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1078,10 +1073,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      CHECK(Array.isArray(state1));
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
-         if (state0[i][j].length === 1 &&
-             state1[i][j].length === 1 &&
-             state0[i][j][0] == state1[i][j][0]) {
-           const intvalue = state0[i][j][0];
+         if (state0[i*(n*n)+j].length === 1 &&
+             state1[i*(n*n)+j].length === 1 &&
+             state0[i*(n*n)+j][0] == state1[i*(n*n)+j][0]) {
+           const intvalue = state0[i*(n*n)+j][0];
            const charvalue = intvalue2name(intvalue);
            cells[i*n*n+j].innerHTML = charvalue;
          } else {
@@ -1093,8 +1088,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              for (let subj = 0; subj < n; ++subj) {
                cell_inner_html += '<td class="pencil">'
                const intvalue = subi*n+subj+1;
-               const includes0 = state0[i][j].includes(intvalue);
-               const includes1 = state1[i][j].includes(intvalue);
+               const includes0 = state0[i*(n*n)+j].includes(intvalue);
+               const includes1 = state1[i*(n*n)+j].includes(intvalue);
                if (includes0 || includes1) {
                  const color = !includes0 ? '#00c000' : !includes1 ? 'red' : 'black';
                  const weight = !includes0 || !includes1 ? 'bold' : 'normal';
@@ -1114,13 +1109,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // updateUiFromStatePair
 
-   CheckIsBumpy(state);
+   CheckIsFlat(state);
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
    const propagateSinglesButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
-     let scratchState = UnflattenStateXXX(doPropagateSingles(n, FlattenStateXXX(state)));
+     let scratchState = doPropagateSingles(n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
    };
@@ -1129,7 +1124,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doPropagateSingles(n, FlattenStateXXX(state)));
+     state = doPropagateSingles(n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonMouseDown");
@@ -1137,7 +1132,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenSinglesButtonMouseOver = () => {
      console.log("    in propagateSinglesButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doHiddenSingles(n, FlattenStateXXX(state)));
+     const scratchState = doHiddenSingles(n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out propagateSinglesButtonMouseOver");
    };
@@ -1146,7 +1141,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doHiddenSingles(n, FlattenStateXXX(state)));
+     state = doHiddenSingles(n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenSinglesButtonMouseDown");
@@ -1154,7 +1149,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedPairsButtonMouseOver = () => {
      console.log("    in nakedPairsButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doNakedTuples(2, n, FlattenStateXXX(state)));
+     const scratchState = doNakedTuples(2, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedPairsButtonMouseOver");
    };
@@ -1163,7 +1158,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doNakedTuples(2, n, FlattenStateXXX(state)));
+     state = doNakedTuples(2, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedPairsButtonMouseDown");
@@ -1171,7 +1166,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedTriplesButtonMouseOver = () => {
      console.log("    in nakedTriplesButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doNakedTuples(3, n, FlattenStateXXX(state)));
+     const scratchState = doNakedTuples(3, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedTriplesButtonMouseOver");
    };
@@ -1180,7 +1175,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doNakedTuples(3, n, FlattenStateXXX(state)));
+     state = doNakedTuples(3, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedTriplesButtonMouseDown");
@@ -1188,7 +1183,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenTriplesButtonMouseOver = () => {
      console.log("    in hiddenTriplesButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doHiddenTuples(3, n, FlattenStateXXX(state)));
+     const scratchState = doHiddenTuples(3, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out hiddenTriplesButtonMouseOver");
    };
@@ -1197,7 +1192,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doHiddenTuples(3, n, FlattenStateXXX(state)));
+     state = doHiddenTuples(3, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenTriplesButtonMouseDown");
@@ -1205,7 +1200,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const nakedQuadsButtonMouseOver = () => {
      console.log("    in nakedQuadsButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doNakedTuples(4, n, FlattenStateXXX(state)));
+     const scratchState = doNakedTuples(4, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out nakedQuadsButtonMouseOver");
    };
@@ -1214,7 +1209,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doNakedTuples(4, n, FlattenStateXXX(state)));
+     state = doNakedTuples(4, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedQuadsButtonMouseDown");
@@ -1222,7 +1217,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenQuadsButtonMouseOver = () => {
      console.log("    in hiddenQuadsButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doHiddenTuples(4, n, FlattenStateXXX(state)));
+     const scratchState = doHiddenTuples(4, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out hiddenQuadsButtonMouseOver");
    };
@@ -1231,7 +1226,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doHiddenTuples(4, n, FlattenStateXXX(state)));
+     state = doHiddenTuples(4, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenQuadsButtonMouseDown");
@@ -1239,7 +1234,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const hiddenPairsButtonMouseOver = () => {
      console.log("    in hiddenPairsButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doHiddenTuples(2, n, FlattenStateXXX(state)));
+     const scratchState = doHiddenTuples(2, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out hiddenPairsButtonMouseOver");
    };
@@ -1248,7 +1243,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doHiddenTuples(2, n, FlattenStateXXX(state)));
+     state = doHiddenTuples(2, n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenPairsButtonMouseDown");
@@ -1256,7 +1251,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
    const omissionButtonMouseOver = () => {
      console.log("    in omissionButtonMouseOver");
-     const scratchState = UnflattenStateXXX(doOmissions(n, FlattenStateXXX(state)));
+     const scratchState = doOmissions(n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out omissionButtonMouseOver");
    };
@@ -1265,7 +1260,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = UnflattenStateXXX(doOmissions(n, FlattenStateXXX(state)));
+     state = doOmissions(n, state);
      updateUiFromStatePair(Top(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out omissionButtonMouseDown");
@@ -1350,14 +1345,15 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      } else {
        // TODO: more graceful rejection than this!
        // Actually validate and color green/red accordingly!
-       CHECK(false);
+       console.warn("WARNING: unrecognized outerHTML");
+       prefill_string = '1';
      }
 
      [n,prefill] = PrefillString2Prefill(prefill_string);
      console.log("      prefill = ",prefill);
      [n,state,cells,undoStack,redoStack,
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
-     CheckIsBumpy(state);
+     CheckIsFlat(state);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out resetButtonClicked");
