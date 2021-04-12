@@ -906,23 +906,21 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      for (let digit = 1; digit <= n*n; ++digit) {
        if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2cellsContainingDigit = new Map();
-       {
-         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-           for (const cell of house2cells[ihouse]) {
-             if (oldState[cell].includes(digit)) {
-               if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
-               house2cellsContainingDigit.get(ihouse).add(cell);
-             }
+       const house2cellsContainingDigit = [];
+       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+         house2cellsContainingDigit.push(new Set());
+         for (const cell of house2cells[ihouse]) {
+           if (oldState[cell].includes(digit)) {
+             Top(house2cellsContainingDigit).add(cell);
            }
          }
        }
-
-       for (const [ihouse0,cells0] of house2cellsContainingDigit.entries()) {
-         for (const [ihouse1,cells1] of house2cellsContainingDigit.entries()) {
+       for (let ihouse0 = 0; ihouse0 < house2cellsContainingDigit.length; ++ihouse0) {
+         const cells0 = house2cellsContainingDigit[ihouse0];
+         if (cells0.size == 1) continue;  // this is already covered under lone single or something
+         for (let ihouse1 = 0; ihouse1 < house2cellsContainingDigit.length; ++ihouse1) {
            if (ihouse0 == ihouse1) continue;
-           if (cells0.size == 1) continue;  // this is already covered under lone single or something
-
+           const cells1 = house2cellsContainingDigit[ihouse1];
            // Are all occurrances of digit in house0 also in house1?
            if (IsSubsetOf(cells0, cells1)) {
              if (verbose_level >= 2) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
@@ -959,14 +957,12 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      for (let digit = 1; digit <= n*n; ++digit) {
        if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2cellsContainingDigit = new Map();
-       {
-         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-           for (const cell of house2cells[ihouse]) {
-             if (oldState[cell].includes(digit)) {
-               if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
-               house2cellsContainingDigit.get(ihouse).add(cell);
-             }
+       const house2cellsContainingDigit = [];
+       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+         house2cellsContainingDigit.push([]);
+         for (const cell of house2cells[ihouse]) {
+           if (oldState[cell].includes(digit)) {
+             Top(house2cellsContainingDigit).push(cell);
            }
          }
        }
