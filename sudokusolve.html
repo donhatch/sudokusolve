@@ -883,8 +883,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            if (verbose_level >= 2) console.log("                    found hidden (or maybe already naked) "+tuplicity+"-tuple "+Stringify(tuple)+" in house "+ihouse+" positions "+Stringify(union));
            // Make this tuple naked, by removing everything except
            // the specific digits.
-           for (const iinhouse of union) {
-             const cell = house2cells[ihouse][iinhouse];
+           for (const cell of house2cells[ihouse]) {
              removeIf(newState[cell], x => !tuple.includes(x));
            }
          }
@@ -910,8 +909,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        const house2cellsContainingDigit = new Map();
        {
          for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-           for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
-             const cell = house2cells[ihouse][iinhouse];
+           for (const cell of house2cells[ihouse]) {
              if (oldState[cell].includes(digit)) {
                if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
                house2cellsContainingDigit.get(ihouse).add(cell);
@@ -931,8 +929,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              if (verbose_level >= 2) console.log("                  cells0 = "+Array.from(cells0));
              if (verbose_level >= 2) console.log("                  cells1 = "+Array.from(cells1));
              // Remove all other occurrances of digit in house1.
-             for (let iinhouse1 = 0; iinhouse1 < house2cells[ihouse1].length; ++iinhouse1) {
-               const cell = house2cells[ihouse1][iinhouse1];
+             for (const cell of house2cells[ihouse1]) {
                if (oldState[cell].includes(digit) &&
                    !cell2houses[cell].includes(ihouse0)) {
                  if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at position "+Stringify(cell));
@@ -965,8 +962,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        const house2cellsContainingDigit = new Map();
        {
          for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-           for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
-             const cell = house2cells[ihouse][iinhouse];
+           for (const cell of house2cells[ihouse]) {
              if (oldState[cell].includes(digit)) {
                if (!house2cellsContainingDigit.has(ihouse)) house2cellsContainingDigit.set(ihouse, new Set());
                house2cellsContainingDigit.get(ihouse).add(cell);
