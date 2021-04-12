@@ -294,17 +294,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    };  // Stringify
    const Top = arr => arr[arr.length-1];
    const Div = (a,b) => Math.floor(a/b);
-   const CheckIsBumpy = bumpyState => {
-     CHECK(Array.isArray(bumpyState));
-     CHECK(Array.isArray(bumpyState[0]));
-     CHECK(Array.isArray(bumpyState[0][0]));
-     CHECK(!Array.isArray(bumpyState[0][0][0]));
-   };
-   const CheckIsFlat = flatState => {
-     CHECK(Array.isArray(flatState));
-     CHECK(Array.isArray(flatState[0]));
-     CHECK(!Array.isArray(flatState[0][0]));
-   };
 
    const IsSubsetOf = (a,b) => {
      CHECK(a instanceof Set);
@@ -692,7 +681,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
 
      console.log("  initial state = ",state);
-     CheckIsFlat(state);
      return [n,state,cells,[],[],
              cell2row,cell2col,cell2block,cell2houses,house2cells];
    };  // PopulateIt
@@ -702,12 +690,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    [n, state,cells,undoStack,redoStack,
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
    console.log("state = ",state);
-   CheckIsFlat(state);
 
    // Propagate singles to eliminate candidates.
    const doPropagateSingles = (n, oldState) => {
      console.log("      in doPropagateSingles(n="+n+", state)");
-     CheckIsFlat(oldState);
      const newState = deepCopy(oldState);
      for (let i = 0; i < n*n; ++i) {
        for (let j = 0; j < n*n; ++j) {
@@ -742,7 +728,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", oldState)");
      if (verbose_level >= 2) console.log("          oldState = "+Stringify(oldState));
-     CheckIsFlat(oldState);
      const newState = deepCopy(oldState);
      // For each digit and house (i.e. row, column, or block),
      // if there's only one place the digit can go
@@ -776,7 +761,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const doNakedTuples = (tuplicity, n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     CheckIsFlat(oldState);
      const newState = deepCopy(oldState);
 
      // What is a naked pair?  It's when two cells in a house
@@ -834,7 +818,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const doHiddenTuples = (tuplicity, n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     CheckIsFlat(oldState);
      const newState = deepCopy(oldState);
      for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
        if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
@@ -907,34 +890,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      return newState;
    };  // doHiddenTuples
 
-   const FlattenStateXXX = bumpyState => {
-     CheckIsBumpy(bumpyState);
-     const flatState = [];
-     for (let i = 0; i < bumpyState.length; ++i) {
-       for (let j = 0; j < bumpyState[i].length; ++j) {
-         flatState.push(bumpyState[i][j]);
-       }
-     }
-     return flatState;
-   };
-   const UnflattenStateXXX = flatState => {
-     CheckIsFlat(flatState);
-     const n = Math.round(Math.sqrt(Math.sqrt(flatState.length)));
-     CHECK_EQ(n*n*n*n, flatState.length);
-     const bumpyState = [];
-     for (let i = 0; i < n*n; ++i) {
-       bumpyState.push([]);
-       for (let j = 0; j < n*n; ++j) {
-         Top(bumpyState).push(flatState[i*(n*n) + j]);
-       }
-     }
-     return bumpyState;
-   };
-
    const doOmissions = (n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
-     CheckIsFlat(oldState);
      const newState = deepCopy(oldState);
 
      // When a given digit's occurrances (candidacies) in house A
@@ -1012,17 +970,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
    const howManyTimesStateWillChange= (state,state2changedState) => {
-     CheckIsFlat(state);
      let answer = 0;
      while (true) {
        const newState = state2changedState(state);
-       CheckIsFlat(newState);
        if (deepEquals(newState, state)) {
          break;
        }
        ++answer;
        state = newState;
-       CheckIsFlat(state);
      }
      return answer;
    };  // howManyTimesStateWillChange
@@ -1034,7 +989,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      redoButton.disabled = (redoStack.length === 0);
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
      redoStackSizeSpan.innerHTML = ''+redoStack.length;
-     CheckIsFlat(state);
      const nPropagates = howManyTimesStateWillChange(state, scratchState=>doPropagateSingles(n,scratchState));
      const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
      const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
@@ -1044,7 +998,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
      const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
-     CheckIsFlat(state);
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1109,7 +1062,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // updateUiFromStatePair
 
-   CheckIsFlat(state);
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
@@ -1346,14 +1298,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        // TODO: more graceful rejection than this!
        // Actually validate and color green/red accordingly!
        console.warn("WARNING: unrecognized outerHTML");
-       prefill_string = '1';
+       prefill_string = '';
      }
 
      [n,prefill] = PrefillString2Prefill(prefill_string);
      console.log("      prefill = ",prefill);
      [n,state,cells,undoStack,redoStack,
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
-     CheckIsFlat(state);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("    out resetButtonClicked");
