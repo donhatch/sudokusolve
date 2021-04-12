@@ -775,23 +775,23 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      // if there's only one place the digit can go
      // in that house, then put it there
      // (i.e. remove all other candidates in that cell).
-     if (verbose_level >= 2) console.log("          all_housesOLD = "+Stringify(all_housesOLD));
 
      for (let digit = 1; digit <= n*n; ++digit) {
        if (verbose_level >= 2) console.log("              digit = "+digit);
-       for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
+
+       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
          const candidatePositionsInHouse = [];
-         for (let iinhouse = 0; iinhouse < all_housesOLD[ihouse].length; ++iinhouse) {
-           const coords = all_housesOLD[ihouse][iinhouse];
-           if (oldState[coords[0]][coords[1]].includes(digit)) {
+         for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
+           const cell = house2cells[ihouse][iinhouse];
+           if (oldState[cell2row[cell]][cell2col[cell]].includes(digit)) {
              candidatePositionsInHouse.push(iinhouse);
            }
          }
          if (candidatePositionsInHouse.length === 1) {
-           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+all_housesOLD[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(all_housesOLD[ihouse]));
-           const coords = all_housesOLD[ihouse][candidatePositionsInHouse[0]];
-           newState[coords[0]][coords[1]].length = 1;
-           newState[coords[0]][coords[1]][0] = digit;
+           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+house2cells[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(house2cells[ihouse]));
+           const cell = house2cells[ihouse][candidatePositionsInHouse[0]];
+           newState[cell2row[cell]][cell2col[cell]].length = 1;
+           newState[cell2row[cell]][cell2col[cell]][0] = digit;
          }
        }
      }
