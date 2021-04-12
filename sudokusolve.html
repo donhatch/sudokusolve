@@ -1249,8 +1249,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
            if (housetype1 == housetype0) continue;
            if (verbose_level >= 2) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
-           // one of the the two types must be blocks.
-           if (housetype0 != 2 && housetype1 != 2) continue;
            for (const ihouse00 of housesOfTypeContainingDigitTwice[housetype0]) {
              if (verbose_level >= 2) console.log("                  ihouse00 = "+ihouse00);
              {
