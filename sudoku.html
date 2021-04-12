@@ -685,52 +685,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        house2cells[blockhouse].push(cell);
      }
 
-
-     const all_housesOLD = [];
-     {
-       for (let i = 0; i < n*n; ++i) {
-         all_housesOLD.push([]);
-         for (let j = 0; j < n*n; ++j) Top(all_housesOLD).push([i,j]);
-       }
-       for (let j = 0; j < n*n; ++j) {
-         all_housesOLD.push([]);
-         for (let i = 0; i < n*n; ++i) Top(all_housesOLD).push([i,j]);
-       }
-       for (let ii = 0; ii < n; ++ii) {
-         for (let jj = 0; jj < n; ++jj) {
-           all_housesOLD.push([]);
-           for (let iii = 0; iii < n; ++iii) {
-             for (let jjj = 0; jjj < n; ++jjj) {
-               Top(all_housesOLD).push([ii*n+iii, jj*n+jjj]);
-             }
-           }
-         }
-       }
-     }
-     const coords2housesOLD = [];
-     {
-       for (let i = 0; i < n*n; ++i) {
-         coords2housesOLD.push([]);
-         for (let j = 0; j < n*n; ++j) {
-           Top(coords2housesOLD).push([]);
-         }
-       }
-       for (let ihouse = 0; ihouse < all_housesOLD.length; ++ihouse) {
-         for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-           const coord = all_housesOLD[ihouse][iinhouse];
-           coords2housesOLD[coord[0]][coord[1]].push(ihouse);
-         }
-       }
-     }
      console.log("  initial state = ",state);
      return [n,state,cells,[],[],
-             coords2housesOLD,
              cell2row,cell2col,cell2block,cell2houses,house2cells];
    };  // PopulateIt
 
-   let [state,cells,undoStack,redoStack,coords2housesOLD,
+   let [state,cells,undoStack,redoStack,
         cell2row,cell2col,cell2block,cell2houses,house2cells] = [undefined];
-   [n, state,cells,undoStack,redoStack,coords2housesOLD,
+   [n, state,cells,undoStack,redoStack,
     cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
 
    // Propagate singles to eliminate candidates.
@@ -973,7 +935,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
              for (let iinhouse1 = 0; iinhouse1 < house2cells[ihouse1].length; ++iinhouse1) {
                const cell = house2cells[ihouse1][iinhouse1];
                if (oldState[cell2row[cell]][cell2col[cell]].includes(digit) &&
-                   !coords2housesOLD[cell2row[cell]][cell2col[cell]].includes(ihouse0)) {
+                   !cell2houses[cell].includes(ihouse0)) {
                  if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at "+Stringify(coords));
                  removeIf(newState[cell2row[cell]][cell2col[cell]], x => x===digit);
                }
@@ -1344,7 +1306,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      [n,prefill] = PrefillString2Prefill(prefill_string);
      console.log("      prefill = ",prefill);
-     [n,state,cells,undoStack,redoStack,coords2housesOLD,
+     [n,state,cells,undoStack,redoStack,
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
