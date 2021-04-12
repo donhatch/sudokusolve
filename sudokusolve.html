@@ -655,8 +655,12 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      const cell2block = [];
      const cell2houses = [];
      const house2cells = [];
+     const houseNames = [];
      for (let house = 0; house < 3*n*n; ++house) {
        house2cells.push([]);
+       houseNames.push(house < n*n ? "Row "+house :
+                       house < 2*(n*n) ? "Col "+(house-n*n)
+                                       : "Block "+(house-2*(n*n)));
      }
      console.log("  n = "+n);
      for (let cell = 0; cell < n*n*n*n; ++cell) {
@@ -686,13 +690,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
      console.log("  initial state = ",state);
      return [n,state,cells,[],[],
-             cell2row,cell2col,cell2block,cell2houses,house2cells];
+             cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames];
    };  // PopulateIt
 
    let [state,cells,undoStack,redoStack,
-        cell2row,cell2col,cell2block,cell2houses,house2cells] = [undefined];
+        cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames] = [undefined];
    [n, state,cells,undoStack,redoStack,
-    cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
+    cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames] = PopulateIt(prefill);
    console.log("state = ",state);
 
    // Propagate singles to eliminate candidates.
@@ -944,7 +948,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    };  // doOmissions
 
    const doXwings = (n, oldState) => {
-     const verbose_level = 1;
+     const verbose_level = 2;
      if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
      const newState = deepCopy(oldState);
 
@@ -966,8 +970,43 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            }
          }
        }
+       // Which houses have exactly two possible positions for this digit?
+       const housesContainingDigitTwice = [];
+       for (let ihouse = 0; ihouse < house2cellsContainingDigit.length; ++ihouse) {
+         if (house2cellsContainingDigit[ihouse].length === 2) {
+           housesContainingDigitTwice.push(ihouse);
+         }
+       }
 
-       // XXX YOU ARE HERE
+       if (verbose_level >= 2) console.log("              housesContainingDigitTwice = "+Stringify(housesContainingDigitTwice.map(i=>houseNames[i])));
+
+       // For starters, look for simple xwing like in the cracking-the-cryptic
+       // video.
+       // That is, just two rows having the digit twice,
+       // in the same columns, or two cols having the digit twice, in the same rows.
+       for (const ihouse0 of housesContainingDigitTwice) {
+         for (const ihouse1 of housesContainingDigitTwice) {
+           if (ihouse1 <= ihouse0) continue;
+           const [cell00,cell01] = house2cellsContainingDigit[ihouse0];
+           const [cell10,cell11] = house2cellsContainingDigit[ihouse1];
+           if (ihouse0 < n*n && ihouse1 < n*n) {
+             // both houses are rows.
+             if (cell2col[cell00] === cell2col[cell10] &&
+                 cell2col[cell01] === cell2col[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO ROWS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+             }
+           } else if (ihouse0 >= n*n && ihouse0 < 2*(n*n) &&
+                      ihouse1 >= n*n && ihouse1 < 2*(n*n)) {
+             // both houses are columns.
+             if (cell2row[cell00] === cell2row[cell10] &&
+                 cell2row[cell01] === cell2row[cell11]) {
+               if (verbose_level >= 2) console.log("              FOUND AN XWING ON TWO COLS!"+houseNames[ihouse0]+" "+houseNames[ihouse1]);
+             }
+           }
+         }
+       }
+
+
 
      }
 
