@@ -1,4 +1,5 @@
 <!--
+TODO: digit-examination mode, that quickly shows all remaining candidacies of a digit
 
 TODO: switch to notation like they use in forum: http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
       not sure whether it's used with a program, but the important thing
@@ -214,9 +215,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
         <tr>
          <td>
-           <input class="redo" type="button" value="Reset to pasted from crackingthecryptic.com or 1sudoko.com:" onclick="resetButtonClicked()">
-           <input id="prefill" onkeydown="inputKeyDown(event)"></input>
-
+           <input class="redo" type="button" value="Reset to pasted from crackingthecryptic.com or 1sudoko.com:" onclick="resetButtonClicked()" onpaste="console.log(.pasted on button')">
+           <br>
+           <input id="prefill" size="70" onkeydown="inputKeyDown(event)" onpaste="inputPasted(event)"></input>
         <tr>
          <td>
          <br><br><br><br><br><br><br><br><br>
@@ -1545,18 +1546,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("    out anyButtonMouseUp");
    };
 
-   const resetButtonClicked = () => {
-     console.log("    in resetButtonClicked");
-
-     //const prefill_string = '1300020000300004';
-
-     const prefill_input = document.getElementById("prefill");
-     console.log("      prefill_input = ",prefill_input);
-     CHECK(prefill_input != null);
-     console.log("      prefill_input.innerHTML = ",prefill_input.innerHTML);
-     console.log("      prefill_input.value = ",prefill_input.value);
-
-     const outerHTML = prefill_input.value;
+   const processPastedInput = pastedInput => {
+     console.log("        in processPastedInput");
+     console.log("          pastedInput = ",pastedInput);
+     const outerHTML = pastedInput;
 
      let prefill_string;
      if (outerHTML.indexOf('grilleJeu') != -1) {
@@ -1599,6 +1592,21 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
+     console.log("        out processPastedInput");
+   };  // processPastedInput
+
+   const resetButtonClicked = () => {
+     console.log("    in resetButtonClicked");
+
+     //const prefill_string = '1300020000300004';
+
+     const prefill_input = document.getElementById("prefill");
+     console.log("      prefill_input = ",prefill_input);
+     CHECK(prefill_input != null);
+     console.log("      prefill_input.value = ",prefill_input.value);
+
+     processPastedInput(prefill_input.value);
+
      console.log("    out resetButtonClicked");
    };  // resetButtonClicked
 
@@ -1607,10 +1615,25 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("      event = ",event);
      if (EQ(event.key, "Enter")) {
        // hack
-       resetButtonClicked();
+       processPastedInput(document.getElementById("prefill").value);
      }
      console.log("    out inputKeyDown");
    };  // inputKeyDown
+   const inputPasted = event => {
+     console.log("    in inputPasted");
+     console.log("      event = ",event);
+     console.log("      event.clipboardData = ",event.clipboardData);
+     console.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
+     const theData = event.clipboardData.getData('text/plain');
+     console.log("      theData.length = ",theData.length);
+     if (theData.length >= 1000) {
+       console.log('      preventing default to avoid choking!');
+       event.preventDefault();
+       document.getElementById("prefill").value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
+       processPastedInput(theData);
+     }
+     console.log("    out inputPasted");
+   };
 
    //console.log("  file_contents = ",file_contents);
    console.log("out script");
