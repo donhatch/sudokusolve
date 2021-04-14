@@ -5,6 +5,11 @@ https://github.com/PseudoFish/Hodoku
 (which is fork of https://github.com/yoki123/hodoku,
 but with a better README at least)
 
+https://www.sudokuwiki.org/sudoku.htm looks good too.
+
+
+=========================================
+
 
 Working on a general sudoko player/solver.
 
@@ -17,6 +22,12 @@ in auto candidate mode.
 References:
   https://www.learn-sudoku.com/omission.html
 My reviews:
+
+  https://www.sudokuwiki.org/sudoku.htm
+    Looks good, haven't looked in detail yet.
+
+
+
   Cracking the cryptic -
     hard to find a good hub page!
 
@@ -85,6 +96,8 @@ Logic:
    a "locked pair".
  DONE: "naked triple", "naked quad".  probably increasingly
    hard to spot.
+   It means (according to http://hodoku.sourceforge.net/en/tech_als.php)
+   when N unsolved cells in a house together contain only N candidates.
 
  - "visual elimination" of a digit - supposedly powerful,
    but I don't totally get it yet. https://www.learn-sudoku.com/visual-elimination.html
