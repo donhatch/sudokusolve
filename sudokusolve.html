@@ -1,5 +1,14 @@
 <!--
-TODO: digit-examination mode, that quickly shows all remaining candidacies of a digit
+
+TODO: actually make a nice user-solve mode
+- should be able to easily navigate stack of stuff that is done and consequences
+  examined, vs done and consequences not yet examined.
+  Hmm, how will that look?
+
+TODO: digit-examination mode, that quickly shows all remaining candidacies of a digit.
+        green: definitely
+        light green: maybe
+        light red: definitely not
 
 TODO: switch to notation like they use in forum: http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
       not sure whether it's used with a program, but the important thing
@@ -716,7 +725,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    }
 
 
-
+   let digitToHighlight = null;
 
 
    const PopulateIt = prefill => {
@@ -735,7 +744,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        for (let j = 0; j < n*n; ++j) {
          const after_divider_maybe = j!=0 && j%n==0 ? " after_divider" : "";
          const prefilled_maybe = prefill[i*n*n+j] != 0 ? " prefilled" : "";
-         table_inner_html += ' <td class="cell'+after_divider_maybe+prefilled_maybe+'">';
+         table_inner_html += ' <td class="cell'+after_divider_maybe+prefilled_maybe+'" onmouseover="mouseOverCell(event,'+(i*n*n+j)+');" onmouseout="mouseOutCell(event,'+(i*n*n+j)+')">';
        }
      }
 
@@ -1285,6 +1294,31 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      doXwingsCountSpan.innerHTML = ''+nDoXwings;
    };
 
+   const highlightDigit = (state,digit) => {
+     CHECK(Array.isArray(state));
+     CHECK(typeof(digit) === 'number');
+     for (let icell = 0; icell < n*n*n*n; ++icell) {
+       if (state[icell].length === 1 && EQ(state[icell][0], digit)) {
+         // note 'green' is #008000
+         cells[icell].style.background = '#00c000';
+       } else if (state[icell].length === 1) {
+         cells[icell].style.background = '#ffa0a0';  // slightly darker pink
+       } else if (state[icell].includes(digit)) {
+         cells[icell].style.background = '#c0ffc0';  // light green
+       } else {
+         cells[icell].style.background = '#ffc0c0';  // pink
+       }
+     }
+   };  // highlightDigit
+   const unhighlightDigit = (state) => {
+     CHECK(Array.isArray(state));
+     for (let icell = 0; icell < n*n*n*n; ++icell) {
+       // default to style sheet
+       cells[icell].style.background = null;
+     }
+   };  // unhighlightDigit
+
+
    // Show common stuff in black, appearing stuff in green, disappearing stuff in red
    const updateUiFromStatePair = (state0,state1) => {
      CHECK(Array.isArray(state0));
@@ -1325,7 +1359,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          }
        }
      }
+     if (digitToHighlight !== null) {
+       highlightDigit(state1,digitToHighlight);
+     } else {
+       unhighlightDigit(state1);
+     }
    };  // updateUiFromStatePair
+
 
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
@@ -1545,6 +1585,32 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      updateUndoRedoButtons();
      console.log("    out anyButtonMouseUp");
    };
+
+   const mouseOverCell = (event,icell) => {
+     console.log("    in mouseOverCell");
+     console.log("      event = ",event);
+     console.log("      icell = ",icell);
+     let newDigitToHighlight = null;
+     if (state[icell].length == 1) {
+       newDigitToHighlight = state[icell][0];
+     }
+     if (newDigitToHighlight != digitToHighlight) {
+       digitToHighlight = newDigitToHighlight;
+       updateUiFromStatePair(state,state);
+     }
+     console.log("    out mouseOverCell");
+   };  // mouseOverCell
+   const mouseOutCell = (event,icell) => {
+     console.log("    in mouseOutCell");
+     console.log("      event = ",event);
+     console.log("      icell = ",icell);
+     let newDigitToHighlight = null;
+     if (newDigitToHighlight != digitToHighlight) {
+       digitToHighlight = newDigitToHighlight;
+       updateUiFromStatePair(state,state);
+     }
+     console.log("    out mouseOutCell");
+   };  // mouseOutCell
 
    const processPastedInput = pastedInput => {
      console.log("        in processPastedInput");
