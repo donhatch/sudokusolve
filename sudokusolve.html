@@ -1,11 +1,50 @@
 <!--
 
+TODO: switch to notation like they use in forum: http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
+      not sure whether it's used with a program, but the important thing
+      is that blanks are '.'s.
+
+      Really should be able to copy-paste right out of it.
+
+
+TODO: swordfish.
+  examples:
+    T-Rex ttps://www.youtube.com/watch?v=12lPDRFXhYs at 19:46 and 23:20
+    ... ... ...    .5. .5. .5.
+    ... ... ...    ... ... ...
+    .7. .7. .7.    .5. .5. .5.
+
+    ... ... ...    ... .5. .5.
+    ... ... ...    ... ... ...
+    .7. ... .7.    ... ... ...
+
+    ... ... ...    ... ... ...
+    ... ... ...    ... ... ...
+    ... .7. .7.    ... ... ...
+  interesting thread (maybe; I don't understand the forum yet)
+  which includes enumeration of lots of techniques
+    http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
+
+  Q: hmm, it mentions 1000 isomorphs of puzzle.   how is that?
+  PA:
+       9! digit permutations (although can just canonicalize here? not sure)
+       6 row-of-blocks permutations
+     * 6*6*6 row permutations within each row-of-blocks
+       and same for columns
+    
+
 TODO: T-Rex by Macrovius
   https://www.youtube.com/watch?v=12lPDRFXhYs
   Also talks about Tatooine sunset
   - ey used 8 different swordfishes?
     but could have used a new technique called MSLS (multi sector locked sets)
-    which is the one being shown here
+    which is the one being shown here.
+    wait wtf? the video doesn't talk about it?  maybe that's in another video?
+    I think maybe this one?
+      https://www.youtube.com/watch?v=TQ0lso4fJzk
+
+  - "10:20 or so: nobody puts 9s in the corner of the grid" ??
+    - hmm something more about that here https://www.youtube.com/watch?v=GrLVkH122XU
 
 TODO: huh! doesn't solve this one:
     https://app.crackingthecryptic.com/sudoku/94Qq6qGjh2
@@ -1501,6 +1540,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        //     s/</<^M/g
        //   grep su-cell 0 | grep -v su-cell__ > 1
        prefill_string = ExtractPrefillStringFromNYTimesOuterHTML(outerHTML);
+     } else if (true) {
+       // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
+       prefill_string = outerHTML.replace(/[^.0-9a-zA-Z]/g, '').replace(/\./g, '0');
      } else {
        // TODO: more graceful rejection than this!
        // Actually validate and color green/red accordingly!

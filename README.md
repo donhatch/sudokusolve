@@ -1,7 +1,15 @@
+UPDATE:
+
+Hoduku pretty much does everything I was wanting to do and more:
+https://github.com/PseudoFish/Hodoku
+(which is fork of https://github.com/yoki123/hodoku,
+but with a better README at least)
+
+
 Working on a general sudoko player/solver.
 
 I think my favorite interface I've seen and used
-for solving puzzles is the one nytimes one,
+for solving puzzles on line is the one nytimes one,
 in auto candidate mode.
 
 ================
