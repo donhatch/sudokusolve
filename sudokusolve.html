@@ -433,6 +433,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // KSets
 
+   // Output is typically too big, but put newlines before the <'s
+   // and then grep something (I forget what)
    const ExtractPrefillStringFromNYTimesOuterHTML = (outerHTML) => {
      console.log("        in ExtractPrefillStringFromNYTimesOuterHTML");
      // We use svg as a helper container,
@@ -463,6 +465,39 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      console.log("        out ExtractPrefillStringFromNYTimesOuterHTML");
      return answer;
    };  // ExtractPrefillStringFromNYTimesOuterHTML
+
+   // Output is typically too big, but put newlines before the <'s
+   // and then `grep span` it.
+   const ExtractPrefillStringFromLATimesOuterHTML = (outerHTML) => {
+     console.log("        in ExtractPrefillStringFromLATimesOuterHTML");
+     // We use svg as a helper container,
+     // because it has a getElementById method (unlike div,
+     // for some strange reason).
+     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+     svg.innerHTML = outerHTML;
+     console.log("  svg = ",svg);
+
+     const cells = svg.getElementsByClassName('letter-in-box');
+     console.log("          cells = ",cells);
+     console.log("          cells.length = ",cells.length);
+     const n = Math.round(Math.sqrt(Math.sqrt(cells.length)));
+     CHECK_EQ(n*n*n*n, cells.length);
+
+     let answer = '';
+     for (const cell of cells) {
+       const value = cell.innerHTML.trim();
+       if (EQ(value, '')) {
+         answer += "0";
+       } else {
+         CHECK_EQ(value.length, 1);
+         answer += value;
+       }
+     }
+
+     console.log("        out ExtractPrefillStringFromLATimesOuterHTML");
+     return answer;
+   };  // ExtractPrefillStringFromLATimesOuterHTML
+
 
    // Right-click on the `<div class="grid">`
    // or anything containing it, and choose Copy -> Outer HTML,
@@ -1540,6 +1575,14 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        //     s/</<^M/g
        //   grep su-cell 0 | grep -v su-cell__ > 1
        prefill_string = ExtractPrefillStringFromNYTimesOuterHTML(outerHTML);
+     } else if (outerHTML.indexOf('div class="crossword"') != -1 ||
+                outerHTML.indexOf('class="letter-in-box') != -1) {
+       // Same reasoning as for NYTimes, for checking letter-in-box
+       //   vi 0
+       //     s/</<^M/g
+       //   grep span 0 > 1
+       //
+       prefill_string = ExtractPrefillStringFromLATimesOuterHTML(outerHTML);
      } else if (true) {
        // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        prefill_string = outerHTML.replace(/[^.0-9a-zA-Z]/g, '').replace(/\./g, '0');
