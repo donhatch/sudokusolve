@@ -251,8 +251,16 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          <small><small><span class="doxwingscount"></span></small></small>
 
         <tr>
-         <td><input class="fish" type="button" value="Row-column fish (work in progress)" onmouseover="fishButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown()" onmouseup="anyButtonMouseUp()">
-         <small><small><span class="dofishescount"></span></small></small>
+         <td>
+           Row-column fish:
+           <input class="fish1" type="button" value="1" onmouseover="fishButtonMouseOver(1)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(1)" onmouseup="anyButtonMouseUp()">
+           <small><small><span class="dofish1scount"></span></small></small>
+           <input class="fish2" type="button" value="2" onmouseover="fish2ButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
+           <small><small><span class="dofish2scount"></span></small></small>
+           <input class="fish3" type="button" value="3" onmouseover="fish3ButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
+           <small><small><span class="dofish3scount"></span></small></small>
+           <input class="fish4" type="button" value="4" onmouseover="fish4ButtonMouseOver(4)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(4)" onmouseup="anyButtonMouseUp()">
+           <small><small><span class="dofish4scount"></span></small></small>
 
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
@@ -786,663 +794,639 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      */
    }
 
-
-
-
    console.log("in script");
-   console.log("  window.location = ",window.location);
-   console.log("  window.location.href = ",window.location.href);
+   try {
+     console.log("  window.location = ",window.location);
+     console.log("  window.location.href = ",window.location.href);
 
-   let n = 3;  // standard puzzle: 3x3x3x3
+     let n = 3;  // standard puzzle: 3x3x3x3
 
-   let prefill = undefined;
+     let prefill = undefined;
 
-   if (true) {
+     if (true) {
 
-     // Whoa, this one gets *no* progress other than the initial naked single projection (although I haven't implemented swordfish yet)
-     // https://www.telegraph.co.uk/news/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
-     //const url_param_prefill = '800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400';
-     //  file:///home/donhatch/gitrepos/sudokusolve/sudokusolve.html?prefill=800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400
+       // Whoa, this one gets *no* progress other than the initial naked single projection (although I haven't implemented swordfish yet)
+       // https://www.telegraph.co.uk/news/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
+       //const url_param_prefill = '800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400';
+       //  file:///home/donhatch/gitrepos/sudokusolve/sudokusolve.html?prefill=800000000.003600000.070090200.050007000.000045700.000100030.001000068.008500010.090000400
 
-     //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
-     //
-     // An "easy" 16x16 puzzle from https://1sudoku.com/sudoku-variants/super-sudoku-16x16
-     //const url_param_prefill = ('_EG3_F9__24_da7_' + 'DB_6A______CE_F2' + '_28_74e1db5a_6G_' + '__a____dg____B__' + '3______79______g' + '_A61_GC__8F_42D_' + '_854________6EA_' + '____BA_45_6E____' + '____29_84_c7____' + '_518________2g9_' + '_3fd_cg__51_87e_' + '4______3e______5' + '__d____23____5__' + '_62_g34EFAD5_C1_' + '_c35_8F__72_gd6_' + 'a1_F5______87_23').replace(/_/g, '0').toLowerCase();
+       //const url_param_prefill = '003020600.900305001.001806400.008102900.700000008.006708200.002609500.800203009.005010300';
+       //
+       // An "easy" 16x16 puzzle from https://1sudoku.com/sudoku-variants/super-sudoku-16x16
+       //const url_param_prefill = ('_EG3_F9__24_da7_' + 'DB_6A______CE_F2' + '_28_74e1db5a_6G_' + '__a____dg____B__' + '3______79______g' + '_A61_GC__8F_42D_' + '_854________6EA_' + '____BA_45_6E____' + '____29_84_c7____' + '_518________2g9_' + '_3fd_cg__51_87e_' + '4______3e______5' + '__d____23____5__' + '_62_g34EFAD5_C1_' + '_c35_8F__72_gd6_' + 'a1_F5______87_23').replace(/_/g, '0').toLowerCase();
 
-     //const url_param_prefill = '1000.0200.0030.0004';  // unsolvable
-     //const url_param_prefill = '1300.0200.0030.0004';  // solvable
-     //const url_param_prefill = '1300.0200.0030.0000';  // unsolvable
-     //const url_param_prefill = '1300.0000.0032.0000';  // solvable
+       //const url_param_prefill = '1000.0200.0030.0004';  // unsolvable
+       //const url_param_prefill = '1300.0200.0030.0004';  // solvable
+       //const url_param_prefill = '1300.0200.0030.0000';  // unsolvable
+       //const url_param_prefill = '1300.0000.0032.0000';  // solvable
 
-     let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
+       let url_param_prefill = new URL(window.location.href).searchParams.get("prefill");
 
-     //const url_param_prefill = ExtractPrefillStringFrom1SudokoOuterHTML('<div id="grilleJeu"> <div id="c_0" class="c fixe" l="1" c="1" r="1" v="A"><p>3</p></div><div id="c_1" class="c" l="1" c="2" r="1"></div><div id="c_2" class="c" l="1" c="3" r="2"></div><div id="c_3" class="c fixe" l="1" c="4" r="2" v="2"><p>2</p></div><div id="c_4" class="c" l="2" c="1" r="1"></div><div id="c_5" class="c" l="2" c="2" r="1"></div><div id="c_6" class="c fixe" l="2" c="3" r="2" v="3"><p>3</p></div><div id="c_7" class="c" l="2" c="4" r="2"></div><div id="c_8" class="c" l="3" c="1" r="3"></div><div id="c_9" class="c fixe" l="3" c="2" r="3" v="4"><p>4</p></div><div id="c_10" class="c" l="3" c="3" r="4"></div><div id="c_11" class="c" l="3" c="4" r="4"></div><div id="c_12" class="c fixe" l="4" c="1" r="3" v="1"><p>1</p></div><div id="c_13" class="c" l="4" c="2" r="3"></div><div id="c_14" class="c" l="4" c="3" r="4"></div><div id="c_15" class="c" l="4" c="4" r="4"></div>            </div>');
+       //const url_param_prefill = ExtractPrefillStringFrom1SudokoOuterHTML('<div id="grilleJeu"> <div id="c_0" class="c fixe" l="1" c="1" r="1" v="A"><p>3</p></div><div id="c_1" class="c" l="1" c="2" r="1"></div><div id="c_2" class="c" l="1" c="3" r="2"></div><div id="c_3" class="c fixe" l="1" c="4" r="2" v="2"><p>2</p></div><div id="c_4" class="c" l="2" c="1" r="1"></div><div id="c_5" class="c" l="2" c="2" r="1"></div><div id="c_6" class="c fixe" l="2" c="3" r="2" v="3"><p>3</p></div><div id="c_7" class="c" l="2" c="4" r="2"></div><div id="c_8" class="c" l="3" c="1" r="3"></div><div id="c_9" class="c fixe" l="3" c="2" r="3" v="4"><p>4</p></div><div id="c_10" class="c" l="3" c="3" r="4"></div><div id="c_11" class="c" l="3" c="4" r="4"></div><div id="c_12" class="c fixe" l="4" c="1" r="3" v="1"><p>1</p></div><div id="c_13" class="c" l="4" c="2" r="3"></div><div id="c_14" class="c" l="4" c="3" r="4"></div><div id="c_15" class="c" l="4" c="4" r="4"></div>            </div>');
 
-     console.log("  url_param_prefill = ",url_param_prefill);
-
-     if (url_param_prefill[0] == 'p') {
-       // Get it out of file_contents
-       const found = url_param_prefill.match(/^.*[^0-9]([0-9]+)$/);
-       console.log("  found = ",found);
-       const puzzle_number = parseInt(found[1]);
-       console.log("  puzzle_number = ",puzzle_number);
-       const puzzle_numeral = ''+((puzzle_number-puzzle_number%10)/10)+(puzzle_number%10);
-
-       const what_to_look_for = "Grid "+puzzle_numeral+"\n";
-       console.log("  what_to_look_for = ",what_to_look_for);
-       const index = file_contents.indexOf(what_to_look_for);
-       console.log("  index = ",index);
-       CHECK_GE(index, 0);
-       url_param_prefill = ''
-       for (let i = index + what_to_look_for.length; i < file_contents.length && url_param_prefill.length < 81; ++i) {
-         if (file_contents[i] >= '0' && file_contents[i] <= '9') {
-           url_param_prefill += file_contents[i];
-         }
-       }
        console.log("  url_param_prefill = ",url_param_prefill);
 
-       if (true) {
-         // Make "prev" and "next" links
-         if (puzzle_number > 1) {
-           const scratch = new URL(window.location.href);
-           scratch.searchParams.set("prefill", "p"+(puzzle_number-1));
-           document.body.innerHTML += '<a href="'+scratch.href+'">prev</a>';
-         }
-         if (puzzle_number < 50) {
-           const scratch = new URL(window.location.href);
-           scratch.searchParams.set("prefill", "p"+(puzzle_number+1));
-           document.body.innerHTML += ' <a href="'+scratch.href+'">next</a>';
-         }
-       }
-     }
-    [n,prefill] = PrefillString2Prefill(url_param_prefill);
+       if (url_param_prefill[0] == 'p') {
+         // Get it out of file_contents
+         const found = url_param_prefill.match(/^.*[^0-9]([0-9]+)$/);
+         console.log("  found = ",found);
+         const puzzle_number = parseInt(found[1]);
+         console.log("  puzzle_number = ",puzzle_number);
+         const puzzle_numeral = ''+((puzzle_number-puzzle_number%10)/10)+(puzzle_number%10);
 
-   } else {
-     prefill = [];
-     for (let i = 0; i < n*n*n*n; ++i) {
-       prefill.push(0);
-     }
-   }
-
-
-   let digitToHighlight = null;
-
-
-   const PopulateIt = prefill => {
-     let the_table = document.getElementsByClassName("toplevel_table");
-     the_table.innerHTML = '';  // clear it, for starters
-
-     console.log("  the_table = ",the_table);
-     CHECK_EQ(the_table.length, 1);
-     the_table = the_table[0];
-     console.log("  the_table = ",the_table);
-
-     let table_inner_html = ''
-     for (let i = 0; i < n*n; ++i) {
-       const after_divider_maybe = i!=0 && i%n==0 ? " after_divider" : "";
-       table_inner_html += '<tr class="toplevel_row'+after_divider_maybe+'">'
-       for (let j = 0; j < n*n; ++j) {
-         const after_divider_maybe = j!=0 && j%n==0 ? " after_divider" : "";
-         const prefilled_maybe = prefill[i*n*n+j] != 0 ? " prefilled" : "";
-         table_inner_html += ' <td class="cell'+after_divider_maybe+prefilled_maybe+'" onmouseover="mouseOverCell(event,'+(i*n*n+j)+');" onmouseout="mouseOutCell(event,'+(i*n*n+j)+')">';
-       }
-     }
-
-     the_table.innerHTML = table_inner_html;
-
-     const cells = document.getElementsByClassName("cell");
-     CHECK_EQ(cells.length, n*n*n*n);
-
-
-     // State will be a list of candidates for each cell.
-     const state = [];
-     for (let i = 0; i < n*n*n*n; ++i) {
-       if (EQ(prefill[i], 0)) {
-         state.push(range(1,n*n+1));
-       } else {
-         state.push([prefill[i]]);
-       }
-     }
-
-     const cell2row = [];
-     const cell2col = [];
-     const cell2block = [];
-     const cell2houses = [];
-     const house2cells = [];
-     const houseNames = [];
-     const row2cells = [];
-     const col2cells = [];
-     const block2cells = [];
-     for (let i = 0; i < n*n; ++i) {
-       row2cells.push([]);
-       col2cells.push([]);
-       block2cells.push([]);
-     }
-     for (let house = 0; house < 3*n*n; ++house) {
-       house2cells.push([]);
-       houseNames.push(house < n*n ? "Row "+house :
-                       house < 2*(n*n) ? "Col "+(house-n*n)
-                                       : "Block "+(house-2*(n*n)));
-     }
-     console.log("  n = "+n);
-     for (let cell = 0; cell < n*n*n*n; ++cell) {
-       //console.log("      cell = "+cell);
-       const row = Math.floor(cell / (n*n));
-       const col = cell % (n*n);
-       const blockrow = Div(Div(cell,n*n), n);
-       const blockcol = Div(cell%(n*n), n);
-       const block = blockrow*n + blockcol;
-       const rowhouse = row;
-       const colhouse = n*n + col;
-       const blockhouse = 2*(n*n) + block;
-       //console.log("          row = "+row);
-       //console.log("          col = "+col);
-       //console.log("          blockrow = "+blockrow);
-       //console.log("          blockcol = "+blockcol);
-       //console.log("          block = "+block);
-       //console.log("          blockhouse = "+blockhouse);
-       cell2row.push(row);
-       cell2col.push(col);
-       cell2block.push(block);
-       cell2houses.push([rowhouse,colhouse,blockhouse]);
-       house2cells[rowhouse].push(cell);
-       house2cells[colhouse].push(cell);
-       house2cells[blockhouse].push(cell);
-       row2cells[row].push(cell);
-       col2cells[col].push(cell);
-       block2cells[block].push(cell);
-     }
-
-     console.log("  initial state = "+Stringify(state));
-     return [n,state,cells,[],[],
-             cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
-             row2cells,col2cells,block2cells];
-   };  // PopulateIt
-
-   let [state,cells,undoStack,redoStack,
-        cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
-        row2cells,col2cells,block2cells] = [undefined];
-   [n, state,cells,undoStack,redoStack,
-    cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
-    row2cells,col2cells,block2cells] = PopulateIt(prefill);
-   console.log("state = "+Stringify(state));
-
-   // Propagate singles to eliminate candidates.
-   const doPropagateSingles = (n, oldState) => {
-     console.log("      in doPropagateSingles(n="+n+", state)");
-     const newState = deepCopy(oldState);
-     for (let i = 0; i < n*n; ++i) {
-       for (let j = 0; j < n*n; ++j) {
-         if (oldState[i*(n*n)+j].length == 1) {
-           // same row
-           //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i*(n*n)+j][0]+"; lasering");
-           for (let k = 0; k < n*n; ++k) {
-             if (k != j) {
-               removeIf(newState[i*(n*n)+k], x => x===oldState[i*(n*n)+j][0]);
-             }
+         const what_to_look_for = "Grid "+puzzle_numeral+"\n";
+         console.log("  what_to_look_for = ",what_to_look_for);
+         const index = file_contents.indexOf(what_to_look_for);
+         console.log("  index = ",index);
+         CHECK_GE(index, 0);
+         url_param_prefill = ''
+         for (let i = index + what_to_look_for.length; i < file_contents.length && url_param_prefill.length < 81; ++i) {
+           if (file_contents[i] >= '0' && file_contents[i] <= '9') {
+             url_param_prefill += file_contents[i];
            }
-           for (let k = 0; k < n*n; ++k) {
-             if (k != i) {
-               removeIf(newState[k*(n*n)+j], x => x===oldState[i*(n*n)+j][0]);
-             }
+         }
+         console.log("  url_param_prefill = ",url_param_prefill);
+
+         if (true) {
+           // Make "prev" and "next" links
+           if (puzzle_number > 1) {
+             const scratch = new URL(window.location.href);
+             scratch.searchParams.set("prefill", "p"+(puzzle_number-1));
+             document.body.innerHTML += '<a href="'+scratch.href+'">prev</a>';
            }
-           for (let ii = 0; ii < n; ++ii) {
-             for (let jj = 0; jj < n; ++jj) {
-               if (ii != i%n || jj != j%n) {
-                 removeIf(newState[(i-i%n+ii)*(n*n)+(j-j%n+jj)], x=>x===oldState[i*(n*n)+j][0]);
+           if (puzzle_number < 50) {
+             const scratch = new URL(window.location.href);
+             scratch.searchParams.set("prefill", "p"+(puzzle_number+1));
+             document.body.innerHTML += ' <a href="'+scratch.href+'">next</a>';
+           }
+         }
+       }
+      [n,prefill] = PrefillString2Prefill(url_param_prefill);
+
+     } else {
+       prefill = [];
+       for (let i = 0; i < n*n*n*n; ++i) {
+         prefill.push(0);
+       }
+     }
+
+
+     let digitToHighlight = null;
+
+
+     const PopulateIt = prefill => {
+       let the_table = document.getElementsByClassName("toplevel_table");
+       the_table.innerHTML = '';  // clear it, for starters
+
+       console.log("  the_table = ",the_table);
+       CHECK_EQ(the_table.length, 1);
+       the_table = the_table[0];
+       console.log("  the_table = ",the_table);
+
+       let table_inner_html = ''
+       for (let i = 0; i < n*n; ++i) {
+         const after_divider_maybe = i!=0 && i%n==0 ? " after_divider" : "";
+         table_inner_html += '<tr class="toplevel_row'+after_divider_maybe+'">'
+         for (let j = 0; j < n*n; ++j) {
+           const after_divider_maybe = j!=0 && j%n==0 ? " after_divider" : "";
+           const prefilled_maybe = prefill[i*n*n+j] != 0 ? " prefilled" : "";
+           table_inner_html += ' <td class="cell'+after_divider_maybe+prefilled_maybe+'" onmouseover="mouseOverCell(event,'+(i*n*n+j)+');" onmouseout="mouseOutCell(event,'+(i*n*n+j)+')">';
+         }
+       }
+
+       the_table.innerHTML = table_inner_html;
+
+       const cells = document.getElementsByClassName("cell");
+       CHECK_EQ(cells.length, n*n*n*n);
+
+
+       // State will be a list of candidates for each cell.
+       const state = [];
+       for (let i = 0; i < n*n*n*n; ++i) {
+         if (EQ(prefill[i], 0)) {
+           state.push(range(1,n*n+1));
+         } else {
+           state.push([prefill[i]]);
+         }
+       }
+
+       const cell2row = [];
+       const cell2col = [];
+       const cell2block = [];
+       const cell2houses = [];
+       const house2cells = [];
+       const houseNames = [];
+       const row2cells = [];
+       const col2cells = [];
+       const block2cells = [];
+       for (let i = 0; i < n*n; ++i) {
+         row2cells.push([]);
+         col2cells.push([]);
+         block2cells.push([]);
+       }
+       for (let house = 0; house < 3*n*n; ++house) {
+         house2cells.push([]);
+         houseNames.push(house < n*n ? "Row "+house :
+                         house < 2*(n*n) ? "Col "+(house-n*n)
+                                         : "Block "+(house-2*(n*n)));
+       }
+       console.log("  n = "+n);
+       for (let cell = 0; cell < n*n*n*n; ++cell) {
+         //console.log("      cell = "+cell);
+         const row = Math.floor(cell / (n*n));
+         const col = cell % (n*n);
+         const blockrow = Div(Div(cell,n*n), n);
+         const blockcol = Div(cell%(n*n), n);
+         const block = blockrow*n + blockcol;
+         const rowhouse = row;
+         const colhouse = n*n + col;
+         const blockhouse = 2*(n*n) + block;
+         //console.log("          row = "+row);
+         //console.log("          col = "+col);
+         //console.log("          blockrow = "+blockrow);
+         //console.log("          blockcol = "+blockcol);
+         //console.log("          block = "+block);
+         //console.log("          blockhouse = "+blockhouse);
+         cell2row.push(row);
+         cell2col.push(col);
+         cell2block.push(block);
+         cell2houses.push([rowhouse,colhouse,blockhouse]);
+         house2cells[rowhouse].push(cell);
+         house2cells[colhouse].push(cell);
+         house2cells[blockhouse].push(cell);
+         row2cells[row].push(cell);
+         col2cells[col].push(cell);
+         block2cells[block].push(cell);
+       }
+
+       console.log("  initial state = "+Stringify(state));
+       return [n,state,cells,[],[],
+               cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+               row2cells,col2cells,block2cells];
+     };  // PopulateIt
+
+     let [state,cells,undoStack,redoStack,
+          cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+          row2cells,col2cells,block2cells] = [undefined];
+     [n, state,cells,undoStack,redoStack,
+      cell2row,cell2col,cell2block,cell2houses,house2cells,houseNames,
+      row2cells,col2cells,block2cells] = PopulateIt(prefill);
+     console.log("state = "+Stringify(state));
+
+     // Propagate singles to eliminate candidates.
+     const doPropagateSingles = (n, oldState) => {
+       console.log("      in doPropagateSingles(n="+n+", state)");
+       const newState = deepCopy(oldState);
+       for (let i = 0; i < n*n; ++i) {
+         for (let j = 0; j < n*n; ++j) {
+           if (oldState[i*(n*n)+j].length == 1) {
+             // same row
+             //console.log("      state["+i+"]["+j+"] is a singleton "+oldState[i*(n*n)+j][0]+"; lasering");
+             for (let k = 0; k < n*n; ++k) {
+               if (k != j) {
+                 removeIf(newState[i*(n*n)+k], x => x===oldState[i*(n*n)+j][0]);
+               }
+             }
+             for (let k = 0; k < n*n; ++k) {
+               if (k != i) {
+                 removeIf(newState[k*(n*n)+j], x => x===oldState[i*(n*n)+j][0]);
+               }
+             }
+             for (let ii = 0; ii < n; ++ii) {
+               for (let jj = 0; jj < n; ++jj) {
+                 if (ii != i%n || jj != j%n) {
+                   removeIf(newState[(i-i%n+ii)*(n*n)+(j-j%n+jj)], x=>x===oldState[i*(n*n)+j][0]);
+                 }
                }
              }
            }
          }
        }
-     }
-     console.log("      out doPropagateSingles(n="+n+", state)");
-     return newState;
-   };  // doPropagateSingles
+       console.log("      out doPropagateSingles(n="+n+", state)");
+       return newState;
+     };  // doPropagateSingles
 
-   const doHiddenSingles = (n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", oldState)");
-     if (verbose_level >= 2) console.log("          oldState = "+Stringify(oldState));
-     const newState = deepCopy(oldState);
-     // For each digit and house (i.e. row, column, or block),
-     // if there's only one place the digit can go
-     // in that house, then put it there
-     // (i.e. remove all other candidates in that cell).
+     const doHiddenSingles = (n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doHiddenSingles(n="+n+", oldState)");
+       if (verbose_level >= 2) console.log("          oldState = "+Stringify(oldState));
+       const newState = deepCopy(oldState);
+       // For each digit and house (i.e. row, column, or block),
+       // if there's only one place the digit can go
+       // in that house, then put it there
+       // (i.e. remove all other candidates in that cell).
 
-     for (let digit = 1; digit <= n*n; ++digit) {
-       if (verbose_level >= 2) console.log("              digit = "+digit);
+       for (let digit = 1; digit <= n*n; ++digit) {
+         if (verbose_level >= 2) console.log("              digit = "+digit);
+
+         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+           const candidatePositionsInHouse = [];
+           for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
+             const cell = house2cells[ihouse][iinhouse];
+             if (oldState[cell].includes(digit)) {
+               candidatePositionsInHouse.push(iinhouse);
+             }
+           }
+           if (candidatePositionsInHouse.length === 1) {
+             if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+house2cells[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(house2cells[ihouse]));
+             const cell = house2cells[ihouse][candidatePositionsInHouse[0]];
+             newState[cell].length = 1;
+             newState[cell][0] = digit;
+           }
+         }
+       }
+
+       if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", oldState)");
+       return newState;
+     };  // doHiddenSingles
+
+
+     let XXXmaxever = -1;
+     const TryToExtractOneFish = (digit,
+                                  fish_size,
+                                  base_housetype,
+                                  covering_housetype,
+                                  remaining_basehouses,
+                                  remaining_coveringhouses,
+                                  state) => {
+       const verbose_level = 0;
+       if (verbose_level >= 1) console.log("                        in TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+")");
+       const n_remaining_rowscols = remaining_basehouses.length;
+       CHECK_EQ(n_remaining_rowscols, remaining_coveringhouses.length);
+
+       // CBB: probably very inefficient.  Well, worst case for n=3 is k=4, which is
+       // (9 choose 4)=126 subsets.
+       const ksets = KSets(n_remaining_rowscols, fish_size);
+       if (verbose_level >= 1) console.log("                          iterating over "+ksets.length+" "+fish_size+"-sets of "+n_remaining_rowscols);
+       XXXmaxever = Math.max(XXXmaxever, ksets.length);
+       const base_house2cell = base_housetype===0 ? row2cells : base_housetype===1 ? col2cells : blocks2cells;
+
+       for (const kset of ksets) {
+         if (verbose_level >= 2) console.log("                              kset = "+Stringify(kset));
+         const base_houses = Sub(remaining_basehouses, kset);
+         const covering_houses = [];
+         for (const covering_house of remaining_coveringhouses) {
+           for (const base_house of base_houses) {
+             const cell = base_house2cell[base_house][covering_house];
+             if (state[cell].includes(digit)) {
+               covering_houses.push(covering_house);
+               break;  // done with this covering house
+             }
+           }
+           if (covering_houses.length > fish_size) {
+             break;  // no good
+           }
+         }
+         CHECK_GE(covering_houses.length, fish_size);
+         if (covering_houses.length == fish_size) {
+           // found a fish!!!!
+           if (verbose_level >= 1) console.log("                                  found a fish! base_houses="+Stringify(base_houses)+" covering_houses="+Stringify(covering_houses));
+           const answer = [base_houses,covering_houses];
+           if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+"), returning "+Stringify(answer));
+           return answer;
+         }
+       }
+
+       if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+"), returning null at bottom");
+       return null;
+     };  // TryToExtractOneFish
+
+     // Note that a k-row k-column fish (k base rows, k covering columns) is equivalent to:
+     // if a given intersection of k rows with n-k columns is empty,
+     // then the complementary intersection of n-k rows with n-k columns
+     // must also be also empty.
+     // This leads to the concept of a row-column fish decomposition.
+     // The decomposition is a partitioning of the original n rows,
+     // where each partition of k rows has a corresponding cover of n-k columns,
+     // such that either the intersection of the k rows and complementary (n-k) columns is empty
+     // or the intersection of the complementary (n-k) rows and k columns is empty,
+     // and so the other can be made empty.
+     const RowColumnFishDecompose = (digit, max_fish_size, n, state) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("            in RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state)");
+       let answer = [[range(n*n),range(n*n)]];  // one partition containing all n rows and n columns
+
+       let count = 0;
+       for (let fish_size = 1; fish_size <= max_fish_size && fish_size*2 <= Last(answer)[0].length; ++fish_size) {
+         if (verbose_level >= 2) console.log("                  fish_size = "+fish_size);
+         if (verbose_level >= 2) console.log("                      answer so far = "+Stringify(answer));
+         while (true) {
+           CHECK_LE(++count, 100);
+
+           let fish = TryToExtractOneFish(digit, fish_size,
+                                          0, 1,
+                                          /*remaining_rows=*/Last(answer)[0],
+                                          /*remaining_cols=*/Last(answer)[1],
+                                          state);
+           if (fish === null) {
+             fish = TryToExtractOneFish(digit, fish_size,
+                                        1, 0,
+                                        /*remaining_cols=*/Last(answer)[1],
+                                        /*remaining_rows=*/Last(answer)[0],
+                                        state);
+             if (fish !== null) { fish = [fish[1],fish[0]]; }
+           }
+           if (fish === null) {
+             break;  // on to the next size
+           }
+           const [fish_rows,fish_cols] = fish;
+           let [remaining_rows,remaining_cols] = answer.pop();
+           answer.push([fish_rows,fish_cols]);
+           remaining_rows = SortedArrayMinus(remaining_rows, fish_rows);
+           remaining_cols = SortedArrayMinus(remaining_cols, fish_cols);
+           answer.push([remaining_rows,remaining_cols]);
+         }
+       };
+       if (verbose_level >= 1) console.log("            out RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer));
+       return answer;
+     };  // RowColumnFishDecompose
+
+     const doFishes = (max_fish_size, n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
+       CHECK_EQ(typeof(max_fish_size), 'number');
+       CHECK_EQ(typeof(n), 'number');
+       CHECK(Array.isArray(oldState));
+       CHECK(Array.isArray(oldState[0]));
+       CHECK(!Array.isArray(oldState[0][0]));
+       // First of all, make sure there's at least one copy of each digit
+       // in each row and each column.  If not, everything will go insane.
+       for (let digit = 1; digit <= n*n; ++digit) {
+         for (let house = 0; house < 2*n*n; ++house) {  // i.e. rows and columns
+           let num_in_house = 0;
+           for (let cell of house2cells[house]) {
+             if (oldState[cell].includes(digit)) num_in_house++;
+           }
+           if (num_in_house === 0) {
+             if (verbose_level >= 1) console.log("        out doFishes(max_fish_size="+max_fish_size+", n="+n+", state), state is illegal since no instances of digit "+digit+" in house "+houseNames[house]);
+           }
+         }
+       }
+
+       if (verbose_level >= 1) console.log("          oldState = "+Stringify(oldState));
+       const newState = deepCopy(oldState);
+
+       for (let digit = 1; digit <= n*n; ++digit) {
+         if (verbose_level >= 1) console.log("          digit = "+digit);
+         const decomposition = RowColumnFishDecompose(digit, max_fish_size, n, oldState);
+         // Simplest way to do this that I can think of is to clear the digit
+         // from all cells that aren't in any of the fishes.
+         const cells_to_clear = new Set(range(n*n*n*n));
+         for (const [fish_rows,fish_cols] of decomposition) {
+           for (const row of fish_rows) {
+             for (const col of fish_cols) {
+               cells_to_clear.delete(row*(n*n) + col);
+             }
+           }
+         }
+         for (const cell of cells_to_clear) {
+           removeIf(newState[cell], x => x===digit);
+         }
+       }
+       if (verbose_level >= 1) console.log("              XXXmaxever = "+XXXmaxever);
+       XXXmaxever = -1;
+       if (verbose_level >= 1) console.log("        out doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
+       return newState;
+    };  // doFishes
+
+     const doNakedTuples = (tuplicity, n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
+       const newState = deepCopy(oldState);
+
+       // What is a naked pair?  It's when two cells in a house
+       // have the exact same candidates.  In this case we can eliminate
+       // those two candidates from the rest of the house.
+
+       // What is a naked triple?  It's when three cells in a house
+       // have the same three candidates, although it may be that only
+       // two of them occur at a time.  E.g.
+       //   123 123 12
+       //   12 13 23
+       // In that case we can eliminate these three candidates from
+       // the rest of the house.
 
        for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-         const candidatePositionsInHouse = [];
-         for (let iinhouse = 0; iinhouse < house2cells[ihouse].length; ++iinhouse) {
+         if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
+
+         const iindicesOfNonSingles = [];
+         for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
            const cell = house2cells[ihouse][iinhouse];
-           if (oldState[cell].includes(digit)) {
-             candidatePositionsInHouse.push(iinhouse);
+           if (oldState[cell].length >= 2) {
+            iindicesOfNonSingles.push(iinhouse);
            }
          }
-         if (candidatePositionsInHouse.length === 1) {
-           if (verbose_level >= 2) console.log("                  digit "+intvalue2name(digit)+" can go in only position "+candidatePositionsInHouse[0]+":"+house2cells[ihouse][candidatePositionsInHouse[0]]+" in house "+ihouse+" = "+Stringify(house2cells[ihouse]));
-           const cell = house2cells[ihouse][candidatePositionsInHouse[0]];
-           newState[cell].length = 1;
-           newState[cell][0] = digit;
-         }
-       }
-     }
-
-     if (verbose_level >= 1) console.log("        out doHiddenSingles(n="+n+", oldState)");
-     return newState;
-   };  // doHiddenSingles
-
-
-   let XXXmaxever = -1;
-   const TryToExtractOneFish = (digit,
-                                fish_size,
-                                base_housetype,
-                                covering_housetype,
-                                remaining_basehouses,
-                                remaining_coveringhouses,
-                                state) => {
-     const verbose_level = 0;
-     if (verbose_level >= 1) console.log("                        in TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+")");
-     const n_remaining_rowscols = remaining_basehouses.length;
-     CHECK_EQ(n_remaining_rowscols, remaining_coveringhouses.length);
-
-     // CBB: probably very inefficient.  Well, worst case for n=3 is k=4, which is
-     // (9 choose 4)=126 subsets.
-     const ksets = KSets(n_remaining_rowscols, fish_size);
-     if (verbose_level >= 1) console.log("                          iterating over "+ksets.length+" "+fish_size+"-sets of "+n_remaining_rowscols);
-     XXXmaxever = Math.max(XXXmaxever, ksets.length);
-     const base_house2cell = base_housetype===0 ? row2cells : base_housetype===1 ? col2cells : blocks2cells;
-
-     for (const kset of ksets) {
-       if (verbose_level >= 2) console.log("                              kset = "+Stringify(kset));
-       const base_houses = Sub(remaining_basehouses, kset);
-       const covering_houses = [];
-       for (const covering_house of remaining_coveringhouses) {
-         for (const base_house of base_houses) {
-           const cell = base_house2cell[base_house][covering_house];
-           if (state[cell].includes(digit)) {
-             covering_houses.push(covering_house);
-             break;  // done with this covering house
+         // CBB: probably very inefficient, especially when no naked singles
+         // in the house
+         const ksets = KSets(iindicesOfNonSingles.length, tuplicity);
+         for (const kset of ksets) {
+           const union = new Set();
+           for (const i of kset) {
+             const iinhouse = iindicesOfNonSingles[i];
+             const cell = house2cells[ihouse][iinhouse];
+             for (const digit of oldState[cell]) {
+               union.add(digit);
+             }
+           }
+           if (union.size == tuplicity) {
+             if (verbose_level >= 2) console.log("                    found naked "+tuplicity+"-tuple "+Stringify(union)+" in house "+ihouse+" non-single positions "+Stringify(kset));
+             // remove the digits in the union from the rest of this house.
+             for (let i = 0; i < iindicesOfNonSingles.length; ++i) {
+               if (!kset.includes(i)) {
+                 const iinhouse = iindicesOfNonSingles[i];
+                 const cell = house2cells[ihouse][iinhouse];
+                 removeIf(newState[cell], x => union.has(x));
+               }
+             }
            }
          }
-         if (covering_houses.length > fish_size) {
-           break;  // no good
-         }
-       }
-       CHECK_GE(covering_houses.length, fish_size);
-       if (covering_houses.length == fish_size) {
-         // found a fish!!!!
-         if (verbose_level >= 1) console.log("                                  found a fish! base_houses="+Stringify(base_houses)+" covering_houses="+Stringify(covering_houses));
-         const answer = [base_houses,covering_houses];
-         if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+"), returning "+Stringify(answer));
-         return answer;
-       }
-     }
 
-     if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", base_housetype="+base_housetype+" covering_housetype="+covering_housetype+" remaining_basehouses="+Stringify(remaining_basehouses)+" remaining_coveringhouses="+Stringify(remaining_coveringhouses)+"), returning null at bottom");
-     return null;
-   };  // TryToExtractOneFish
+        }
+       if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
+       return newState;
+     };  // doNakedTuples
 
-   // Note that a k-row k-column fish (k base rows, k covering columns) is equivalent to:
-   // if a given intersection of k rows with n-k columns is empty,
-   // then the complementary intersection of n-k rows with n-k columns
-   // must also be also empty.
-   // This leads to the concept of a row-column fish decomposition.
-   // The decomposition is a partitioning of the original n rows,
-   // where each partition of k rows has a corresponding cover of n-k columns,
-   // such that either the intersection of the k rows and complementary (n-k) columns is empty
-   // or the intersection of the complementary (n-k) rows and k columns is empty,
-   // and so the other can be made empty.
-   const RowColumnFishDecompose = (digit, max_fish_size, n, state) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("            in RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state)");
-     let answer = [[range(n*n),range(n*n)]];  // one partition containing all n rows and n columns
+     const doHiddenTuples = (tuplicity, n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
+       const newState = deepCopy(oldState);
+       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+         if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
 
-     let count = 0;
-     for (let fish_size = 1; fish_size <= max_fish_size && fish_size*2 <= Last(answer)[0].length; ++fish_size) {
-       if (verbose_level >= 2) console.log("                  fish_size = "+fish_size);
-       if (verbose_level >= 2) console.log("                      answer so far = "+Stringify(answer));
-       while (true) {
-         CHECK_LE(++count, 100);
+         // What exactly is a hidden pair?
+         // It's a pair of digits such that each of them occurs only twice
+         // in the house, in the same place.
 
-         let fish = TryToExtractOneFish(digit, fish_size,
-                                        0, 1,
-                                        /*remaining_rows=*/Last(answer)[0],
-                                        /*remaining_cols=*/Last(answer)[1],
-                                        state);
-         if (fish === null) {
-           fish = TryToExtractOneFish(digit, fish_size,
-                                      1, 0,
-                                      /*remaining_cols=*/Last(answer)[1],
-                                      /*remaining_rows=*/Last(answer)[0],
-                                      state);
-           if (fish !== null) { fish = [fish[1],fish[0]]; }
-         }
-         if (fish === null) {
-           break;  // on to the next size
-         }
-         const [fish_rows,fish_cols] = fish;
-         let [remaining_rows,remaining_cols] = answer.pop();
-         answer.push([fish_rows,fish_cols]);
-         remaining_rows = SortedArrayMinus(remaining_rows, fish_rows);
-         remaining_cols = SortedArrayMinus(remaining_cols, fish_cols);
-         answer.push([remaining_rows,remaining_cols]);
-       }
-     };
-     if (verbose_level >= 1) console.log("            out RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer));
-     return answer;
-   };  // RowColumnFishDecompose
+         // What exactly is a hidden triple?
+         // Well, it's 3 different digits
+         // whose union spans only 3 different cells in this house.
+         // (and none of them should be naked singles)
 
-   const doFishes = (max_fish_size, n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
-     CHECK_EQ(typeof(max_fish_size), 'number');
-     CHECK_EQ(typeof(n), 'number');
-     CHECK(Array.isArray(oldState));
-     CHECK(Array.isArray(oldState[0]));
-     CHECK(!Array.isArray(oldState[0][0]));
-     // First of all, make sure there's at least one copy of each digit
-     // in each row and each column.  If not, everything will go insane.
-     for (let digit = 1; digit <= n*n; ++digit) {
-       for (let house = 0; house < 2*n*n; ++house) {  // i.e. rows and columns
-         let num_in_house = 0;
-         for (let cell of house2cells[house]) {
-           if (oldState[cell].includes(digit)) num_in_house++;
-         }
-         if (num_in_house === 0) {
-           if (verbose_level >= 1) console.log("        out doFishes(max_fish_size="+max_fish_size+", n="+n+", state), state is illegal since no instances of digit "+digit+" in house "+houseNames[house]);
-         }
-       }
-     }
-
-     if (verbose_level >= 1) console.log("          oldState = "+Stringify(oldState));
-     const newState = deepCopy(oldState);
-
-     for (let digit = 1; digit <= n*n; ++digit) {
-       if (verbose_level >= 1) console.log("          digit = "+digit);
-       const decomposition = RowColumnFishDecompose(digit, max_fish_size, n, oldState);
-       // Simplest way to do this that I can think of is to clear the digit
-       // from all cells that aren't in any of the fishes.
-       const cells_to_clear = new Set(range(n*n*n*n));
-       for (const [fish_rows,fish_cols] of decomposition) {
-         for (const row of fish_rows) {
-           for (const col of fish_cols) {
-             cells_to_clear.delete(row*(n*n) + col);
+         const definitelyUninterestingDigits = new Set();
+         for (let cell of house2cells[ihouse]) {
+           const oldStateCell = oldState[cell];
+           if (oldStateCell.length == 1) {
+             definitelyUninterestingDigits.add(oldStateCell[0]);
            }
          }
-       }
-       for (const cell of cells_to_clear) {
-         removeIf(newState[cell], x => x===digit);
-       }
-     }
-     if (verbose_level >= 1) console.log("              XXXmaxever = "+XXXmaxever);
-     XXXmaxever = -1;
-     if (verbose_level >= 1) console.log("        out doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
-     return newState;
-  };  // doFishes
 
-   const doNakedTuples = (tuplicity, n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     const newState = deepCopy(oldState);
-
-     // What is a naked pair?  It's when two cells in a house
-     // have the exact same candidates.  In this case we can eliminate
-     // those two candidates from the rest of the house.
-
-     // What is a naked triple?  It's when three cells in a house
-     // have the same three candidates, although it may be that only
-     // two of them occur at a time.  E.g.
-     //   123 123 12
-     //   12 13 23
-     // In that case we can eliminate these three candidates from
-     // the rest of the house.
-
-     for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-       if (verbose_level >= 2) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
-
-       const iindicesOfNonSingles = [];
-       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-         const cell = house2cells[ihouse][iinhouse];
-         if (oldState[cell].length >= 2) {
-          iindicesOfNonSingles.push(iinhouse);
+         // CBB: should be array indexed by digit, but the 1-basing makes it awkward
+         const digit2indicesInHouse = new Map();
+         for (let digit = 1; digit <= n*n; ++digit) {
+           if (definitelyUninterestingDigits.has(digit)) continue;
+           digit2indicesInHouse.set(digit, []);
          }
-       }
-       // CBB: probably very inefficient, especially when no naked singles
-       // in the house
-       const ksets = KSets(iindicesOfNonSingles.length, tuplicity);
-       for (const kset of ksets) {
-         const union = new Set();
-         for (const i of kset) {
-           const iinhouse = iindicesOfNonSingles[i];
+         for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
            const cell = house2cells[ihouse][iinhouse];
            for (const digit of oldState[cell]) {
-             union.add(digit);
+             if (definitelyUninterestingDigits.has(digit)) continue;
+             digit2indicesInHouse.get(digit).push(iinhouse);
            }
          }
-         if (union.size == tuplicity) {
-           if (verbose_level >= 2) console.log("                    found naked "+tuplicity+"-tuple "+Stringify(union)+" in house "+ihouse+" non-single positions "+Stringify(kset));
-           // remove the digits in the union from the rest of this house.
-           for (let i = 0; i < iindicesOfNonSingles.length; ++i) {
-             if (!kset.includes(i)) {
-               const iinhouse = iindicesOfNonSingles[i];
-               const cell = house2cells[ihouse][iinhouse];
-               removeIf(newState[cell], x => union.has(x));
-             }
-           }
-         }
-       }
 
-      }
-     if (verbose_level >= 1) console.log("        out doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     return newState;
-   };  // doNakedTuples
-
-   const doHiddenTuples = (tuplicity, n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doHiddenTuples(tuplicity="+tuplicity+", n="+n+", state)");
-     const newState = deepCopy(oldState);
-     for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-       if (verbose_level >= 3) console.log("            ihouse = "+ihouse+" = "+Stringify(house2cells[ihouse]));
-
-       // What exactly is a hidden pair?
-       // It's a pair of digits such that each of them occurs only twice
-       // in the house, in the same place.
-
-       // What exactly is a hidden triple?
-       // Well, it's 3 different digits
-       // whose union spans only 3 different cells in this house.
-       // (and none of them should be naked singles)
-
-       const definitelyUninterestingDigits = new Set();
-       for (let cell of house2cells[ihouse]) {
-         const oldStateCell = oldState[cell];
-         if (oldStateCell.length == 1) {
-           definitelyUninterestingDigits.add(oldStateCell[0]);
-         }
-       }
-
-       // CBB: should be array indexed by digit, but the 1-basing makes it awkward
-       const digit2indicesInHouse = new Map();
-       for (let digit = 1; digit <= n*n; ++digit) {
-         if (definitelyUninterestingDigits.has(digit)) continue;
-         digit2indicesInHouse.set(digit, []);
-       }
-       for (let iinhouse = 0; iinhouse < n*n; ++iinhouse) {
-         const cell = house2cells[ihouse][iinhouse];
-         for (const digit of oldState[cell]) {
+         const interesting_digits = [];
+         for (let digit = 1; digit <= n*n; ++digit) {
            if (definitelyUninterestingDigits.has(digit)) continue;
-           digit2indicesInHouse.get(digit).push(iinhouse);
+           if (digit2indicesInHouse.get(digit).length >= 2 &&
+               digit2indicesInHouse.get(digit).length <= tuplicity) {
+             interesting_digits.push(digit);
+           }
+         }
+         if (verbose_level >= 3) console.log("                interesting_digits = "+Stringify(interesting_digits));
+
+         const ksets = KSets(interesting_digits.length, tuplicity);
+         if (verbose_level >= 2) console.log("                ksets = "+Stringify(ksets));;
+         for (const kset of ksets) {
+           const tuple = Sub(interesting_digits, kset);
+           if (verbose_level >= 3) console.log("                considering tuple of digits "+Stringify(tuple));
+           const union = new Set();
+           for (const digit of tuple) {
+             for (const iinhouse of digit2indicesInHouse.get(digit)) {
+               union.add(iinhouse);
+             }
+           }
+           if (verbose_level >= 3) console.log("                    union = "+Stringify(union));
+           if (union.size == tuplicity) {
+             if (verbose_level >= 2) console.log("                    found hidden (or maybe already naked) "+tuplicity+"-tuple "+Stringify(tuple)+" in house "+ihouse+" positions "+Stringify(union));
+             // Make this tuple naked, by removing everything except
+             // the specific digits.
+             for (const iinhouse of union) {
+               const cell = house2cells[ihouse][iinhouse];
+               removeIf(newState[cell], x => !tuple.includes(x));
+             }
+           }
          }
        }
+       if (verbose_level >= 1) console.log("        out doHiddenTuples(tuplicity="+tuplicity+", n="+n+", newState)");
+       return newState;
+     };  // doHiddenTuples
 
-       const interesting_digits = [];
+     const doOmissions = (n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
+       const newState = deepCopy(oldState);
+
+       // When a given digit's occurrances (candidacies) in house A
+       // is limited to an intersecting house B,
+       // then that digit can be eliminated from the rest of house B.
+       // (one of A or B will be a block, the other will be a row or
+       // column)
+
        for (let digit = 1; digit <= n*n; ++digit) {
-         if (definitelyUninterestingDigits.has(digit)) continue;
-         if (digit2indicesInHouse.get(digit).length >= 2 &&
-             digit2indicesInHouse.get(digit).length <= tuplicity) {
-           interesting_digits.push(digit);
-         }
-       }
-       if (verbose_level >= 3) console.log("                interesting_digits = "+Stringify(interesting_digits));
-
-       const ksets = KSets(interesting_digits.length, tuplicity);
-       if (verbose_level >= 2) console.log("                ksets = "+Stringify(ksets));;
-       for (const kset of ksets) {
-         const tuple = Sub(interesting_digits, kset);
-         if (verbose_level >= 3) console.log("                considering tuple of digits "+Stringify(tuple));
-         const union = new Set();
-         for (const digit of tuple) {
-           for (const iinhouse of digit2indicesInHouse.get(digit)) {
-             union.add(iinhouse);
+         if (verbose_level >= 2) console.log("          digit = "+digit);
+         const house2cellsContainingDigit = [];
+         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+           house2cellsContainingDigit.push(new Set());
+           for (const cell of house2cells[ihouse]) {
+             if (oldState[cell].includes(digit)) {
+               Last(house2cellsContainingDigit).add(cell);
+             }
            }
          }
-         if (verbose_level >= 3) console.log("                    union = "+Stringify(union));
-         if (union.size == tuplicity) {
-           if (verbose_level >= 2) console.log("                    found hidden (or maybe already naked) "+tuplicity+"-tuple "+Stringify(tuple)+" in house "+ihouse+" positions "+Stringify(union));
-           // Make this tuple naked, by removing everything except
-           // the specific digits.
-           for (const iinhouse of union) {
-             const cell = house2cells[ihouse][iinhouse];
-             removeIf(newState[cell], x => !tuple.includes(x));
-           }
-         }
-       }
-     }
-     if (verbose_level >= 1) console.log("        out doHiddenTuples(tuplicity="+tuplicity+", n="+n+", newState)");
-     return newState;
-   };  // doHiddenTuples
-
-   const doOmissions = (n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doOmissions(n="+n+", state)");
-     const newState = deepCopy(oldState);
-
-     // When a given digit's occurrances (candidacies) in house A
-     // is limited to an intersecting house B,
-     // then that digit can be eliminated from the rest of house B.
-     // (one of A or B will be a block, the other will be a row or
-     // column)
-
-     for (let digit = 1; digit <= n*n; ++digit) {
-       if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2cellsContainingDigit = [];
-       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-         house2cellsContainingDigit.push(new Set());
-         for (const cell of house2cells[ihouse]) {
-           if (oldState[cell].includes(digit)) {
-             Last(house2cellsContainingDigit).add(cell);
-           }
-         }
-       }
-       if (verbose_level >= 2) console.log("          house2cellsContainingDigit = "+Stringify(house2cellsContainingDigit));
-       for (let ihouse0 = 0; ihouse0 < house2cellsContainingDigit.length; ++ihouse0) {
-         if (verbose_level >= 2) console.log("              ihouse0 = "+ihouse0);
-         const cells0 = house2cellsContainingDigit[ihouse0];
-         CHECK_GE(cells0.size, 1);
-         if (cells0.size == 1) continue;  // this is already covered under lone single or something
-         for (let ihouse1 = 0; ihouse1 < house2cellsContainingDigit.length; ++ihouse1) {
-           if (ihouse0 == ihouse1) continue;
-           const cells1 = house2cellsContainingDigit[ihouse1];
-           CHECK_GE(cells1.size, 1);
-           // Are all occurrances of digit in house0 also in house1?
-           if (IsSubsetOf(cells0, cells1)) {
-             if (verbose_level >= 2) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
-             if (verbose_level >= 2) console.log("                  cells0 = "+Array.from(cells0));
-             if (verbose_level >= 2) console.log("                  cells1 = "+Array.from(cells1));
-             // Remove all other occurrances of digit in house1.
-             for (const cell of house2cells[ihouse1]) {
-               if (oldState[cell].includes(digit) &&
-                   !cell2houses[cell].includes(ihouse0)) {
-                 if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at position "+Stringify(cell));
-                 removeIf(newState[cell], x => x===digit);
+         if (verbose_level >= 2) console.log("          house2cellsContainingDigit = "+Stringify(house2cellsContainingDigit));
+         for (let ihouse0 = 0; ihouse0 < house2cellsContainingDigit.length; ++ihouse0) {
+           if (verbose_level >= 2) console.log("              ihouse0 = "+ihouse0);
+           const cells0 = house2cellsContainingDigit[ihouse0];
+           CHECK_GE(cells0.size, 1);
+           if (cells0.size == 1) continue;  // this is already covered under lone single or something
+           for (let ihouse1 = 0; ihouse1 < house2cellsContainingDigit.length; ++ihouse1) {
+             if (ihouse0 == ihouse1) continue;
+             const cells1 = house2cellsContainingDigit[ihouse1];
+             CHECK_GE(cells1.size, 1);
+             // Are all occurrances of digit in house0 also in house1?
+             if (IsSubsetOf(cells0, cells1)) {
+               if (verbose_level >= 2) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
+               if (verbose_level >= 2) console.log("                  cells0 = "+Array.from(cells0));
+               if (verbose_level >= 2) console.log("                  cells1 = "+Array.from(cells1));
+               // Remove all other occurrances of digit in house1.
+               for (const cell of house2cells[ihouse1]) {
+                 if (oldState[cell].includes(digit) &&
+                     !cell2houses[cell].includes(ihouse0)) {
+                   if (verbose_level >= 2) console.log("                      so can remove the "+digit+" at position "+Stringify(cell));
+                   removeIf(newState[cell], x => x===digit);
+                 }
                }
              }
            }
          }
        }
-     }
 
-     if (verbose_level >= 1) console.log("        out doOmissions(n="+n+", state)");
-     return newState;
-   };  // doOmissions
+       if (verbose_level >= 1) console.log("        out doOmissions(n="+n+", state)");
+       return newState;
+     };  // doOmissions
 
-   const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
+     const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
 
-   const doXwingsNEW = (n, oldState) => {
-     const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
-     if (verbose_level >= 1) console.log("        in doXwingsNEW(n="+n+", state)");
-     const newState = deepCopy(oldState);
-     // And x-wing is when, for a given digit,
-     // there is a pair of houses (say, rows) such that
-     // all the occurrances of this digit
-     // on these two houses
-     // span only two houses of some different type (say, cols).
-     for (let digit = 1; digit <= n*n; ++digit) {
-       if (verbose_level >= 2) console.log("          digit = "+digit);
-       const house2cellsContainingDigit = [];
-       for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
-         house2cellsContainingDigit.push([]);
-         for (const cell of house2cells[ihouse]) {
-           if (oldState[cell].includes(digit)) {
-             Last(house2cellsContainingDigit).push(cell);
+     const doXwingsNEW = (n, oldState) => {
+       const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
+       if (verbose_level >= 1) console.log("        in doXwingsNEW(n="+n+", state)");
+       const newState = deepCopy(oldState);
+       // And x-wing is when, for a given digit,
+       // there is a pair of houses (say, rows) such that
+       // all the occurrances of this digit
+       // on these two houses
+       // span only two houses of some different type (say, cols).
+       for (let digit = 1; digit <= n*n; ++digit) {
+         if (verbose_level >= 2) console.log("          digit = "+digit);
+         const house2cellsContainingDigit = [];
+         for (let ihouse = 0; ihouse < house2cells.length; ++ihouse) {
+           house2cellsContainingDigit.push([]);
+           for (const cell of house2cells[ihouse]) {
+             if (oldState[cell].includes(digit)) {
+               Last(house2cellsContainingDigit).push(cell);
+             }
            }
          }
-       }
-       // Which houses have exactly two possible positions for this digit?
-       const housesContainingDigitTwice = [];
-       for (let ihouse = 0; ihouse < house2cellsContainingDigit.length; ++ihouse) {
-         if (house2cellsContainingDigit[ihouse].length === 2) {
-           housesContainingDigitTwice.push(ihouse);
+         // Which houses have exactly two possible positions for this digit?
+         const housesContainingDigitTwice = [];
+         for (let ihouse = 0; ihouse < house2cellsContainingDigit.length; ++ihouse) {
+           if (house2cellsContainingDigit[ihouse].length === 2) {
+             housesContainingDigitTwice.push(ihouse);
+           }
          }
-       }
-       if (verbose_level >= 3) console.log("              housesContainingDigitTwice = "+Stringify(Sub(houseNames, housesContainingDigitTwice)));
-       const housesOfTypeContainingDigitTwice = [[],[],[]];
-       for (const house of housesContainingDigitTwice) {
-         const houseType = Div(house, n*n);
-         housesOfTypeContainingDigitTwice[houseType].push(house);
-       }
-       if (verbose_level >= 2) console.log("              housesOfTypeContainingDigitTwice = "+Stringify(Sub(houseNames, housesOfTypeContainingDigitTwice)));
+         if (verbose_level >= 3) console.log("              housesContainingDigitTwice = "+Stringify(Sub(houseNames, housesContainingDigitTwice)));
+         const housesOfTypeContainingDigitTwice = [[],[],[]];
+         for (const house of housesContainingDigitTwice) {
+           const houseType = Div(house, n*n);
+           housesOfTypeContainingDigitTwice[houseType].push(house);
+         }
+         if (verbose_level >= 2) console.log("              housesOfTypeContainingDigitTwice = "+Stringify(Sub(houseNames, housesOfTypeContainingDigitTwice)));
 
-       for (let housetype0 = 0; housetype0 < 3; ++housetype0) {
-         for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
-           if (housetype1 == housetype0) continue;
-           if (verbose_level >= 2) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
-           for (const ihouse00 of housesOfTypeContainingDigitTwice[housetype0]) {
-             if (verbose_level >= 2) console.log("                  ihouse00 = "+ihouse00);
-             {
-               const ihouse00_spannedHousesOfType1 = new Set();
-               for (const cell of house2cellsContainingDigit[ihouse00]) {
-                   ihouse00_spannedHousesOfType1.add(housetype1*(n*n) +
-                                                     (housetype1===0 ? cell2row[cell] :
-                                                      housetype1===1 ? cell2col[cell] : cell2block[cell]));
-               }
-               if (verbose_level >= 2) console.log("                      ihouse00_spannedHousesOfType1.size = "+ihouse00_spannedHousesOfType1.size);
-               if (ihouse00_spannedHousesOfType1.size == 1) {
-                 // Both cells are in the same house of type 1.
-                 // This is caught under a simpler analysis ("omission").
-                 // It can happen only if one of the two types is block.
-                 CHECK(housetype0 == 2 || housetype1 == 2);
-                 //CHECK(false);  // coverage: yes, hit
-                 continue;
-               }
-               CHECK_EQ(ihouse00_spannedHousesOfType1.size, 2);
-             }
-
-             for (const ihouse01 of housesOfTypeContainingDigitTwice[housetype0]) {
-               if (ihouse01 <= ihouse00) continue;  // do them only in canonical order ihouse00<ihouse01
-               if (verbose_level >= 2) console.log("                      ihouse01 = "+ihouse01);
+         for (let housetype0 = 0; housetype0 < 3; ++housetype0) {
+           for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
+             if (housetype1 == housetype0) continue;
+             if (verbose_level >= 2) console.log("              housetype0="+housetype0+" housetype1="+housetype1);
+             for (const ihouse00 of housesOfTypeContainingDigitTwice[housetype0]) {
+               if (verbose_level >= 2) console.log("                  ihouse00 = "+ihouse00);
                {
-                 const ihouse01_spannedHousesOfType1 = new Set();
-                 for (const cell of house2cellsContainingDigit[ihouse01]) {
-                     ihouse01_spannedHousesOfType1.add(housetype1*(n*n) +
+                 const ihouse00_spannedHousesOfType1 = new Set();
+                 for (const cell of house2cellsContainingDigit[ihouse00]) {
+                     ihouse00_spannedHousesOfType1.add(housetype1*(n*n) +
                                                        (housetype1===0 ? cell2row[cell] :
                                                         housetype1===1 ? cell2col[cell] : cell2block[cell]));
                  }
-                 if (verbose_level >= 2) console.log("                      ihouse01_spannedHousesOfType1.size = "+ihouse01_spannedHousesOfType1.size);
-                 if (ihouse01_spannedHousesOfType1.size == 1) {
+                 if (verbose_level >= 2) console.log("                      ihouse00_spannedHousesOfType1.size = "+ihouse00_spannedHousesOfType1.size);
+                 if (ihouse00_spannedHousesOfType1.size == 1) {
                    // Both cells are in the same house of type 1.
                    // This is caught under a simpler analysis ("omission").
                    // It can happen only if one of the two types is block.
@@ -1450,33 +1434,56 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
                    //CHECK(false);  // coverage: yes, hit
                    continue;
                  }
-                 CHECK_EQ(ihouse01_spannedHousesOfType1.size, 2);
+                 CHECK_EQ(ihouse00_spannedHousesOfType1.size, 2);
                }
 
+               for (const ihouse01 of housesOfTypeContainingDigitTwice[housetype0]) {
+                 if (ihouse01 <= ihouse00) continue;  // do them only in canonical order ihouse00<ihouse01
+                 if (verbose_level >= 2) console.log("                      ihouse01 = "+ihouse01);
+                 {
+                   const ihouse01_spannedHousesOfType1 = new Set();
+                   for (const cell of house2cellsContainingDigit[ihouse01]) {
+                       ihouse01_spannedHousesOfType1.add(housetype1*(n*n) +
+                                                         (housetype1===0 ? cell2row[cell] :
+                                                          housetype1===1 ? cell2col[cell] : cell2block[cell]));
+                   }
+                   if (verbose_level >= 2) console.log("                      ihouse01_spannedHousesOfType1.size = "+ihouse01_spannedHousesOfType1.size);
+                   if (ihouse01_spannedHousesOfType1.size == 1) {
+                     // Both cells are in the same house of type 1.
+                     // This is caught under a simpler analysis ("omission").
+                     // It can happen only if one of the two types is block.
+                     CHECK(housetype0 == 2 || housetype1 == 2);
+                     //CHECK(false);  // coverage: yes, hit
+                     continue;
+                   }
+                   CHECK_EQ(ihouse01_spannedHousesOfType1.size, 2);
+                 }
 
 
-               if (verbose_level >= 3) console.log("                  "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse]));
-               const the4cells = new Set([...house2cellsContainingDigit[ihouse00],
-                                          ...house2cellsContainingDigit[ihouse01]]);
-               CHECK_EQ(the4cells.size, 4);  // two distinct on one row and two distinct on another
-               const spannedHousesOfType1 = new Set();
-               for (const cell of the4cells) {
-                 spannedHousesOfType1.add(housetype1*(n*n) +
-                                          (housetype1===0 ? cell2row[cell] :
-                                           housetype1===1 ? cell2col[cell] : cell2block[cell]));
-               }
-               // CBB: this can fail if theres no solution;
-               // should do something more graceful in that case
-               CHECK_GE(spannedHousesOfType1.size, 2);
-               if (EQ(spannedHousesOfType1.size, 2)) {
-                 if (verbose_level >= 2) console.log("              FOUND AN XWING ON "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse])+" AFFECTING "+[...spannedHousesOfType1].map(ihouse=>houseNames[ihouse])+"!");
-                 if (verbose_level >= 2) console.log("                the4cells="+Stringify(the4cells)+" = "+Stringify([...the4cells].map(cell=>Cell2Description(cell))));
-                 // Remove digit from the two houses of type 1,
-                 // except for the 4 cells in question.
-                 for (const ihouse1 of spannedHousesOfType1) {
-                   for (const cell of house2cells[ihouse1]) {
-                     if (!the4cells.has(cell)) {
-                       removeIf(newState[cell], x => x===digit);
+
+                 if (verbose_level >= 3) console.log("                  "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse]));
+                 const the4cells = new Set([...house2cellsContainingDigit[ihouse00],
+                                            ...house2cellsContainingDigit[ihouse01]]);
+                 CHECK_EQ(the4cells.size, 4);  // two distinct on one row and two distinct on another
+                 const spannedHousesOfType1 = new Set();
+                 for (const cell of the4cells) {
+                   spannedHousesOfType1.add(housetype1*(n*n) +
+                                            (housetype1===0 ? cell2row[cell] :
+                                             housetype1===1 ? cell2col[cell] : cell2block[cell]));
+                 }
+                 // CBB: this can fail if theres no solution;
+                 // should do something more graceful in that case
+                 CHECK_GE(spannedHousesOfType1.size, 2);
+                 if (EQ(spannedHousesOfType1.size, 2)) {
+                   if (verbose_level >= 2) console.log("              FOUND AN XWING ON "+[ihouse00,ihouse01].map(ihouse=>houseNames[ihouse])+" AFFECTING "+[...spannedHousesOfType1].map(ihouse=>houseNames[ihouse])+"!");
+                   if (verbose_level >= 2) console.log("                the4cells="+Stringify(the4cells)+" = "+Stringify([...the4cells].map(cell=>Cell2Description(cell))));
+                   // Remove digit from the two houses of type 1,
+                   // except for the 4 cells in question.
+                   for (const ihouse1 of spannedHousesOfType1) {
+                     for (const cell of house2cells[ihouse1]) {
+                       if (!the4cells.has(cell)) {
+                         removeIf(newState[cell], x => x===digit);
+                       }
                      }
                    }
                  }
@@ -1485,587 +1492,602 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            }
          }
        }
-     }
 
-     if (verbose_level >= 1) console.log("        out doXwingsNEW(n="+n+", state)");
-     return newState;
-   };  // doXwingsNEW
+       if (verbose_level >= 1) console.log("        out doXwingsNEW(n="+n+", state)");
+       return newState;
+     };  // doXwingsNEW
 
-   // Keeping this around in case I need to do another overhaul and test it.
-   const doXwings = (n, oldState) => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
-     //const answerOLD = doXwingsOLD(n, oldState);
-     const answerNEW = doXwingsNEW(n, oldState);
-     //CHECK(deepEquals(answerOLD, answerNEW));
-     if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
-     return answerNEW;
-   };  // doXwings
+     // Keeping this around in case I need to do another overhaul and test it.
+     const doXwings = (n, oldState) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("        in doXwings(n="+n+", state)");
+       //const answerOLD = doXwingsOLD(n, oldState);
+       const answerNEW = doXwingsNEW(n, oldState);
+       //CHECK(deepEquals(answerOLD, answerNEW));
+       if (verbose_level >= 1) console.log("        out doXwings(n="+n+", state)");
+       return answerNEW;
+     };  // doXwings
 
-   const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
-   const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
-   const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
-   const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
-   const nakedTriplesButton = document.getElementsByClassName("nakedtriples")[0];
-   const hiddenTriplesButton = document.getElementsByClassName("hiddentriples")[0];
-   const nakedQuadsButton = document.getElementsByClassName("nakedquads")[0];
-   const hiddenQuadsButton = document.getElementsByClassName("hiddenquads")[0];
-   const omissionButton = document.getElementsByClassName("omission")[0];
-   const xwingButton = document.getElementsByClassName("xwing")[0];
-   const fishButton = document.getElementsByClassName("fish")[0];
-   const undoButton = document.getElementsByClassName("undo")[0];
-   const redoButton = document.getElementsByClassName("redo")[0];
-   const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
-   const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
-   const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
-   const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
-   const doNakedTriplesCountSpan = document.getElementsByClassName("donakedtriplescount")[0];
-   const doHiddenTriplesCountSpan = document.getElementsByClassName("dohiddentriplescount")[0];
-   const doNakedQuadsCountSpan = document.getElementsByClassName("donakedquadscount")[0];
-   const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
-   const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
-   const doXwingsCountSpan = document.getElementsByClassName("doxwingscount")[0];
-   const doFishesCountSpan = document.getElementsByClassName("dofishescount")[0];
-   const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
-   const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
+     const propagateSinglesButton = document.getElementsByClassName("propagatesingles")[0];
+     const hiddenSinglesButton = document.getElementsByClassName("hiddensingles")[0];
+     const nakedPairsButton = document.getElementsByClassName("nakedpairs")[0];
+     const hiddenPairsButton = document.getElementsByClassName("hiddenpairs")[0];
+     const nakedTriplesButton = document.getElementsByClassName("nakedtriples")[0];
+     const hiddenTriplesButton = document.getElementsByClassName("hiddentriples")[0];
+     const nakedQuadsButton = document.getElementsByClassName("nakedquads")[0];
+     const hiddenQuadsButton = document.getElementsByClassName("hiddenquads")[0];
+     const omissionButton = document.getElementsByClassName("omission")[0];
+     const xwingButton = document.getElementsByClassName("xwing")[0];
+     const fish1Button = document.getElementsByClassName("fish1")[0];
+     const fish2Button = document.getElementsByClassName("fish2")[0];
+     const fish3Button = document.getElementsByClassName("fish3")[0];
+     const fish4Button = document.getElementsByClassName("fish4")[0];
+     const undoButton = document.getElementsByClassName("undo")[0];
+     const redoButton = document.getElementsByClassName("redo")[0];
+     const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
+     const doHiddenSinglesCountSpan = document.getElementsByClassName("dohiddensinglescount")[0];
+     const doNakedPairsCountSpan = document.getElementsByClassName("donakedpairscount")[0];
+     const doHiddenPairsCountSpan = document.getElementsByClassName("dohiddenpairscount")[0];
+     const doNakedTriplesCountSpan = document.getElementsByClassName("donakedtriplescount")[0];
+     const doHiddenTriplesCountSpan = document.getElementsByClassName("dohiddentriplescount")[0];
+     const doNakedQuadsCountSpan = document.getElementsByClassName("donakedquadscount")[0];
+     const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
+     const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
+     const doXwingsCountSpan = document.getElementsByClassName("doxwingscount")[0];
+     const doFishesCountSpan = document.getElementsByClassName("dofishescount")[0];
+     const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
+     const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
-   const howManyTimesStateWillChange= (state,state2changedState) => {
-     let answer = 0;
-     while (true) {
-       const newState = state2changedState(state);
-       if (deepEquals(newState, state)) {
-         break;
+     const howManyTimesStateWillChange= (state,state2changedState) => {
+       let answer = 0;
+       while (true) {
+         const newState = state2changedState(state);
+         if (deepEquals(newState, state)) {
+           break;
+         }
+         ++answer;
+         state = newState;
        }
-       ++answer;
-       state = newState;
-     }
-     return answer;
-   };  // howManyTimesStateWillChange
+       return answer;
+     };  // howManyTimesStateWillChange
 
-   // This must be separate from updateUiFromStatePair: we do *not* want
-   // to do it on mousedown, since that will prevent recognizing mouseup!
-   const _updateUndoRedoButtons = () => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("    in _updateUndoRedoButtons");
-     undoButton.disabled = (undoStack.length === 0);
-     redoButton.disabled = (redoStack.length === 0);
-     undoStackSizeSpan.innerHTML = ''+undoStack.length;
-     redoStackSizeSpan.innerHTML = ''+redoStack.length;
-     const nPropagates = howManyTimesStateWillChange(state, scratchState=>doPropagateSingles(n,scratchState));
-     const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
-     const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
-     const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
-     const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
-     const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
-     const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
-     const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
-     const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
-     const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
-     const nDoFishes = howManyTimesStateWillChange(state, scratchState=>doFishes(MAX_FISH_SIZE,n,scratchState));  // 3-fishes, i.e. swordfishes, for now
+     // This must be separate from updateUiFromStatePair: we do *not* want
+     // to do it on mousedown, since that will prevent recognizing mouseup!
+     const _updateUndoRedoButtons = () => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("    in _updateUndoRedoButtons");
+       undoButton.disabled = (undoStack.length === 0);
+       redoButton.disabled = (redoStack.length === 0);
+       undoStackSizeSpan.innerHTML = ''+undoStack.length;
+       redoStackSizeSpan.innerHTML = ''+redoStack.length;
+       const nPropagates = howManyTimesStateWillChange(state, scratchState=>doPropagateSingles(n,scratchState));
+       const nDoHiddenSingles = howManyTimesStateWillChange(state, scratchState=>doHiddenSingles(n,scratchState));
+       const nDoNakedPairs = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(2,n,scratchState));
+       const nDoHiddenPairs = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(2,n,scratchState));
+       const nDoNakedTriples = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(3,n,scratchState));
+       const nDoHiddenTriples = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(3,n,scratchState));
+       const nDoNakedQuads = howManyTimesStateWillChange(state, scratchState=>doNakedTuples(4,n,scratchState));
+       const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
+       const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
+       const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
+       const nDoFish1s = howManyTimesStateWillChange(state, scratchState=>doFishes(1,n,scratchState));
+       const nDoFish2s = howManyTimesStateWillChange(state, scratchState=>doFishes(2,n,scratchState));
+       const nDoFish3s = howManyTimesStateWillChange(state, scratchState=>doFishes(3,n,scratchState));
+       const nDoFish4s = howManyTimesStateWillChange(state, scratchState=>doFishes(4,n,scratchState));
 
-     propagateSinglesButton.disabled = nPropagates===0;
-     hiddenSinglesButton.disabled = nDoHiddenSingles===0;
-     nakedPairsButton.disabled = nDoNakedPairs===0;
-     hiddenPairsButton.disabled = nDoHiddenPairs===0;
-     nakedTriplesButton.disabled = nDoNakedTriples===0;
-     hiddenTriplesButton.disabled = nDoHiddenTriples===0;
-     nakedQuadsButton.disabled = nDoNakedQuads===0;
-     hiddenQuadsButton.disabled = nDoHiddenQuads===0;
-     omissionButton.disabled = nDoOmissions===0;
-     xwingButton.disabled = nDoXwings===0;
-     fishButton.disabled = nDoFishes===0;
+       propagateSinglesButton.disabled = nPropagates===0;
+       hiddenSinglesButton.disabled = nDoHiddenSingles===0;
+       nakedPairsButton.disabled = nDoNakedPairs===0;
+       hiddenPairsButton.disabled = nDoHiddenPairs===0;
+       nakedTriplesButton.disabled = nDoNakedTriples===0;
+       hiddenTriplesButton.disabled = nDoHiddenTriples===0;
+       nakedQuadsButton.disabled = nDoNakedQuads===0;
+       hiddenQuadsButton.disabled = nDoHiddenQuads===0;
+       omissionButton.disabled = nDoOmissions===0;
+       xwingButton.disabled = nDoXwings===0;
+       fish1Button.disabled = nDoFish1s===0;
+       fish2Button.disabled = nDoFish2s===0;
+       fish3Button.disabled = nDoFish3s===0;
+       fish4Button.disabled = nDoFish4s===0;
 
-     propagateSinglesCountSpan.innerHTML = ''+nPropagates;
-     doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
-     doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
-     doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
-     doNakedTriplesCountSpan.innerHTML = ''+nDoNakedTriples;
-     doHiddenTriplesCountSpan.innerHTML = ''+nDoHiddenTriples;
-     doNakedQuadsCountSpan.innerHTML = ''+nDoNakedQuads;
-     doHiddenQuadsCountSpan.innerHTML = ''+nDoHiddenQuads;
-     doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
-     doXwingsCountSpan.innerHTML = ''+nDoXwings;
-     doFishesCountSpan.innerHTML = ''+nDoFishes;
+       propagateSinglesCountSpan.innerHTML = ''+nPropagates;
+       doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
+       doNakedPairsCountSpan.innerHTML = ''+nDoNakedPairs;
+       doHiddenPairsCountSpan.innerHTML = ''+nDoHiddenPairs;
+       doNakedTriplesCountSpan.innerHTML = ''+nDoNakedTriples;
+       doHiddenTriplesCountSpan.innerHTML = ''+nDoHiddenTriples;
+       doNakedQuadsCountSpan.innerHTML = ''+nDoNakedQuads;
+       doHiddenQuadsCountSpan.innerHTML = ''+nDoHiddenQuads;
+       doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
+       doXwingsCountSpan.innerHTML = ''+nDoXwings;
+       doFish1sCountSpan.innerHTML = ''+nDoFish1s;
+       doFish2sCountSpan.innerHTML = ''+nDoFish2s;
+       doFish3sCountSpan.innerHTML = ''+nDoFish3s;
+       doFish4sCountSpan.innerHTML = ''+nDoFish4s;
 
-     if (verbose_level >= 1) console.log("    out _updateUndoRedoButtons");
-   };
-   const updateUndoRedoButtons = () => {
-     const verbose_level = 1;
-     if (verbose_level >= 1) console.log("in updateUndoRedoButtons");
-     thinking.innerHTML = "thinking";
-     const f = ()=>{
-       _updateUndoRedoButtons();
-       thinking.innerHTML = "not thinking";
+       if (verbose_level >= 1) console.log("    out _updateUndoRedoButtons");
      };
-     if (false) {
-       // try to get significant work out of the event handler.
-       // it doesn't help :-(  Now I get "[Violation] 'setTimeout' handler took 64ms"
-       // and console still slows to a crawl
-       setTimeout(f);
-     } else {
-       f();
-     }
-     if (verbose_level >= 1) console.log("out updateUndoRedoButtons");
-  }
-
-   const highlightDigit = (state,digit) => {
-     CHECK(Array.isArray(state));
-     CHECK(typeof(digit) === 'number');
-     for (let icell = 0; icell < n*n*n*n; ++icell) {
-       if (state[icell].length === 1 && EQ(state[icell][0], digit)) {
-         // note 'green' is #008000
-         cells[icell].style.background = '#00c000';
-       } else if (state[icell].length === 1) {
-         cells[icell].style.background = '#ffa0a0';  // slightly darker pink
-       } else if (state[icell].includes(digit)) {
-         cells[icell].style.background = '#c0ffc0';  // light green
+     const updateUndoRedoButtons = () => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("in updateUndoRedoButtons");
+       thinking.innerHTML = "thinking";
+       const f = ()=>{
+         _updateUndoRedoButtons();
+         thinking.innerHTML = "done thinking";
+       };
+       if (false) {
+         // try to get significant work out of the event handler.
+         // it doesn't help :-(  Now I get "[Violation] 'setTimeout' handler took 64ms"
+         // and console still slows to a crawl
+         setTimeout(f);
        } else {
-         cells[icell].style.background = '#ffc0c0';  // pink
+         f();
        }
-     }
-   };  // highlightDigit
-   const unhighlightDigit = (state) => {
-     CHECK(Array.isArray(state));
-     for (let icell = 0; icell < n*n*n*n; ++icell) {
-       // default to style sheet
-       cells[icell].style.background = null;
-     }
-   };  // unhighlightDigit
+       if (verbose_level >= 1) console.log("out updateUndoRedoButtons");
+    }
 
-
-   // Show common stuff in black, appearing stuff in green, disappearing stuff in red
-   const updateUiFromStatePair = (state0,state1) => {
-     CHECK(Array.isArray(state0));
-     CHECK(Array.isArray(state1));
-     for (let i = 0; i < n*n; ++i) {
-       for (let j = 0; j < n*n; ++j) {
-         if (state0[i*(n*n)+j].length === 1 &&
-             state1[i*(n*n)+j].length === 1 &&
-             state0[i*(n*n)+j][0] == state1[i*(n*n)+j][0]) {
-           const intvalue = state0[i*(n*n)+j][0];
-           const charvalue = intvalue2name(intvalue);
-           cells[i*n*n+j].innerHTML = charvalue;
+     const highlightDigit = (state,digit) => {
+       CHECK(Array.isArray(state));
+       CHECK(typeof(digit) === 'number');
+       for (let icell = 0; icell < n*n*n*n; ++icell) {
+         if (state[icell].length === 1 && EQ(state[icell][0], digit)) {
+           // note 'green' is #008000
+           cells[icell].style.background = '#00c000';
+         } else if (state[icell].length === 1) {
+           cells[icell].style.background = '#ffa0a0';  // slightly darker pink
+         } else if (state[icell].includes(digit)) {
+           cells[icell].style.background = '#c0ffc0';  // light green
          } else {
-           let cell_inner_html = '';
-           cell_inner_html += '<table>'
-
-           for (let subi = 0; subi < n; ++subi) {
-             cell_inner_html += '<tr>'
-             for (let subj = 0; subj < n; ++subj) {
-               cell_inner_html += '<td class="pencil">'
-               const intvalue = subi*n+subj+1;
-               const includes0 = state0[i*(n*n)+j].includes(intvalue);
-               const includes1 = state1[i*(n*n)+j].includes(intvalue);
-               if (includes0 || includes1) {
-                 const color = !includes0 ? '#00c000' : !includes1 ? 'red' : 'black';
-                 const weight = !includes0 || !includes1 ? 'bold' : 'normal';
-                 cell_inner_html += '<span style="font-weight:'+weight+'; color:'+color+';">';
-                 // TODO: make it so size doesn't jump, and do this <big> thing!
-                 //if (!includes0 || !includes1) { cell_inner_html += '<big>'; }
-                 cell_inner_html += '' + intvalue2name(intvalue);
-                 //if (!includes0 || !includes1) { cell_inner_html += '</big>'; }
-                 cell_inner_html += '</span>';
-               }
-             }
-           }
-           cell_inner_html += '</table>'
-           cells[i*n*n+j].innerHTML = cell_inner_html;
+           cells[icell].style.background = '#ffc0c0';  // pink
          }
        }
-     }
-     if (digitToHighlight !== null) {
-       highlightDigit(state1,digitToHighlight);
-     } else {
-       unhighlightDigit(state1);
-     }
-   };  // updateUiFromStatePair
+     };  // highlightDigit
+     const unhighlightDigit = (state) => {
+       CHECK(Array.isArray(state));
+       for (let icell = 0; icell < n*n*n*n; ++icell) {
+         // default to style sheet
+         cells[icell].style.background = null;
+       }
+     };  // unhighlightDigit
 
 
-   // XXX wait a minute, do I want the loop?  I don't think so!  Argh, need to distinguish between penned single and pencilled single
-   while (true) {
-     const newState = doPropagateSingles(n, state);
-     if (deepEquals(newState, state)) break;
-     state = newState;
+     // Show common stuff in black, appearing stuff in green, disappearing stuff in red
+     const updateUiFromStatePair = (state0,state1) => {
+       CHECK(Array.isArray(state0));
+       CHECK(Array.isArray(state1));
+       for (let i = 0; i < n*n; ++i) {
+         for (let j = 0; j < n*n; ++j) {
+           if (state0[i*(n*n)+j].length === 1 &&
+               state1[i*(n*n)+j].length === 1 &&
+               state0[i*(n*n)+j][0] == state1[i*(n*n)+j][0]) {
+             const intvalue = state0[i*(n*n)+j][0];
+             const charvalue = intvalue2name(intvalue);
+             cells[i*n*n+j].innerHTML = charvalue;
+           } else {
+             let cell_inner_html = '';
+             cell_inner_html += '<table>'
+
+             for (let subi = 0; subi < n; ++subi) {
+               cell_inner_html += '<tr>'
+               for (let subj = 0; subj < n; ++subj) {
+                 cell_inner_html += '<td class="pencil">'
+                 const intvalue = subi*n+subj+1;
+                 const includes0 = state0[i*(n*n)+j].includes(intvalue);
+                 const includes1 = state1[i*(n*n)+j].includes(intvalue);
+                 if (includes0 || includes1) {
+                   const color = !includes0 ? '#00c000' : !includes1 ? 'red' : 'black';
+                   const weight = !includes0 || !includes1 ? 'bold' : 'normal';
+                   cell_inner_html += '<span style="font-weight:'+weight+'; color:'+color+';">';
+                   // TODO: make it so size doesn't jump, and do this <big> thing!
+                   //if (!includes0 || !includes1) { cell_inner_html += '<big>'; }
+                   cell_inner_html += '' + intvalue2name(intvalue);
+                   //if (!includes0 || !includes1) { cell_inner_html += '</big>'; }
+                   cell_inner_html += '</span>';
+                 }
+               }
+             }
+             cell_inner_html += '</table>'
+             cells[i*n*n+j].innerHTML = cell_inner_html;
+           }
+         }
+       }
+       if (digitToHighlight !== null) {
+         highlightDigit(state1,digitToHighlight);
+       } else {
+         unhighlightDigit(state1);
+       }
+     };  // updateUiFromStatePair
+
+
+     // XXX wait a minute, do I want the loop?  I don't think so!  Argh, need to distinguish between penned single and pencilled single
+     while (true) {
+       const newState = doPropagateSingles(n, state);
+       if (deepEquals(newState, state)) break;
+       state = newState;
+     }
+
+     updateUiFromStatePair(state,state);
+     updateUndoRedoButtons();
+
+     const propagateSinglesButtonMouseOver = () => {
+       console.log("    in propagateSinglesButtonMouseOver");
+       let scratchState = doPropagateSingles(n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out propagateSinglesButtonMouseOver");
+     };
+     const propagateSinglesButtonMouseDown = () => {
+       console.log("    in propagateSinglesButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doPropagateSingles(n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out propagateSinglesButtonMouseDown");
+     };
+
+     const hiddenSinglesButtonMouseOver = () => {
+       console.log("    in propagateSinglesButtonMouseOver");
+       const scratchState = doHiddenSingles(n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out propagateSinglesButtonMouseOver");
+     };
+     const hiddenSinglesButtonMouseDown = () => {
+       console.log("    in hiddenSinglesButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doHiddenSingles(n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out hiddenSinglesButtonMouseDown");
+     };
+
+     const nakedPairsButtonMouseOver = () => {
+       console.log("    in nakedPairsButtonMouseOver");
+       const scratchState = doNakedTuples(2, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out nakedPairsButtonMouseOver");
+     };
+     const nakedPairsButtonMouseDown = () => {
+       console.log("    in nakedPairsButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doNakedTuples(2, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out nakedPairsButtonMouseDown");
+     };
+
+     const nakedTriplesButtonMouseOver = () => {
+       console.log("    in nakedTriplesButtonMouseOver");
+       const scratchState = doNakedTuples(3, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out nakedTriplesButtonMouseOver");
+     };
+     const nakedTriplesButtonMouseDown = () => {
+       console.log("    in nakedTriplesButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doNakedTuples(3, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out nakedTriplesButtonMouseDown");
+     };
+
+     const hiddenTriplesButtonMouseOver = () => {
+       console.log("    in hiddenTriplesButtonMouseOver");
+       const scratchState = doHiddenTuples(3, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out hiddenTriplesButtonMouseOver");
+     };
+     const hiddenTriplesButtonMouseDown = () => {
+       console.log("    in hiddenTriplesButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doHiddenTuples(MAX_FISH_SIZE, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out hiddenTriplesButtonMouseDown");
+     };
+
+     const nakedQuadsButtonMouseOver = () => {
+       console.log("    in nakedQuadsButtonMouseOver");
+       const scratchState = doNakedTuples(4, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out nakedQuadsButtonMouseOver");
+     };
+     const nakedQuadsButtonMouseDown = () => {
+       console.log("    in nakedQuadsButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doNakedTuples(4, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out nakedQuadsButtonMouseDown");
+     };
+
+     const hiddenQuadsButtonMouseOver = () => {
+       console.log("    in hiddenQuadsButtonMouseOver");
+       const scratchState = doHiddenTuples(4, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out hiddenQuadsButtonMouseOver");
+     };
+     const hiddenQuadsButtonMouseDown = () => {
+       console.log("    in hiddenQuadsButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doHiddenTuples(4, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out hiddenQuadsButtonMouseDown");
+     };
+
+     const hiddenPairsButtonMouseOver = () => {
+       console.log("    in hiddenPairsButtonMouseOver");
+       const scratchState = doHiddenTuples(2, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out hiddenPairsButtonMouseOver");
+     };
+     const hiddenPairsButtonMouseDown = () => {
+       console.log("    in hiddenPairsButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doHiddenTuples(2, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out hiddenPairsButtonMouseDown");
+     };
+
+     const omissionButtonMouseOver = () => {
+       console.log("    in omissionButtonMouseOver");
+       const scratchState = doOmissions(n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out omissionButtonMouseOver");
+     };
+     const omissionButtonMouseDown = () => {
+       console.log("    in omissionButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doOmissions(n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out omissionButtonMouseDown");
+     };
+
+     const xwingButtonMouseOver = () => {
+       console.log("    in xwingButtonMouseOver");
+       const scratchState = doXwings(n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out xwingButtonMouseOver");
+     };
+     const xwingButtonMouseDown = () => {
+       console.log("    in xwingButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doXwings(n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out xwingButtonMouseDown");
+     };
+
+     const fishButtonMouseOver = () => {
+       console.log("    in fishButtonMouseOver");
+       const scratchState = doFishes(MAX_FISH_SIZE, n, state);
+       updateUiFromStatePair(state,scratchState);
+       console.log("    out fishButtonMouseOver");
+     };
+     const fishButtonMouseDown = () => {
+       console.log("    in fishButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       redoStack.length = 0;  // clear
+       undoStack.push(state);
+       state = doFishes(MAX_FISH_SIZE, n, state);
+       updateUiFromStatePair(Last(undoStack),state);
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out fishButtonMouseDown");
+     };
+
+     const undoButtonMouseDown = () => {
+       console.log("    in undoButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       if (undoStack.length >= 1) {
+         redoStack.push(state);
+         state = undoStack.pop();
+         // It seems to be less confusing if we show
+         // undos in the same color as the do's/redo's,
+         // even though they are doing the opposite thing.
+         updateUiFromStatePair(state, Last(redoStack));
+       } else {
+         // This shouldn't ever happen because the button should be disabled
+         // when there's nothing to undo.
+         console.log("      nothing to undo!");
+       }
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out undoButtonMouseDown");
+     };
+     const redoButtonMouseDown = () => {
+       console.log("    in redoButtonMouseDown");
+       console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       if (redoStack.length >= 1) {
+         undoStack.push(state);
+         state = redoStack.pop();
+         updateUiFromStatePair(Last(undoStack), state);
+       } else {
+         // This shouldn't ever happen because the button should be disabled
+         // when there's nothing to redo.
+         console.log("      nothing to redo!");
+       }
+       console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+       console.log("    out redoButtonMouseDown");
+     };
+
+     const anyButtonMouseOut = () => {
+       console.log("    in anyButtonMouseOut");
+       updateUiFromStatePair(state,state);
+       console.log("    out anyButtonMouseOut");
+     };
+     const anyButtonMouseUp = () => {
+       console.log("    in anyButtonMouseUp");
+       updateUiFromStatePair(state,state);
+       updateUndoRedoButtons();
+       console.log("    out anyButtonMouseUp");
+     };
+
+     const mouseOverCell = (event,icell) => {
+       const verbose_level = 0;
+       if (verbose_level >= 1) console.log("    in mouseOverCell");
+       if (verbose_level >= 1) console.log("      event = ",event);
+       if (verbose_level >= 1) console.log("      icell = ",icell);
+       let newDigitToHighlight = null;
+       if (state[icell].length == 1) {
+         newDigitToHighlight = state[icell][0];
+       }
+       if (newDigitToHighlight != digitToHighlight) {
+         digitToHighlight = newDigitToHighlight;
+         updateUiFromStatePair(state,state);
+       }
+       if (verbose_level >= 1) console.log("    out mouseOverCell");
+     };  // mouseOverCell
+     const mouseOutCell = (event,icell) => {
+       const verbose_level = 0;
+       if (verbose_level >= 1) console.log("    in mouseOutCell");
+       if (verbose_level >= 1) console.log("      event = ",event);
+       if (verbose_level >= 1) console.log("      icell = ",icell);
+       let newDigitToHighlight = null;
+       if (newDigitToHighlight != digitToHighlight) {
+         digitToHighlight = newDigitToHighlight;
+         updateUiFromStatePair(state,state);
+       }
+       if (verbose_level >= 1) console.log("    out mouseOutCell");
+     };  // mouseOutCell
+
+     const processPastedInput = pastedInput => {
+       console.log("        in processPastedInput");
+       console.log("          pastedInput = ",pastedInput);
+       const outerHTML = pastedInput;
+
+       let prefill_string;
+       if (outerHTML.indexOf('grilleJeu') != -1) {
+         prefill_string = ExtractPrefillStringFrom1SudokoOuterHTML(outerHTML)
+       } else if (outerHTML.indexOf('div class="grid"') != -1 &&
+                  outerHTML.indexOf('div class="cells"') != -1 &&
+                  outerHTML.indexOf('id="cell-givens"') != -1) {
+         prefill_string = ExtractPrefillStringFromCrackingTheCrypticOuterHTML(outerHTML);
+       } else if (outerHTML.indexOf('div role="grid" class="su-board"') != -1 ||
+                  outerHTML.indexOf('class="su-cell') != -1) {
+         // Reason for checking for su-cell
+         // is in case someone grepped for that in the output
+         // before pasting: if they paste the whole grid thing,
+         // it's too huge :-(
+         //   vi 0
+         //     s/</<^M/g
+         //   grep su-cell 0 | grep -v su-cell__ > 1
+         prefill_string = ExtractPrefillStringFromNYTimesOuterHTML(outerHTML);
+       } else if (outerHTML.indexOf('div class="crossword"') != -1 ||
+                  outerHTML.indexOf('class="letter-in-box') != -1) {
+         // Same reasoning as for NYTimes, for checking letter-in-box
+         //   vi 0
+         //     s/</<^M/g
+         //   grep span 0 > 1
+         //
+         prefill_string = ExtractPrefillStringFromLATimesOuterHTML(outerHTML);
+       } else if (true) {
+         // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html:
+         /*
+             2 . . | . 9 . | . . .
+             . 6 . | . . 3 | 1 . .
+             . . 1 | 2 . . | . 7 .
+            -------+-------+------
+             . . 7 | . . . | . 2 .
+             3 . . | . . . | . . 8
+             . 8 . | . . . | 4 . .
+            -------+-------+------
+             . 4 . | . . 8 | 6 . .
+             . . 2 | 7 . . | . 1 .
+             . . . | . 5 . | . . 4
+         // Everything except dots and digits and letters are ignored, so the following also works:
+         /*
+          2...9.....6...31....12...7...7....2.3.......8.8....4...4...86....27...1.....5...4
+         */
+
+         prefill_string = outerHTML.replace(/[^.0-9a-zA-Z]/g, '').replace(/\./g, '0');
+       } else {
+         // TODO: more graceful rejection than this!
+         // Actually validate and color green/red accordingly!
+         console.warn("WARNING: unrecognized outerHTML");
+         prefill_string = '';
+       }
+
+       [n,prefill] = PrefillString2Prefill(prefill_string);
+       console.log("      prefill = ",prefill);
+       [n,state,cells,undoStack,redoStack,
+        cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
+       state = doPropagateSingles(n, state);
+       updateUiFromStatePair(state,state);
+       updateUndoRedoButtons();
+       console.log("        out processPastedInput");
+     };  // processPastedInput
+
+     const resetButtonClicked = () => {
+       console.log("    in resetButtonClicked");
+
+       //const prefill_string = '1300020000300004';
+
+       const prefill_input = document.getElementById("prefill");
+       console.log("      prefill_input = ",prefill_input);
+       CHECK(prefill_input != null);
+       console.log("      prefill_input.value = ",prefill_input.value);
+
+       processPastedInput(prefill_input.value);
+
+       console.log("    out resetButtonClicked");
+     };  // resetButtonClicked
+
+     const inputKeyDown = (event) => {
+       console.log("    in inputKeyDown");
+       console.log("      event = ",event);
+       // XXX TODO: which of these do I want? evidently both work
+       //const element = event.srcElement;
+       const element = event.target;
+       if (EQ(event.key, "Enter")) {
+         //processPastedInput(document.getElementById("prefill").value);
+         processPastedInput(element.value);
+       }
+       console.log("    out inputKeyDown");
+     };  // inputKeyDown
+     const inputPasted = event => {
+       console.log("    in inputPasted");
+       console.log("      event = ",event);
+       // XXX TODO: which of these do I want? evidently both work
+       //const element = event.srcElement;
+       const element = event.target;
+       console.log("      event.clipboardData = ",event.clipboardData);
+       console.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
+       const theData = event.clipboardData.getData('text/plain');
+       console.log("      theData.length = ",theData.length);
+       if (theData.length >= 1000) {
+         console.log('      preventing default to avoid choking!');
+         event.preventDefault();
+         element.value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
+         processPastedInput(theData);
+       }
+       console.log("    out inputPasted");
+     };
+
+     //console.log("  file_contents = ",file_contents);
+   } catch (error) {
+     console.error("ARGH, caught error: ",error);
    }
 
-   updateUiFromStatePair(state,state);
-   updateUndoRedoButtons();
-
-   const propagateSinglesButtonMouseOver = () => {
-     console.log("    in propagateSinglesButtonMouseOver");
-     let scratchState = doPropagateSingles(n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const propagateSinglesButtonMouseDown = () => {
-     console.log("    in propagateSinglesButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doPropagateSingles(n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out propagateSinglesButtonMouseDown");
-   };
-
-   const hiddenSinglesButtonMouseOver = () => {
-     console.log("    in propagateSinglesButtonMouseOver");
-     const scratchState = doHiddenSingles(n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out propagateSinglesButtonMouseOver");
-   };
-   const hiddenSinglesButtonMouseDown = () => {
-     console.log("    in hiddenSinglesButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doHiddenSingles(n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out hiddenSinglesButtonMouseDown");
-   };
-
-   const nakedPairsButtonMouseOver = () => {
-     console.log("    in nakedPairsButtonMouseOver");
-     const scratchState = doNakedTuples(2, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out nakedPairsButtonMouseOver");
-   };
-   const nakedPairsButtonMouseDown = () => {
-     console.log("    in nakedPairsButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doNakedTuples(2, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out nakedPairsButtonMouseDown");
-   };
-
-   const nakedTriplesButtonMouseOver = () => {
-     console.log("    in nakedTriplesButtonMouseOver");
-     const scratchState = doNakedTuples(3, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out nakedTriplesButtonMouseOver");
-   };
-   const nakedTriplesButtonMouseDown = () => {
-     console.log("    in nakedTriplesButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doNakedTuples(3, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out nakedTriplesButtonMouseDown");
-   };
-
-   const hiddenTriplesButtonMouseOver = () => {
-     console.log("    in hiddenTriplesButtonMouseOver");
-     const scratchState = doHiddenTuples(3, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out hiddenTriplesButtonMouseOver");
-   };
-   const hiddenTriplesButtonMouseDown = () => {
-     console.log("    in hiddenTriplesButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doHiddenTuples(MAX_FISH_SIZE, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out hiddenTriplesButtonMouseDown");
-   };
-
-   const nakedQuadsButtonMouseOver = () => {
-     console.log("    in nakedQuadsButtonMouseOver");
-     const scratchState = doNakedTuples(4, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out nakedQuadsButtonMouseOver");
-   };
-   const nakedQuadsButtonMouseDown = () => {
-     console.log("    in nakedQuadsButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doNakedTuples(4, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out nakedQuadsButtonMouseDown");
-   };
-
-   const hiddenQuadsButtonMouseOver = () => {
-     console.log("    in hiddenQuadsButtonMouseOver");
-     const scratchState = doHiddenTuples(4, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out hiddenQuadsButtonMouseOver");
-   };
-   const hiddenQuadsButtonMouseDown = () => {
-     console.log("    in hiddenQuadsButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doHiddenTuples(4, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out hiddenQuadsButtonMouseDown");
-   };
-
-   const hiddenPairsButtonMouseOver = () => {
-     console.log("    in hiddenPairsButtonMouseOver");
-     const scratchState = doHiddenTuples(2, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out hiddenPairsButtonMouseOver");
-   };
-   const hiddenPairsButtonMouseDown = () => {
-     console.log("    in hiddenPairsButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doHiddenTuples(2, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out hiddenPairsButtonMouseDown");
-   };
-
-   const omissionButtonMouseOver = () => {
-     console.log("    in omissionButtonMouseOver");
-     const scratchState = doOmissions(n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out omissionButtonMouseOver");
-   };
-   const omissionButtonMouseDown = () => {
-     console.log("    in omissionButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doOmissions(n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out omissionButtonMouseDown");
-   };
-
-   const xwingButtonMouseOver = () => {
-     console.log("    in xwingButtonMouseOver");
-     const scratchState = doXwings(n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out xwingButtonMouseOver");
-   };
-   const xwingButtonMouseDown = () => {
-     console.log("    in xwingButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doXwings(n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out xwingButtonMouseDown");
-   };
-
-   const fishButtonMouseOver = () => {
-     console.log("    in fishButtonMouseOver");
-     const scratchState = doFishes(MAX_FISH_SIZE, n, state);
-     updateUiFromStatePair(state,scratchState);
-     console.log("    out fishButtonMouseOver");
-   };
-   const fishButtonMouseDown = () => {
-     console.log("    in fishButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     redoStack.length = 0;  // clear
-     undoStack.push(state);
-     state = doFishes(MAX_FISH_SIZE, n, state);
-     updateUiFromStatePair(Last(undoStack),state);
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out fishButtonMouseDown");
-   };
-
-   const undoButtonMouseDown = () => {
-     console.log("    in undoButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     if (undoStack.length >= 1) {
-       redoStack.push(state);
-       state = undoStack.pop();
-       // It seems to be less confusing if we show
-       // undos in the same color as the do's/redo's,
-       // even though they are doing the opposite thing.
-       updateUiFromStatePair(state, Last(redoStack));
-     } else {
-       // This shouldn't ever happen because the button should be disabled
-       // when there's nothing to undo.
-       console.log("      nothing to undo!");
-     }
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out undoButtonMouseDown");
-   };
-   const redoButtonMouseDown = () => {
-     console.log("    in redoButtonMouseDown");
-     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     if (redoStack.length >= 1) {
-       undoStack.push(state);
-       state = redoStack.pop();
-       updateUiFromStatePair(Last(undoStack), state);
-     } else {
-       // This shouldn't ever happen because the button should be disabled
-       // when there's nothing to redo.
-       console.log("      nothing to redo!");
-     }
-     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
-     console.log("    out redoButtonMouseDown");
-   };
-
-   const anyButtonMouseOut = () => {
-     console.log("    in anyButtonMouseOut");
-     updateUiFromStatePair(state,state);
-     console.log("    out anyButtonMouseOut");
-   };
-   const anyButtonMouseUp = () => {
-     console.log("    in anyButtonMouseUp");
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("    out anyButtonMouseUp");
-   };
-
-   const mouseOverCell = (event,icell) => {
-     const verbose_level = 0;
-     if (verbose_level >= 1) console.log("    in mouseOverCell");
-     if (verbose_level >= 1) console.log("      event = ",event);
-     if (verbose_level >= 1) console.log("      icell = ",icell);
-     let newDigitToHighlight = null;
-     if (state[icell].length == 1) {
-       newDigitToHighlight = state[icell][0];
-     }
-     if (newDigitToHighlight != digitToHighlight) {
-       digitToHighlight = newDigitToHighlight;
-       updateUiFromStatePair(state,state);
-     }
-     if (verbose_level >= 1) console.log("    out mouseOverCell");
-   };  // mouseOverCell
-   const mouseOutCell = (event,icell) => {
-     const verbose_level = 0;
-     if (verbose_level >= 1) console.log("    in mouseOutCell");
-     if (verbose_level >= 1) console.log("      event = ",event);
-     if (verbose_level >= 1) console.log("      icell = ",icell);
-     let newDigitToHighlight = null;
-     if (newDigitToHighlight != digitToHighlight) {
-       digitToHighlight = newDigitToHighlight;
-       updateUiFromStatePair(state,state);
-     }
-     if (verbose_level >= 1) console.log("    out mouseOutCell");
-   };  // mouseOutCell
-
-   const processPastedInput = pastedInput => {
-     console.log("        in processPastedInput");
-     console.log("          pastedInput = ",pastedInput);
-     const outerHTML = pastedInput;
-
-     let prefill_string;
-     if (outerHTML.indexOf('grilleJeu') != -1) {
-       prefill_string = ExtractPrefillStringFrom1SudokoOuterHTML(outerHTML)
-     } else if (outerHTML.indexOf('div class="grid"') != -1 &&
-                outerHTML.indexOf('div class="cells"') != -1 &&
-                outerHTML.indexOf('id="cell-givens"') != -1) {
-       prefill_string = ExtractPrefillStringFromCrackingTheCrypticOuterHTML(outerHTML);
-     } else if (outerHTML.indexOf('div role="grid" class="su-board"') != -1 ||
-                outerHTML.indexOf('class="su-cell') != -1) {
-       // Reason for checking for su-cell
-       // is in case someone grepped for that in the output
-       // before pasting: if they paste the whole grid thing,
-       // it's too huge :-(
-       //   vi 0
-       //     s/</<^M/g
-       //   grep su-cell 0 | grep -v su-cell__ > 1
-       prefill_string = ExtractPrefillStringFromNYTimesOuterHTML(outerHTML);
-     } else if (outerHTML.indexOf('div class="crossword"') != -1 ||
-                outerHTML.indexOf('class="letter-in-box') != -1) {
-       // Same reasoning as for NYTimes, for checking letter-in-box
-       //   vi 0
-       //     s/</<^M/g
-       //   grep span 0 > 1
-       //
-       prefill_string = ExtractPrefillStringFromLATimesOuterHTML(outerHTML);
-     } else if (true) {
-       // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html:
-       /*
-           2 . . | . 9 . | . . .
-           . 6 . | . . 3 | 1 . .
-           . . 1 | 2 . . | . 7 .
-          -------+-------+------
-           . . 7 | . . . | . 2 .
-           3 . . | . . . | . . 8
-           . 8 . | . . . | 4 . .
-          -------+-------+------
-           . 4 . | . . 8 | 6 . .
-           . . 2 | 7 . . | . 1 .
-           . . . | . 5 . | . . 4
-       // Everything except dots and digits and letters are ignored, so the following also works:
-       /*
-        2...9.....6...31....12...7...7....2.3.......8.8....4...4...86....27...1.....5...4
-       */
-
-       prefill_string = outerHTML.replace(/[^.0-9a-zA-Z]/g, '').replace(/\./g, '0');
-     } else {
-       // TODO: more graceful rejection than this!
-       // Actually validate and color green/red accordingly!
-       console.warn("WARNING: unrecognized outerHTML");
-       prefill_string = '';
-     }
-
-     [n,prefill] = PrefillString2Prefill(prefill_string);
-     console.log("      prefill = ",prefill);
-     [n,state,cells,undoStack,redoStack,
-      cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
-     state = doPropagateSingles(n, state);
-     updateUiFromStatePair(state,state);
-     updateUndoRedoButtons();
-     console.log("        out processPastedInput");
-   };  // processPastedInput
-
-   const resetButtonClicked = () => {
-     console.log("    in resetButtonClicked");
-
-     //const prefill_string = '1300020000300004';
-
-     const prefill_input = document.getElementById("prefill");
-     console.log("      prefill_input = ",prefill_input);
-     CHECK(prefill_input != null);
-     console.log("      prefill_input.value = ",prefill_input.value);
-
-     processPastedInput(prefill_input.value);
-
-     console.log("    out resetButtonClicked");
-   };  // resetButtonClicked
-
-   const inputKeyDown = (event) => {
-     console.log("    in inputKeyDown");
-     console.log("      event = ",event);
-     // XXX TODO: which of these do I want? evidently both work
-     //const element = event.srcElement;
-     const element = event.target;
-     if (EQ(event.key, "Enter")) {
-       //processPastedInput(document.getElementById("prefill").value);
-       processPastedInput(element.value);
-     }
-     console.log("    out inputKeyDown");
-   };  // inputKeyDown
-   const inputPasted = event => {
-     console.log("    in inputPasted");
-     console.log("      event = ",event);
-     // XXX TODO: which of these do I want? evidently both work
-     //const element = event.srcElement;
-     const element = event.target;
-     console.log("      event.clipboardData = ",event.clipboardData);
-     console.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
-     const theData = event.clipboardData.getData('text/plain');
-     console.log("      theData.length = ",theData.length);
-     if (theData.length >= 1000) {
-       console.log('      preventing default to avoid choking!');
-       event.preventDefault();
-       element.value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
-       processPastedInput(theData);
-     }
-     console.log("    out inputPasted");
-   };
-
-   //console.log("  file_contents = ",file_contents);
    console.log("out script");
  </script>
 </html>
