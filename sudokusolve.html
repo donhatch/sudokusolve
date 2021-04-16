@@ -1,5 +1,7 @@
 <!--
 
+TODO: http://hodoku.sourceforge.net/en/show_example.php?file=bf301&tech=Swordfish says "The following representation can be pasted in most Soduku programs:"
+
 TODO: actually make a nice user-solve mode
 - should be able to easily navigate stack of stuff that is done and consequences
   examined, vs done and consequences not yet examined.
@@ -20,6 +22,7 @@ TODO: switch to notation like they use in forum: http://forum.enjoysudoku.com/a-
 TODO: swordfish.
   examples:
     T-Rex ttps://www.youtube.com/watch?v=12lPDRFXhYs at 19:46 and 23:20
+
     ... ... ...    .5. .5. .5.
     ... ... ...    ... ... ...
     .7. .7. .7.    .5. .5. .5.
@@ -224,9 +227,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
         <tr>
          <td>
-           <input class="redo" type="button" value="Reset to pasted from crackingthecryptic.com or 1sudoko.com:" onclick="resetButtonClicked()" onpaste="console.log(.pasted on button')">
+           <input class="redo" type="button" value="Reset to pasted from crackingthecryptic.com or 1sudoko.com or nytimes.com or latimes.com:" onclick="resetButtonClicked()" onpaste="console.log(.pasted on button')">
            <br>
-           <input id="prefill" size="70" onkeydown="inputKeyDown(event)" onpaste="inputPasted(event)"></input>
+           <textarea id="prefill" rows="26" cols="65" onkeydown="inputKeyDown(event)" onpaste="inputPasted(event)"></textarea>
         <tr>
          <td>
          <br><br><br><br><br><br><br><br><br>
@@ -443,6 +446,65 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };  // KSets
 
+   // TODO: Need canonical way to express a prefill string.
+   // All of the following should be accepted
+   // (see http://hodoku.sourceforge.net/en/show_example.php?file=bf301&tech=Swordfish )
+/*
+Already accepted:
+16.54..7...8..1.3..3.8.....7...5..696..9.2.57.............3..4........16...1645..
+
+.----------------.------------.---------------.
+| 1     6    29  | 5   4   3  | 289   7    28 |
+| 29    7    8   | 6   29  1  | 4     3    5  |
+| 4     3    5   | 8   29  7  | 6     29   1  |
+:----------------+------------+---------------:
+| 7     2    13  | 4   5   8  | 13    6    9  |
+| 6     48   34  | 9   1   2  | 38    5    7  |
+| 589   589  19  | 3   7   6  | 128   28   4  |
+:----------------+------------+---------------:
+| 2589  1    6   | 27  3   59 | 2789  4    28 |
+| 3     459  249 | 27  8   59 | 279   1    6  |
+| 289   89   7   | 1   6   4  | 5     289  3  |
+'----------------'------------'---------------'
+.----------------.------------.---------------.
+| 1     6    29  | 5   4   3  | 289   7    28 |
+| 29    7    8   | 6   29  1  | 4     3    5  |
+| 4     3    5   | 8   29  7  | 6     29   1  |
+:----------------+------------+---------------:
+| 7     2    13  | 4   5   8  | 13    6    9  |
+| 6     48   34  | 9   1   2  | 38    5    7  |
+| 589   589  19  | 3   7   6  | 128   28   4  |
+:----------------+------------+---------------:
+| 2589  1    6   | 27  3   59 | 2789  4    28 |
+| 3     459  249 | 27  8   59 | 279   1    6  |
+| 289   89   7   | 1   6   4  | 5     289  3  |
+'----------------'------------'---------------'
+.----------------.------------.---------------.
+
+| 1     6    29  | 5   4   3  | 289   7    28 |
+
+| 29    7    8   | 6   29  1  | 4     3    5  |
+
+| 4     3    5   | 8   29  7  | 6     29   1  |
+
+:----------------+------------+---------------:
+
+| 7     2    13  | 4   5   8  | 13    6    9  |
+
+| 6     48   34  | 9   1   2  | 38    5    7  |
+
+| 589   589  19  | 3   7   6  | 128   28   4  |
+
+:----------------+------------+---------------:
+
+| 2589  1    6   | 27  3   59 | 2789  4    28 |
+
+| 3     459  249 | 27  8   59 | 279   1    6  |
+
+| 289   89   7   | 1   6   4  | 5     289  3  |
+
+'----------------'------------'---------------'
+*/
    // Output is typically too big, but put newlines before the <'s
    // and then grep something (I forget what)
    const ExtractPrefillStringFromNYTimesOuterHTML = (outerHTML) => {
@@ -1679,15 +1741,21 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const inputKeyDown = (event) => {
      console.log("    in inputKeyDown");
      console.log("      event = ",event);
+     // XXX TODO: which of these do I want? evidently both work
+     //const element = event.srcElement;
+     const element = event.target;
      if (EQ(event.key, "Enter")) {
-       // hack
-       processPastedInput(document.getElementById("prefill").value);
+       //processPastedInput(document.getElementById("prefill").value);
+       processPastedInput(element.value);
      }
      console.log("    out inputKeyDown");
    };  // inputKeyDown
    const inputPasted = event => {
      console.log("    in inputPasted");
      console.log("      event = ",event);
+     // XXX TODO: which of these do I want? evidently both work
+     //const element = event.srcElement;
+     const element = event.target;
      console.log("      event.clipboardData = ",event.clipboardData);
      console.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
      const theData = event.clipboardData.getData('text/plain');
@@ -1695,7 +1763,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      if (theData.length >= 1000) {
        console.log('      preventing default to avoid choking!');
        event.preventDefault();
-       document.getElementById("prefill").value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
+       element.value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
        processPastedInput(theData);
      }
      console.log("    out inputPasted");
