@@ -164,6 +164,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
  </head>
  <body>
   <table>
+    <span id="thinking">started</span>
     <tr>
       <td>
        <table class='toplevel_table'>
@@ -174,7 +175,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        <table>
 
         <tr>
-         <td><input class="propagatesingles" type="button" value="Naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <td><input class="propagatesingles" type="button" value="Propagage naked singles" onmouseover="propagateSinglesButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="propagateSinglesButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="propagatesinglescount"></span></small></small>
 
         <tr>
@@ -212,6 +213,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
         <tr>
          <td><input class="xwing" type="button" value="X-wing and similar" onmouseover="xwingButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="xwingButtonMouseDown()" onmouseup="anyButtonMouseUp()">
          <small><small><span class="doxwingscount"></span></small></small>
+
+        <tr>
+         <td><input class="fish" type="button" value="Fish (work in progress)" onmouseover="fishButtonMouseOver()" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown()" onmouseup="anyButtonMouseUp()">
+         <small><small><span class="dofishescount"></span></small></small>
 
         <tr>
          <td><input class="undo" type="button" value="Undo" onmousedown="undoButtonMouseDown()" onmouseup="anyButtonMouseUp()">
@@ -283,13 +288,20 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
    };
 
+   // like python's range
+   // TODO: actually make it a generator
    const range = (a,b) => {
+     if (b === undefined) {
+       // range(n) is range(0,n)
+       [a,b] = [0,a];
+     }
      const answer = [];
      for (let i = a; i < b; ++i) {
        answer.push(i);
      }
      return answer;
    };
+
    const ord = c => {
      CHECK_EQ(c.length, 1);
      return c.charCodeAt(0);
@@ -324,6 +336,16 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      }
      arr.length = iOut;
    };
+   const SortedArrayMinus = (a,b) => {
+     // simple to express way
+     const bSet = new Set(b);
+     const answer = [];
+     for (let x of a) {
+       if (!bSet.has(x)) answer.push(x);
+     }
+     return answer;
+   };  // SortedArrayMinus
+
    const deepEquals = (a,b) => {
      if (a === b) return true;
      const type = typeof(a);
@@ -394,8 +416,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
        CHECK(false);
      }
    };  // Stringify
-   const Top = arr => arr[arr.length-1];
+   const Last = arr => arr[arr.length-1];
    const Div = (a,b) => Math.floor(a/b);
+   const Sub = (arr,indices) => Array.isArray(indices) ? indices.map(i=>Sub(arr,i)) : arr[indices]
 
    const IsSubsetOf = (a,b) => {
      CHECK(a instanceof Set);
@@ -956,6 +979,135 @@ Already accepted:
      return newState;
    };  // doHiddenSingles
 
+
+   const TryToExtractOneFish = (digit, fish_size, state, remaining_rows, remaining_cols) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("                        in TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", remaining_rows="+Stringify(remaining_rows)+" remaining_cols="+Stringify(remaining_cols));
+     const n_remaining_rowscols = remaining_rows.length;
+     CHECK_EQ(n_remaining_rowscols, remaining_cols.length);
+
+     const type2remaining_houses = [remaining_rows, remaining_cols];
+
+     // CBB: probably very inefficient.  Well, worst case for n=3 is k=4, which is
+     // (9 choose 4)=126 subsets.
+     const ksets = KSets(n_remaining_rowscols, fish_size);
+     if (verbose_level >= 1) console.log("                          iterating over "+ksets.length+" "+fish_size+"-sets of "+n_remaining_rowscols);
+     for (const [base_housetype,covering_housetype] of [[0,1],[1,0]]) {
+       if (verbose_level >= 2) console.log("                          base_housetype = "+base_housetype);
+       const base_house2cell = base_housetype===0 ? row2cells : col2cells;
+       for (const kset of ksets) {
+         if (verbose_level >= 2) console.log("                              kset = "+Stringify(kset));
+         const base_houses = Sub(type2remaining_houses[base_housetype], kset);
+         const covering_houses = [];
+         for (const covering_house of type2remaining_houses[covering_housetype]) {
+           for (const base_house of base_houses) {
+             const cell = base_house2cell[base_house][covering_house];
+             if (state[cell].includes(digit)) {
+               covering_houses.push(covering_house);
+               break;  // done with this covering house
+             }
+           }
+           if (covering_houses.length > fish_size) {
+             break;  // no good
+           }
+         }
+         CHECK_GE(covering_houses.length, fish_size);
+         if (covering_houses.length == fish_size) {
+           // found a fish!!!!
+           if (verbose_level >= 1) console.log("                                  found a fish! base_houses="+Stringify(base_houses)+" covering_houses="+Stringify(covering_houses));
+           const answer = base_housetype==0 ? [base_houses,covering_houses] : [covering_houses,base_houses];
+           if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", n="+n+" remaining_rows="+Stringify(remaining_rows)+" remaining_cols="+Stringify(remaining_cols)+", returning "+Stringify(answer));
+           return answer;
+         }
+       }
+     }
+
+
+     if (verbose_level >= 1) console.log("                        out TryToExtractOneFish(digit="+digit+", fish_size="+fish_size+", n="+n+" remaining_rows="+Stringify(remaining_rows)+" remaining_cols="+Stringify(remaining_cols)+", returning null because didn't find a fish");
+     return null;
+   };  // TryToExtractOneFish
+
+   // Note that a k-row k-column fish (k base rows, k covering columns) is equivalent to:
+   // if a given intersection of k rows with n-k columns is empty,
+   // then the complementary intersection of n-k rows with n-k columns
+   // must also be also empty.  
+   // This leads to the concept of a row-column fish decomposition.
+   // The decomposition is a partitioning of the original n rows,
+   // where each partition of k rows has a corresponding cover of n-k columns,
+   // such that either the intersection of the k rows and complementary (n-k) columns is empty
+   // or the intersection of the complementary (n-k) rows and k columns is empty,
+   // and so the other can be made empty.
+   const RowColumnFishDecompose = (digit, n, state) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("            in RowColumnFishDecomposition(digit="+digit+", n="+n+", state)");
+     let answer = [[range(n*n),range(n*n)]];  // one partition containing all n rows and n columns
+
+     let count = 0;
+     for (let fish_size = 1; fish_size*2 <= Last(answer)[0].length; ++fish_size) {
+       if (verbose_level >= 1) console.log("                  fish_size = "+fish_size);
+       /*
+       if (fish_size != 1) {
+         if (verbose_level >= 1) console.log("                    XXX NOT DOING, FOR NOW");
+         continue;
+       }
+       */
+       if (verbose_level >= 1) console.log("                      answer so far = "+Stringify(answer));
+       while (true) {
+         CHECK_LE(++count, 100);
+         const fish = TryToExtractOneFish(digit, fish_size,
+                                          state,
+                                          /*remaining_rows=*/Last(answer)[0],
+                                          /*remaining_cols=*/Last(answer)[1]);
+         if (fish === null) {
+           break;  // on to the next size
+         }
+         const [fish_rows,fish_cols] = fish;
+         let [remaining_rows,remaining_cols] = answer.pop();
+         answer.push([fish_rows,fish_cols]);
+         remaining_rows = SortedArrayMinus(remaining_rows, fish_rows);
+         remaining_cols = SortedArrayMinus(remaining_cols, fish_cols);
+         answer.push([remaining_rows,remaining_cols]);
+       }
+     };
+     if (verbose_level >= 1) console.log("            out RowColumnFishDecomposition(digit="+digit+", n="+n+", state), returning "+Stringify(answer));
+     return answer;
+   };  // RowColumnFishDecompose
+
+   const doFishes = (tuplicity, n, oldState) => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("        in doFishes(tuplicity="+tuplicity+", n="+n+", state)");
+     // First of all, make sure there's at least one copy of each digit
+     // in each row and each column.  If not, everything will go insane.
+     for (let digit = 1; digit <= n*n; ++digit) {
+       for (let house = 0; house < 2*n*n; ++house) {  // i.e. rows and columns
+         let num_in_house = 0;
+         for (let cell of house2cells[house]) {
+           if (oldState[cell].includes(digit)) num_in_house++;
+         }
+         if (num_in_house === 0) {
+           if (verbose_level >= 1) console.log("        out doFishes(tuplicity="+tuplicity+", n="+n+", state), state is illegal since no instances of digit "+digit+" in house "+houseNames[house]);
+         }
+       }
+     }
+
+     const newState = deepCopy(oldState);
+
+
+     for (let digit = 1; digit <= n*n; ++digit) {
+       if (verbose_level >= 1) console.log("          digit = "+digit);
+       /*
+       if (digit != 9) {
+         if (verbose_level >= 1) console.log("              XXX NOT DOING, FOR NOW");
+         continue;
+       }
+       */
+       const decomposition = RowColumnFishDecompose(digit, n, oldState);
+       // ...
+     }
+     if (verbose_level >= 1) console.log("        out doFishes(tuplicity="+tuplicity+", n="+n+", state)");
+     return newState;
+   };  // doFishes
+
    const doNakedTuples = (tuplicity, n, oldState) => {
      const verbose_level = 1;
      if (verbose_level >= 1) console.log("        in doNakedTuples(tuplicity="+tuplicity+", n="+n+", state)");
@@ -1064,7 +1216,7 @@ Already accepted:
        const ksets = KSets(interesting_digits.length, tuplicity);
        if (verbose_level >= 2) console.log("                ksets = "+Stringify(ksets));;
        for (const kset of ksets) {
-         const tuple = kset.map(i=>interesting_digits[i]);
+         const tuple = Sub(interesting_digits, kset);
          if (verbose_level >= 3) console.log("                considering tuple of digits "+Stringify(tuple));
          const union = new Set();
          for (const digit of tuple) {
@@ -1106,7 +1258,7 @@ Already accepted:
          house2cellsContainingDigit.push(new Set());
          for (const cell of house2cells[ihouse]) {
            if (oldState[cell].includes(digit)) {
-             Top(house2cellsContainingDigit).add(cell);
+             Last(house2cellsContainingDigit).add(cell);
            }
          }
        }
@@ -1160,7 +1312,7 @@ Already accepted:
          house2cellsContainingDigit.push([]);
          for (const cell of house2cells[ihouse]) {
            if (oldState[cell].includes(digit)) {
-             Top(house2cellsContainingDigit).push(cell);
+             Last(house2cellsContainingDigit).push(cell);
            }
          }
        }
@@ -1171,13 +1323,13 @@ Already accepted:
            housesContainingDigitTwice.push(ihouse);
          }
        }
-       if (verbose_level >= 3) console.log("              housesContainingDigitTwice = "+Stringify(housesContainingDigitTwice.map(i=>houseNames[i])));
+       if (verbose_level >= 3) console.log("              housesContainingDigitTwice = "+Stringify(Sub(houseNames, housesContainingDigitTwice)));
        const housesOfTypeContainingDigitTwice = [[],[],[]];
        for (const house of housesContainingDigitTwice) {
          const houseType = Div(house, n*n);
          housesOfTypeContainingDigitTwice[houseType].push(house);
        }
-       if (verbose_level >= 2) console.log("              housesOfTypeContainingDigitTwice = "+Stringify(housesOfTypeContainingDigitTwice.map(is=>is.map(i=>houseNames[i]))));
+       if (verbose_level >= 2) console.log("              housesOfTypeContainingDigitTwice = "+Stringify(Sub(houseNames, housesOfTypeContainingDigitTwice)));
 
        for (let housetype0 = 0; housetype0 < 3; ++housetype0) {
          for (let housetype1 = 0; housetype1 < 3; ++housetype1) {
@@ -1285,6 +1437,7 @@ Already accepted:
    const hiddenQuadsButton = document.getElementsByClassName("hiddenquads")[0];
    const omissionButton = document.getElementsByClassName("omission")[0];
    const xwingButton = document.getElementsByClassName("xwing")[0];
+   const fishButton = document.getElementsByClassName("fish")[0];
    const undoButton = document.getElementsByClassName("undo")[0];
    const redoButton = document.getElementsByClassName("redo")[0];
    const propagateSinglesCountSpan = document.getElementsByClassName("propagatesinglescount")[0];
@@ -1297,6 +1450,7 @@ Already accepted:
    const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
    const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
    const doXwingsCountSpan = document.getElementsByClassName("doxwingscount")[0];
+   const doFishesCountSpan = document.getElementsByClassName("dofishescount")[0];
    const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
    const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -1315,7 +1469,9 @@ Already accepted:
 
    // This must be separate from updateUiFromStatePair: we do *not* want
    // to do it on mousedown, since that will prevent recognizing mouseup!
-   const updateUndoRedoButtons = () => {
+   const _updateUndoRedoButtons = () => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("    in _updateUndoRedoButtons");
      undoButton.disabled = (undoStack.length === 0);
      redoButton.disabled = (redoStack.length === 0);
      undoStackSizeSpan.innerHTML = ''+undoStack.length;
@@ -1330,8 +1486,7 @@ Already accepted:
      const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
      const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
-     const nDoXwingsNEW = howManyTimesStateWillChange(state, scratchState=>doXwingsNEW(n,scratchState));
-     //CHECK_EQ(nDoXwingsNEW, nDoXwings);  // XXX should work, need to debug
+     const nDoFishes = howManyTimesStateWillChange(state, scratchState=>doFishes(3,n,scratchState));  // 3-fishes, i.e. swordfishes, for now
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1343,6 +1498,7 @@ Already accepted:
      hiddenQuadsButton.disabled = nDoHiddenQuads===0;
      omissionButton.disabled = nDoOmissions===0;
      xwingButton.disabled = nDoXwings===0;
+     fishButton.disabled = nDoFishes===0;
 
      propagateSinglesCountSpan.innerHTML = ''+nPropagates;
      doHiddenSinglesCountSpan.innerHTML = ''+nDoHiddenSingles;
@@ -1354,7 +1510,28 @@ Already accepted:
      doHiddenQuadsCountSpan.innerHTML = ''+nDoHiddenQuads;
      doOmissionsCountSpan.innerHTML = ''+nDoOmissions;
      doXwingsCountSpan.innerHTML = ''+nDoXwings;
+     doFishesCountSpan.innerHTML = ''+nDoFishes;
+
+     if (verbose_level >= 1) console.log("    out _updateUndoRedoButtons");
    };
+   const updateUndoRedoButtons = () => {
+     const verbose_level = 1;
+     if (verbose_level >= 1) console.log("in updateUndoRedoButtons");
+     thinking.innerHTML = "thinking";
+     const f = ()=>{
+       _updateUndoRedoButtons();
+       thinking.innerHTML = "not thinking";
+     };
+     if (false) {
+       // try to get significant work out of the event handler.
+       // it doesn't help :-(  Now I get "[Violation] 'setTimeout' handler took 64ms"
+       // and console still slows to a crawl
+       setTimeout(f);
+     } else {
+       f();
+     }
+     if (verbose_level >= 1) console.log("out updateUndoRedoButtons");
+  }
 
    const highlightDigit = (state,digit) => {
      CHECK(Array.isArray(state));
@@ -1429,6 +1606,12 @@ Already accepted:
    };  // updateUiFromStatePair
 
 
+   while (true) {
+     const newState = doPropagateSingles(n, state);
+     if (deepEquals(newState, state)) break;
+     state = newState;
+   }
+
    updateUiFromStatePair(state,state);
    updateUndoRedoButtons();
 
@@ -1444,7 +1627,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doPropagateSingles(n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out propagateSinglesButtonMouseDown");
    };
@@ -1461,7 +1644,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doHiddenSingles(n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenSinglesButtonMouseDown");
    };
@@ -1478,7 +1661,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doNakedTuples(2, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedPairsButtonMouseDown");
    };
@@ -1495,7 +1678,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doNakedTuples(3, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedTriplesButtonMouseDown");
    };
@@ -1512,7 +1695,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doHiddenTuples(3, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenTriplesButtonMouseDown");
    };
@@ -1529,7 +1712,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doNakedTuples(4, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out nakedQuadsButtonMouseDown");
    };
@@ -1546,7 +1729,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doHiddenTuples(4, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenQuadsButtonMouseDown");
    };
@@ -1563,7 +1746,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doHiddenTuples(2, n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenPairsButtonMouseDown");
    };
@@ -1580,7 +1763,7 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doOmissions(n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out omissionButtonMouseDown");
    };
@@ -1597,9 +1780,26 @@ Already accepted:
      redoStack.length = 0;  // clear
      undoStack.push(state);
      state = doXwings(n, state);
-     updateUiFromStatePair(Top(undoStack),state);
+     updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out xwingButtonMouseDown");
+   };
+
+   const fishButtonMouseOver = () => {
+     console.log("    in fishButtonMouseOver");
+     const scratchState = doFishes(n, state);
+     updateUiFromStatePair(state,scratchState);
+     console.log("    out fishButtonMouseOver");
+   };
+   const fishButtonMouseDown = () => {
+     console.log("    in fishButtonMouseDown");
+     console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     redoStack.length = 0;  // clear
+     undoStack.push(state);
+     state = doFishes(n, state);
+     updateUiFromStatePair(Last(undoStack),state);
+     console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
+     console.log("    out fishButtonMouseDown");
    };
 
    const undoButtonMouseDown = () => {
@@ -1611,7 +1811,7 @@ Already accepted:
        // It seems to be less confusing if we show
        // undos in the same color as the do's/redo's,
        // even though they are doing the opposite thing.
-       updateUiFromStatePair(state, Top(redoStack));
+       updateUiFromStatePair(state, Last(redoStack));
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to undo.
@@ -1626,7 +1826,7 @@ Already accepted:
      if (redoStack.length >= 1) {
        undoStack.push(state);
        state = redoStack.pop();
-       updateUiFromStatePair(Top(undoStack), state);
+       updateUiFromStatePair(Last(undoStack), state);
      } else {
        // This shouldn't ever happen because the button should be disabled
        // when there's nothing to redo.
@@ -1649,9 +1849,10 @@ Already accepted:
    };
 
    const mouseOverCell = (event,icell) => {
-     console.log("    in mouseOverCell");
-     console.log("      event = ",event);
-     console.log("      icell = ",icell);
+     const verbose_level = 0;
+     if (verbose_level >= 1) console.log("    in mouseOverCell");
+     if (verbose_level >= 1) console.log("      event = ",event);
+     if (verbose_level >= 1) console.log("      icell = ",icell);
      let newDigitToHighlight = null;
      if (state[icell].length == 1) {
        newDigitToHighlight = state[icell][0];
@@ -1660,18 +1861,19 @@ Already accepted:
        digitToHighlight = newDigitToHighlight;
        updateUiFromStatePair(state,state);
      }
-     console.log("    out mouseOverCell");
+     if (verbose_level >= 1) console.log("    out mouseOverCell");
    };  // mouseOverCell
    const mouseOutCell = (event,icell) => {
-     console.log("    in mouseOutCell");
-     console.log("      event = ",event);
-     console.log("      icell = ",icell);
+     const verbose_level = 0;
+     if (verbose_level >= 1) console.log("    in mouseOutCell");
+     if (verbose_level >= 1) console.log("      event = ",event);
+     if (verbose_level >= 1) console.log("      icell = ",icell);
      let newDigitToHighlight = null;
      if (newDigitToHighlight != digitToHighlight) {
        digitToHighlight = newDigitToHighlight;
        updateUiFromStatePair(state,state);
      }
-     console.log("    out mouseOutCell");
+     if (verbose_level >= 1) console.log("    out mouseOutCell");
    };  // mouseOutCell
 
    const processPastedInput = pastedInput => {

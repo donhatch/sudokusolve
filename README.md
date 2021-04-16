@@ -102,6 +102,7 @@ Logic:
  - "visual elimination" of a digit - supposedly powerful,
    but I don't totally get it yet. https://www.learn-sudoku.com/visual-elimination.html
    "Most Sudoku puzzles printed in newspapers and magazines, even those rated with high levels of difficulty, are in fact quite easy to solve — at least from the perspective of someone who has mastered this technique."
+   My current guess is it's just a way of visually scanning for the other patterns such as hidden singles (1-fish), xwings (2-fish), swordfish (3-fish), and other fish.
 
   DONE: "hidden pairs" - https://www.learn-sudoku.com/hidden-pairs.html
     This is a hidden naked pair: 
