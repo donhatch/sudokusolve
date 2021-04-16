@@ -1,5 +1,41 @@
 <!--
 
+TODO: console is barely usable!!!
+
+TODO: sometimes there are prefills that do not include some digit,
+      so I can't hover over it to do the red/green.
+      need some way to do that.
+
+TODO:
+  (jellyfish example on hodoku, taken from pure jellyfish on forum)
+  2....358.....2...1...4.56.....9.4.68..5.1.9..61.8.2.....15.8...3...4.....263....4
+  do the naked singles and hidden pair;
+  why is "naked pair" wanting to remove the 7 at r7c8?  I don't see that being a naked pair.
+
+
+https://www.sudokuoftheday.com/techniques/swordfish/
+195367248
+.78.5.369
+3.6.98157
+..378.59.
+7.9..5..6
+5849.671.
+832549671
+9.7.13.25
+.51.729..
+
+TODO: get fish size ui sorted out, it's very confusing and not very usable.
+      maybe:
+        - there should be a swordfish button, that does nothing unless there is a swordfish that is NOT involved in singles or doubles
+          except... hmm, the way I do decomposition messes things up, it makes it appear that a swordfish appears, prematurely.
+          So, need to do some special logic to make sure we don't sieze the swordfish prematurely.
+
+TODO: http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html consensus seems to be that TTHsieh's
+      second proposal has an xwing, not a swordfish.  which is weird because my program
+      does *not* seem to think it's an xwing, wtf?
+      That thread didn't seem to pan out :-(
+      Oh wait, maybe it did, there is more than one page...
+
 TODO: http://hodoku.sourceforge.net/en/show_example.php?file=bf301&tech=Swordfish says "The following representation can be pasted in most Soduku programs:"
 
 TODO: actually make a nice user-solve mode
@@ -44,7 +80,7 @@ TODO: swordfish.
        6 row-of-blocks permutations
      * 6*6*6 row permutations within each row-of-blocks
        and same for columns
-    
+
 
 TODO: T-Rex by Macrovius
   https://www.youtube.com/watch?v=12lPDRFXhYs
@@ -63,7 +99,7 @@ TODO: huh! doesn't solve this one:
     https://app.crackingthecryptic.com/sudoku/94Qq6qGjh2
     ("classic sudoku") (mark's favorite sudoku ever).  why does he say the 8's are not an x-wing?  they sure seem like one.
 
-  - he used something interesting at 6:30- 
+  - he used something interesting at 6:30-
     Q: is it covered by the techniques I
     have coded so far?
     What's happening is:
@@ -141,10 +177,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    td.cell.prefilled {
     background:#e6e6e6;  /* nytimes is #e6e6e6 */
    }
-   td.cell { 
-    border:1px solid gray; 
-    padding:0px; 
-    margin:0px; 
+   td.cell {
+    border:1px solid gray;
+    padding:0px;
+    margin:0px;
     /* 55 seems to be what is used by nytimes, maybe */
     width:75px;
     height:75px;
@@ -248,6 +284,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
  <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script>
    "use strict";
+
+   const MAX_FISH_SIZE = 3;
+
+
    // strict equality, but enforce that they are the same type
    // (instead of just returning false if they aren't).
    const EQ = (a,b) => {
@@ -527,7 +567,22 @@ Already accepted:
 | 289   89   7   | 1   6   4  | 5     289  3  |
 
 '----------------'------------'---------------'
+And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
+ 2 . . | . 9 . | . . .
+ . 6 . | . . 3 | 1 . .
+ . . 1 | 2 . . | . 7 .
+-------+-------+------
+ . . 7 | . . . | . 2 .
+ 3 . . | . . . | . . 8
+ . 8 . | . . . | 4 . .
+-------+-------+------
+ . 4 . | . . 8 | 6 . .
+ . . 2 | 7 . . | . 1 .
+ . . . | . 5 . | . . 4
 */
+
+
+
    // Output is typically too big, but put newlines before the <'s
    // and then grep something (I forget what)
    const ExtractPrefillStringFromNYTimesOuterHTML = (outerHTML) => {
@@ -1033,7 +1088,7 @@ Already accepted:
    // Note that a k-row k-column fish (k base rows, k covering columns) is equivalent to:
    // if a given intersection of k rows with n-k columns is empty,
    // then the complementary intersection of n-k rows with n-k columns
-   // must also be also empty.  
+   // must also be also empty.
    // This leads to the concept of a row-column fish decomposition.
    // The decomposition is a partitioning of the original n rows,
    // where each partition of k rows has a corresponding cover of n-k columns,
@@ -1506,7 +1561,7 @@ Already accepted:
      const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
      const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
      const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
-     const nDoFishes = howManyTimesStateWillChange(state, scratchState=>doFishes(3,n,scratchState));  // 3-fishes, i.e. swordfishes, for now
+     const nDoFishes = howManyTimesStateWillChange(state, scratchState=>doFishes(MAX_FISH_SIZE,n,scratchState));  // 3-fishes, i.e. swordfishes, for now
 
      propagateSinglesButton.disabled = nPropagates===0;
      hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1626,6 +1681,7 @@ Already accepted:
    };  // updateUiFromStatePair
 
 
+   // XXX wait a minute, do I want the loop?  I don't think so!  Argh, need to distinguish between penned single and pencilled single
    while (true) {
      const newState = doPropagateSingles(n, state);
      if (deepEquals(newState, state)) break;
@@ -1714,7 +1770,7 @@ Already accepted:
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = doHiddenTuples(3, n, state);
+     state = doHiddenTuples(MAX_FISH_SIZE, n, state);
      updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out hiddenTriplesButtonMouseDown");
@@ -1807,7 +1863,7 @@ Already accepted:
 
    const fishButtonMouseOver = () => {
      console.log("    in fishButtonMouseOver");
-     const scratchState = doFishes(3, n, state);
+     const scratchState = doFishes(MAX_FISH_SIZE, n, state);
      updateUiFromStatePair(state,scratchState);
      console.log("    out fishButtonMouseOver");
    };
@@ -1816,7 +1872,7 @@ Already accepted:
      console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      redoStack.length = 0;  // clear
      undoStack.push(state);
-     state = doFishes(3, n, state);
+     state = doFishes(MAX_FISH_SIZE, n, state);
      updateUiFromStatePair(Last(undoStack),state);
      console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
      console.log("    out fishButtonMouseDown");
@@ -1927,7 +1983,24 @@ Already accepted:
        //
        prefill_string = ExtractPrefillStringFromLATimesOuterHTML(outerHTML);
      } else if (true) {
-       // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
+       // Format I see used in http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html:
+       /*
+           2 . . | . 9 . | . . .
+           . 6 . | . . 3 | 1 . .
+           . . 1 | 2 . . | . 7 .
+          -------+-------+------
+           . . 7 | . . . | . 2 .
+           3 . . | . . . | . . 8
+           . 8 . | . . . | 4 . .
+          -------+-------+------
+           . 4 . | . . 8 | 6 . .
+           . . 2 | 7 . . | . 1 .
+           . . . | . 5 . | . . 4
+       // Everything except dots and digits and letters are ignored, so the following also works:
+       /*
+        2...9.....6...31....12...7...7....2.3.......8.8....4...4...86....27...1.....5...4
+       */
+
        prefill_string = outerHTML.replace(/[^.0-9a-zA-Z]/g, '').replace(/\./g, '0');
      } else {
        // TODO: more graceful rejection than this!
@@ -1940,6 +2013,7 @@ Already accepted:
      console.log("      prefill = ",prefill);
      [n,state,cells,undoStack,redoStack,
       cell2row,cell2col,cell2block,cell2houses,house2cells] = PopulateIt(prefill);
+     state = doPropagateSingles(n, state);
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
      console.log("        out processPastedInput");
