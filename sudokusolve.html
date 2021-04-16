@@ -199,6 +199,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
   </style>
  </head>
  <body>
+  <div id="myconsole" style="border:1px solid black;">CONSOLE<br></div>
   <table>
     <span id="thinking">started</span>
     <tr>
@@ -255,11 +256,11 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
            Row-column fish:
            <input class="fish1" type="button" value="1" onmouseover="fishButtonMouseOver(1)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(1)" onmouseup="anyButtonMouseUp()">
            <small><small><span class="dofish1scount"></span></small></small>
-           <input class="fish2" type="button" value="2" onmouseover="fish2ButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
+           <input class="fish2" type="button" value="2" onmouseover="fishButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
            <small><small><span class="dofish2scount"></span></small></small>
-           <input class="fish3" type="button" value="3" onmouseover="fish3ButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
+           <input class="fish3" type="button" value="3" onmouseover="fishButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
            <small><small><span class="dofish3scount"></span></small></small>
-           <input class="fish4" type="button" value="4" onmouseover="fish4ButtonMouseOver(4)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(4)" onmouseup="anyButtonMouseUp()">
+           <input class="fish4" type="button" value="4" onmouseover="fishButtonMouseOver(4)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(4)" onmouseup="anyButtonMouseUp()">
            <small><small><span class="dofish4scount"></span></small></small>
 
         <tr>
@@ -276,7 +277,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
         <tr>
          <td>
-           <input class="redo" type="button" value="Reset to pasted from crackingthecryptic.com or 1sudoko.com or nytimes.com or latimes.com:" onclick="resetButtonClicked()" onpaste="console.log(.pasted on button')">
+           <input class="redo" type="button" value="Reset to pasted from text or crackingthecryptic.com or 1sudoko.com or nytimes.com or latimes.com:" onclick="resetButtonClicked()" onpaste="console.log(.pasted on button')">
            <br>
            <textarea id="prefill" rows="26" cols="65" onkeydown="inputKeyDown(event)" onpaste="inputPasted(event)"></textarea>
         <tr>
@@ -286,15 +287,18 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 
        </table>
    <table>
-
-
  </body>
  <script src="projecteuler_p096_sudoku.txt.js"></script>
+ <script src="myconsole.js"></script>
  <script>
    "use strict";
 
    const MAX_FISH_SIZE = 3;
 
+   //myconsole.log("hey! this is to myconsole: ",[1,2]);
+   myconsole.attachToElement(window.myconsole);
+   myconsole.log("this is to myconsole with stuff", "<div></div>");
+   myconsole.log("this is to myconsole with stuff", "<div></div>");
 
    // strict equality, but enforce that they are the same type
    // (instead of just returning false if they aren't).
@@ -1041,7 +1045,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      };  // doHiddenSingles
 
 
-     let XXXmaxever = -1;
+     let XXXmax_ever_ksets = -1;
      const TryToExtractOneFish = (digit,
                                   fish_size,
                                   base_housetype,
@@ -1058,7 +1062,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        // (9 choose 4)=126 subsets.
        const ksets = KSets(n_remaining_rowscols, fish_size);
        if (verbose_level >= 1) console.log("                          iterating over "+ksets.length+" "+fish_size+"-sets of "+n_remaining_rowscols);
-       XXXmaxever = Math.max(XXXmaxever, ksets.length);
+       XXXmax_ever_ksets = Math.max(XXXmax_ever_ksets, ksets.length);
        const base_house2cell = base_housetype===0 ? row2cells : base_housetype===1 ? col2cells : blocks2cells;
 
        for (const kset of ksets) {
@@ -1101,15 +1105,17 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      // such that either the intersection of the k rows and complementary (n-k) columns is empty
      // or the intersection of the complementary (n-k) rows and k columns is empty,
      // and so the other can be made empty.
-     const RowColumnFishDecompose = (digit, max_fish_size, n, state) => {
+
+     const UncachedRowColumnFishDecompose = (digit, max_fish_size, n, state) => {
        const verbose_level = 1;
-       if (verbose_level >= 1) console.log("            in RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state)");
+       if (verbose_level >= 1) console.log("                in UncachedRowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state)");
+
        let answer = [[range(n*n),range(n*n)]];  // one partition containing all n rows and n columns
 
        let count = 0;
        for (let fish_size = 1; fish_size <= max_fish_size && fish_size*2 <= Last(answer)[0].length; ++fish_size) {
-         if (verbose_level >= 2) console.log("                  fish_size = "+fish_size);
-         if (verbose_level >= 2) console.log("                      answer so far = "+Stringify(answer));
+         if (verbose_level >= 2) console.log("                      fish_size = "+fish_size);
+         if (verbose_level >= 2) console.log("                          answer so far = "+Stringify(answer));
          while (true) {
            CHECK_LE(++count, 100);
 
@@ -1137,9 +1143,51 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            answer.push([remaining_rows,remaining_cols]);
          }
        };
-       if (verbose_level >= 1) console.log("            out RowColumnFishDecomposition(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer));
+       if (verbose_level >= 1) console.log("                out UncachedRowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer));
        return answer;
-     };  // RowColumnFishDecompose
+     };  // UncachedRowColumnFishDecompose
+
+     // This is called a LOT on the same state.  maybe cache?  ok lets's try...
+     // CBB: don't grow forever, make this an LRU queue or something, or explicitly clear it.  Oh hey, I think maps keep track of insertion order, so just remove and re-insert to refresh!
+     let fish_cache = new Map();
+     let fish_cache_max_size = 1000*1000;
+     let cacheMisses = 0;
+     let cacheHits = 0;
+
+     const CachedRowColumnFishDecompose = (digit, max_fish_size, n, state) => {
+       const verbose_level = 1;
+       if (verbose_level >= 1) console.log("            in CachedRowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state)");
+
+       if (false) {
+         // bypass cache
+         const answer = UncachedRowColumnFishDecompose(digit, max_fish_size, n, state);
+         if (verbose_level >= 1) console.log("            out RowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer)+" (bypassing cache)");
+         return answer;
+       }
+
+       const key = Stringify([digit, max_fish_size, n, state]);
+
+       if (fish_cache.has(key)) {
+         ++cacheHits;
+         const value = fish_cache.get(key);
+         const answer = deepCopy(value);  // CBB: is the deepCopy necessary?  I don't know
+
+         // remove and re-insert, so that we have a record of freshness.
+         fish_cache.delete(key);
+         fish_cache.set(key, value);
+
+         if (verbose_level >= 1) console.log("            out RowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer)+" (cache hit)");
+         return answer;
+       } else {
+         ++cacheMisses;
+         const answer = UncachedRowColumnFishDecompose(digit, max_fish_size, n, state);
+         // CBB: probably shouldn't need all these deepCopies, but I don't have a clear handle on what my immutability policy is
+         fish_cache.set(key, deepCopy(answer));  // CBB: is the deepCopy necessary? I don't know
+         if (verbose_level >= 1) console.log("            out RowColumnFishDecompose(digit="+digit+", max_fish_size="+max_fish_size+", n="+n+", state), returning "+Stringify(answer)+" (cache miss)");
+         return answer;
+       }
+     };  // CachedRowColumnFishDecompose
+
 
      const doFishes = (max_fish_size, n, oldState) => {
        const verbose_level = 1;
@@ -1168,7 +1216,8 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
 
        for (let digit = 1; digit <= n*n; ++digit) {
          if (verbose_level >= 1) console.log("          digit = "+digit);
-         const decomposition = RowColumnFishDecompose(digit, max_fish_size, n, oldState);
+         const decomposition = CachedRowColumnFishDecompose(digit, max_fish_size, n, oldState);
+
          // Simplest way to do this that I can think of is to clear the digit
          // from all cells that aren't in any of the fishes.
          const cells_to_clear = new Set(range(n*n*n*n));
@@ -1183,8 +1232,11 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            removeIf(newState[cell], x => x===digit);
          }
        }
-       if (verbose_level >= 1) console.log("              XXXmaxever = "+XXXmaxever);
-       XXXmaxever = -1;
+       if (verbose_level >= 1) console.log("              XXXmax_ever_ksets = "+XXXmax_ever_ksets);
+       XXXmax_ever_ksets = -1;
+       if (verbose_level >= 1) console.log("              cacheHits = "+cacheHits);
+       if (verbose_level >= 1) console.log("              cacheMisses = "+cacheMisses);
+       if (verbose_level >= 1) console.log("              fish_cache.size = "+fish_cache.size);
        if (verbose_level >= 1) console.log("        out doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
        return newState;
     };  // doFishes
@@ -1352,7 +1404,11 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            for (let ihouse1 = 0; ihouse1 < house2cellsContainingDigit.length; ++ihouse1) {
              if (ihouse0 == ihouse1) continue;
              const cells1 = house2cellsContainingDigit[ihouse1];
-             CHECK_GE(cells1.size, 1);
+             if (cells1.size === 0) {
+               if (verbose_level >= 1) console.log("        out doOmissions(n="+n+", state), returning oldState because illegal");
+               return oldState;
+              }
+
              // Are all occurrances of digit in house0 also in house1?
              if (IsSubsetOf(cells0, cells1)) {
                if (verbose_level >= 2) console.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
@@ -1378,7 +1434,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      const Cell2Description = cell => 'r'+cell2row[cell]+'c'+cell2col[cell]+'b'+cell2block[cell];
 
      const doXwingsNEW = (n, oldState) => {
-       const verbose_level = 2;  // seems to be useful, it can be pretty cryptic otherwise
+       const verbose_level = 1;  // 2 seems to be useful, it can be pretty cryptic otherwise. unfortunately it contributes to console lag :-(  and, holy moly, is this THE thing that causes the console lag??? wtf? I guess not, but it certainly is a major contributor.
        if (verbose_level >= 1) console.log("        in doXwingsNEW(n="+n+", state)");
        const newState = deepCopy(oldState);
        // And x-wing is when, for a given digit,
@@ -1534,7 +1590,10 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      const doHiddenQuadsCountSpan = document.getElementsByClassName("dohiddenquadscount")[0];
      const doOmissionsCountSpan = document.getElementsByClassName("doomissionscount")[0];
      const doXwingsCountSpan = document.getElementsByClassName("doxwingscount")[0];
-     const doFishesCountSpan = document.getElementsByClassName("dofishescount")[0];
+     const doFish1sCountSpan = document.getElementsByClassName("dofish1scount")[0];
+     const doFish2sCountSpan = document.getElementsByClassName("dofish2scount")[0];
+     const doFish3sCountSpan = document.getElementsByClassName("dofish3scount")[0];
+     const doFish4sCountSpan = document.getElementsByClassName("dofish4scount")[0];
      const undoStackSizeSpan = document.getElementsByClassName("undostacksize")[0];
      const redoStackSizeSpan = document.getElementsByClassName("redostacksize")[0];
 
@@ -1556,6 +1615,12 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      const _updateUndoRedoButtons = () => {
        const verbose_level = 1;
        if (verbose_level >= 1) console.log("    in _updateUndoRedoButtons");
+
+       if (false) {
+         if (verbose_level >= 1) console.log("    out _updateUndoRedoButtons (NOT DOING ANYTHING)");
+         return;
+       }
+
        undoButton.disabled = (undoStack.length === 0);
        redoButton.disabled = (redoStack.length === 0);
        undoStackSizeSpan.innerHTML = ''+undoStack.length;
@@ -1709,13 +1774,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      updateUiFromStatePair(state,state);
      updateUndoRedoButtons();
 
-     const propagateSinglesButtonMouseOver = () => {
+     window.propagateSinglesButtonMouseOver = () => {
        console.log("    in propagateSinglesButtonMouseOver");
        let scratchState = doPropagateSingles(n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out propagateSinglesButtonMouseOver");
      };
-     const propagateSinglesButtonMouseDown = () => {
+     window.propagateSinglesButtonMouseDown = () => {
        console.log("    in propagateSinglesButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1726,13 +1791,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out propagateSinglesButtonMouseDown");
      };
 
-     const hiddenSinglesButtonMouseOver = () => {
+     window.hiddenSinglesButtonMouseOver = () => {
        console.log("    in propagateSinglesButtonMouseOver");
        const scratchState = doHiddenSingles(n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out propagateSinglesButtonMouseOver");
      };
-     const hiddenSinglesButtonMouseDown = () => {
+     window.hiddenSinglesButtonMouseDown = () => {
        console.log("    in hiddenSinglesButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1743,13 +1808,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out hiddenSinglesButtonMouseDown");
      };
 
-     const nakedPairsButtonMouseOver = () => {
+     window.nakedPairsButtonMouseOver = () => {
        console.log("    in nakedPairsButtonMouseOver");
        const scratchState = doNakedTuples(2, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out nakedPairsButtonMouseOver");
      };
-     const nakedPairsButtonMouseDown = () => {
+     window.nakedPairsButtonMouseDown = () => {
        console.log("    in nakedPairsButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1760,13 +1825,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out nakedPairsButtonMouseDown");
      };
 
-     const nakedTriplesButtonMouseOver = () => {
+     window.nakedTriplesButtonMouseOver = () => {
        console.log("    in nakedTriplesButtonMouseOver");
        const scratchState = doNakedTuples(3, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out nakedTriplesButtonMouseOver");
      };
-     const nakedTriplesButtonMouseDown = () => {
+     window.nakedTriplesButtonMouseDown = () => {
        console.log("    in nakedTriplesButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1777,13 +1842,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out nakedTriplesButtonMouseDown");
      };
 
-     const hiddenTriplesButtonMouseOver = () => {
+     window.hiddenTriplesButtonMouseOver = () => {
        console.log("    in hiddenTriplesButtonMouseOver");
        const scratchState = doHiddenTuples(3, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out hiddenTriplesButtonMouseOver");
      };
-     const hiddenTriplesButtonMouseDown = () => {
+     window.hiddenTriplesButtonMouseDown = () => {
        console.log("    in hiddenTriplesButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1794,13 +1859,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out hiddenTriplesButtonMouseDown");
      };
 
-     const nakedQuadsButtonMouseOver = () => {
+     window.nakedQuadsButtonMouseOver = () => {
        console.log("    in nakedQuadsButtonMouseOver");
        const scratchState = doNakedTuples(4, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out nakedQuadsButtonMouseOver");
      };
-     const nakedQuadsButtonMouseDown = () => {
+     window.nakedQuadsButtonMouseDown = () => {
        console.log("    in nakedQuadsButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1811,13 +1876,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out nakedQuadsButtonMouseDown");
      };
 
-     const hiddenQuadsButtonMouseOver = () => {
+     window.hiddenQuadsButtonMouseOver = () => {
        console.log("    in hiddenQuadsButtonMouseOver");
        const scratchState = doHiddenTuples(4, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out hiddenQuadsButtonMouseOver");
      };
-     const hiddenQuadsButtonMouseDown = () => {
+     window.hiddenQuadsButtonMouseDown = () => {
        console.log("    in hiddenQuadsButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1828,13 +1893,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out hiddenQuadsButtonMouseDown");
      };
 
-     const hiddenPairsButtonMouseOver = () => {
+     window.hiddenPairsButtonMouseOver = () => {
        console.log("    in hiddenPairsButtonMouseOver");
        const scratchState = doHiddenTuples(2, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out hiddenPairsButtonMouseOver");
      };
-     const hiddenPairsButtonMouseDown = () => {
+     window.hiddenPairsButtonMouseDown = () => {
        console.log("    in hiddenPairsButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1845,13 +1910,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out hiddenPairsButtonMouseDown");
      };
 
-     const omissionButtonMouseOver = () => {
+     window.omissionButtonMouseOver = () => {
        console.log("    in omissionButtonMouseOver");
        const scratchState = doOmissions(n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out omissionButtonMouseOver");
      };
-     const omissionButtonMouseDown = () => {
+     window.omissionButtonMouseDown = () => {
        console.log("    in omissionButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1862,13 +1927,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out omissionButtonMouseDown");
      };
 
-     const xwingButtonMouseOver = () => {
+     window.xwingButtonMouseOver = () => {
        console.log("    in xwingButtonMouseOver");
        const scratchState = doXwings(n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out xwingButtonMouseOver");
      };
-     const xwingButtonMouseDown = () => {
+     window.xwingButtonMouseDown = () => {
        console.log("    in xwingButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1879,13 +1944,13 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out xwingButtonMouseDown");
      };
 
-     const fishButtonMouseOver = () => {
+     window.fishButtonMouseOver = () => {
        console.log("    in fishButtonMouseOver");
        const scratchState = doFishes(MAX_FISH_SIZE, n, state);
        updateUiFromStatePair(state,scratchState);
        console.log("    out fishButtonMouseOver");
      };
-     const fishButtonMouseDown = () => {
+     window.fishButtonMouseDown = () => {
        console.log("    in fishButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
@@ -1896,7 +1961,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out fishButtonMouseDown");
      };
 
-     const undoButtonMouseDown = () => {
+     window.undoButtonMouseDown = () => {
        console.log("    in undoButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        if (undoStack.length >= 1) {
@@ -1914,7 +1979,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        console.log("    out undoButtonMouseDown");
      };
-     const redoButtonMouseDown = () => {
+     window.redoButtonMouseDown = () => {
        console.log("    in redoButtonMouseDown");
        console.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        if (redoStack.length >= 1) {
@@ -1930,19 +1995,19 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out redoButtonMouseDown");
      };
 
-     const anyButtonMouseOut = () => {
+     window.anyButtonMouseOut = () => {
        console.log("    in anyButtonMouseOut");
        updateUiFromStatePair(state,state);
        console.log("    out anyButtonMouseOut");
      };
-     const anyButtonMouseUp = () => {
+     window.anyButtonMouseUp = () => {
        console.log("    in anyButtonMouseUp");
        updateUiFromStatePair(state,state);
        updateUndoRedoButtons();
        console.log("    out anyButtonMouseUp");
      };
 
-     const mouseOverCell = (event,icell) => {
+     window.mouseOverCell = (event,icell) => {
        const verbose_level = 0;
        if (verbose_level >= 1) console.log("    in mouseOverCell");
        if (verbose_level >= 1) console.log("      event = ",event);
@@ -1957,7 +2022,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        }
        if (verbose_level >= 1) console.log("    out mouseOverCell");
      };  // mouseOverCell
-     const mouseOutCell = (event,icell) => {
+     window.mouseOutCell = (event,icell) => {
        const verbose_level = 0;
        if (verbose_level >= 1) console.log("    in mouseOutCell");
        if (verbose_level >= 1) console.log("      event = ",event);
@@ -1970,7 +2035,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        if (verbose_level >= 1) console.log("    out mouseOutCell");
      };  // mouseOutCell
 
-     const processPastedInput = pastedInput => {
+     window.processPastedInput = pastedInput => {
        console.log("        in processPastedInput");
        console.log("          pastedInput = ",pastedInput);
        const outerHTML = pastedInput;
@@ -2037,7 +2102,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("        out processPastedInput");
      };  // processPastedInput
 
-     const resetButtonClicked = () => {
+     window.resetButtonClicked = () => {
        console.log("    in resetButtonClicked");
 
        //const prefill_string = '1300020000300004';
@@ -2052,7 +2117,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        console.log("    out resetButtonClicked");
      };  // resetButtonClicked
 
-     const inputKeyDown = (event) => {
+     window.inputKeyDown = (event) => {
        console.log("    in inputKeyDown");
        console.log("      event = ",event);
        // XXX TODO: which of these do I want? evidently both work
@@ -2064,7 +2129,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        }
        console.log("    out inputKeyDown");
      };  // inputKeyDown
-     const inputPasted = event => {
+     window.inputPasted = event => {
        console.log("    in inputPasted");
        console.log("      event = ",event);
        // XXX TODO: which of these do I want? evidently both work
@@ -2086,6 +2151,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      //console.log("  file_contents = ",file_contents);
    } catch (error) {
      console.error("ARGH, caught error: ",error);
+     CHECK(false);
    }
 
    console.log("out script");
