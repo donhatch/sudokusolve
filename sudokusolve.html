@@ -163,6 +163,13 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 <html>
  <head>
   <style>
+   .myconsoleholder {
+     height:200px;
+     border:1px solid black;
+     overflow: auto;
+   }
+   .myconsole {
+   }
    table.toplevel_table {
     border:5px solid black;
     border-collapse:collapse;
@@ -199,7 +206,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
   </style>
  </head>
  <body>
-  <pre id="myconsole" style="border:1px solid black;">CONSOLE<br></pre>
+  <div id="myconsoleholder" class="myconsoleholder">
+   <pre id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></pre>
+  </div>
   <table>
    <span id="thinking">started</span>
    <tr>
@@ -294,13 +303,6 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
  <script src="myconsole.js"></script>
  <script>
    "use strict";
-
-   const MAX_FISH_SIZE = 3;
-
-   //myconsole.log("hey! this is to myconsole: ",[1,2]);
-   myconsole.attachToElement(window.myconsole);
-   myconsole.log("test message to myconsole with stuff", "<div></div>");
-   myconsole.log("test message to myconsole with stuff", "<div></div>");
 
    // strict equality, but enforce that they are the same type
    // (instead of just returning false if they aren't).
@@ -766,7 +768,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
       return [n,prefill];
    };  // PrefillString2Prefill
 
-   if (true) {
+   if (false) {  // XXX this doesn't work anyu more because myconsole not initialized yet
      const sample = '<div id="grilleJeu"> <div id="c_0" class="c fixe" l="1" c="1" r="1" v="3"><p>3</p></div><div id="c_1" class="c" l="1" c="2" r="1"></div><div id="c_2" class="c" l="1" c="3" r="2"></div><div id="c_3" class="c fixe" l="1" c="4" r="2" v="2"><p>2</p></div><div id="c_4" class="c" l="2" c="1" r="1"></div><div id="c_5" class="c" l="2" c="2" r="1"></div><div id="c_6" class="c fixe" l="2" c="3" r="2" v="3"><p>3</p></div><div id="c_7" class="c" l="2" c="4" r="2"></div><div id="c_8" class="c" l="3" c="1" r="3"></div><div id="c_9" class="c fixe" l="3" c="2" r="3" v="4"><p>4</p></div><div id="c_10" class="c" l="3" c="3" r="4"></div><div id="c_11" class="c" l="3" c="4" r="4"></div><div id="c_12" class="c fixe" l="4" c="1" r="3" v="1"><p>1</p></div><div id="c_13" class="c" l="4" c="2" r="3"></div><div id="c_14" class="c" l="4" c="3" r="4"></div><div id="c_15" class="c" l="4" c="4" r="4"></div>            </div>';
 
      const prefill_string = ExtractPrefillStringFrom1SudokoOuterHTML(sample);
@@ -800,7 +802,18 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      */
    }
 
-   myconsole.log("in script");
+   console.log("in script");
+
+   const myconsole = MyConsole();
+
+   //myconsole.log("hey! this is to myconsole: ",[1,2]);
+   myconsole.attachToElement(window.myconsole, window.myconsoleholder);
+   myconsole.log("test message to myconsole with stuff", "<div></div>");
+   myconsole.log("test message to myconsole with stuff", "<div></div>");
+
+   TestMyConsole(myconsole);
+
+ if (false) // XXX
    try {
      myconsole.log("  window.location = ",window.location);
      myconsole.log("  window.location.href = ",window.location.href);
@@ -1855,7 +1868,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        myconsole.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
        undoStack.push(state);
-       state = doHiddenTuples(MAX_FISH_SIZE, n, state);
+       state = doHiddenTuples(3, n, state);
        updateUiFromStatePair(Last(undoStack),state);
        myconsole.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        myconsole.log("    out hiddenTriplesButtonMouseDown");
@@ -1946,18 +1959,18 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        myconsole.log("    out xwingButtonMouseDown");
      };
 
-     window.fishButtonMouseOver = () => {
+     window.fishButtonMouseOver = (fish_size) => {
        myconsole.log("    in fishButtonMouseOver");
-       const scratchState = doFishes(MAX_FISH_SIZE, n, state);
+       const scratchState = doFishes(fish_size, n, state);
        updateUiFromStatePair(state,scratchState);
        myconsole.log("    out fishButtonMouseOver");
      };
-     window.fishButtonMouseDown = () => {
+     window.fishButtonMouseDown = (fish_size) => {
        myconsole.log("    in fishButtonMouseDown");
        myconsole.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        redoStack.length = 0;  // clear
        undoStack.push(state);
-       state = doFishes(MAX_FISH_SIZE, n, state);
+       state = doFishes(fish_size, n, state);
        updateUiFromStatePair(Last(undoStack),state);
        myconsole.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
        myconsole.log("    out fishButtonMouseDown");
@@ -2157,5 +2170,6 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
    }
 
    myconsole.log("out script");
+   console.log("out script");
  </script>
 </html>
