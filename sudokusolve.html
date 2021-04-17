@@ -163,12 +163,10 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
 <html>
  <head>
   <style>
-   .myconsoleholder {
+   .myconsole {
      height:200px;
      border:1px solid black;
      overflow: auto;
-   }
-   .myconsole {
    }
    table.toplevel_table {
     border:5px solid black;
@@ -206,9 +204,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
   </style>
  </head>
  <body>
-  <div id="myconsoleholder" class="myconsoleholder">
-   <pre id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></pre>
-  </div>
+  <pre id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></pre>
   <table>
    <span id="thinking">started</span>
    <tr>
@@ -807,7 +803,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
    const myconsole = MyConsole();
 
    //myconsole.log("hey! this is to myconsole: ",[1,2]);
-   myconsole.attachToElement(window.myconsole, window.myconsoleholder);
+   myconsole.attachToElement(window.myconsole, window.myconsole);
    myconsole.log("test message to myconsole with stuff", "<div></div>");
    myconsole.log("test message to myconsole with stuff", "<div></div>");
 

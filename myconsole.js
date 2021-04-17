@@ -13,53 +13,36 @@ const MyConsole = () => {
       const mm = now.getMinutes();
       const ss = now.getSeconds();
       const ms = now.getSeconds();
-      // holy moly
-      const ms0 = ms%10;
-      const ms1 = (ms-ms0)/10%10;
-      const ms2 = (ms-ms1*10-ms0)/100;
 
-      const thingToAdd = ""+hh+":"+mm+":"+ss+"."+ms2+ms1+ms0+" [LOG] "+args.join(' ')+"\n";
+      const zeropad = (n,minwidth) => {
+        return n.toString().padStart(minwidth,'0');
+      };
 
-      const scrollTopMax = (element) => {
+      let thingToAdd = ""+hh+":"+zeropad(mm,2)+":"+zeropad(ss,2)+"."+zeropad(ms,3)+" [LOG] "+args.join(' ')+"\n";
+
+      // None of the answers on the web for this work.  Seriously.
+      const isScrolledToBottom = (element) => {
         const saved_scrollTop = element.scrollTop;
-        element.scrollTop = 1e9;  // a billion pixels
-        const answer = element.scrollTop;
+        element.scrollTop += 1;
+        const answer = element.scrollTop == saved_scrollTop;
         element.scrollTop = saved_scrollTop;
         return answer;
       };
 
-      console.log("===========");
-      console.log("before: elementholder.scrollTop = "+elementholder.scrollTop);
-      console.log("before: elementholder.scrollHeight = "+elementholder.scrollHeight);
-      console.log("before: elementholder.offsetHeight = "+elementholder.offsetHeight);
-      console.log("before: elementholder.scrollHeight-elementholder.offsetHeight = "+(elementholder.scrollHeight-elementholder.offsetHeight));
-      console.log("before: elementholder.clientTop = "+elementholder.clientTop);
-      console.log("before: scrollTopMax = "+scrollTopMax(elementholder));
-      console.log("before: scrollTopMax = "+scrollTopMax(elementholder));
-      console.log("before: elementholder.scrollTop = "+elementholder.scrollTop);
-
-      // https://stackoverflow.com/questions/876115/how-can-i-determine-if-a-div-is-scrolled-to-the-bottom#answer-876134 but not right, see comment
-      //const wasAtBottom = elementholder.scrollTop === elementholder.scrollHeight
-      const wasAtBottom = elementholder.scrollTop == scrollTopMax(elementholder);
-      console.log("wasAtBottom = "+wasAtBottom);
+      const wasAtBottom = isScrolledToBottom(element);
       // Append at bottom
-      element.innerText += thingToAdd;
-      // Scroll to bottom
-
-      if (wasAtBottom) {
-        const newScrollTop = 1e9;
-        console.log("SETTING SCROLLTOP to "+newScrollTop);
-        elementholder.scrollTop = 1e9;  // a billion pixels.  gets clamped.
-        console.log("AND GOT BACK "+elementholder.scrollTop);
-        "If the number is greater than the maximum allowed scroll amount, the number is set to the maximum number"
+      if (false) {
+        if (wasAtBottom) {
+          thingToAdd = '[was at bottom] '+thingToAdd;
+        } else {
+          thingToAdd = '[was not at bottom] '+thingToAdd;
+        }
       }
-      console.log("after: elementholder.scrollTop = "+elementholder.scrollTop);
-      console.log("after: elementholder.scrollHeight = "+elementholder.scrollHeight);
-      console.log("after: elementholder.offsetHeight = "+elementholder.offsetHeight);
-      console.log("after: elementholder.scrollHeight-elementholder.offsetHeight = "+(elementholder.scrollHeight-elementholder.offsetHeight));
-      console.log("before: elementholder.clientTop = "+elementholder.clientTop);
-      console.log("after: scrollTopMax = "+scrollTopMax(elementholder));
-      console.log("===========");
+      element.innerText += thingToAdd;
+      if (wasAtBottom) {
+        // Scroll to bottom
+        element.scrollTop = 1e9;  // a billion pixels.  gets clamped.
+      }
     },
     info : (...args) => {
       element.innerText += "[INFO] "+args.join(' ')+"\n";
@@ -77,9 +60,8 @@ const MyConsole = () => {
       //console.clear(...args);
       element.innerText = '';
     },
-    attachToElement : (element, elementholder) => {
+    attachToElement : (element) => {
       this.element = element;
-      this.elementholder = elementholder;
     }
   };
   return answer;
