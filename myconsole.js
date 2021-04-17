@@ -5,7 +5,22 @@
 console.log("in myconsole.js");
 
 const MyConsole = () => {
-  const answer = {
+  let element = null;
+  let buffered = false;
+  let bufferedOutput = '';
+  const stack = [];
+
+  // None of the answers on the web for this work.  Seriously.
+  const isScrolledToBottom = (element) => {
+    const saved_scrollTop = element.scrollTop;
+    element.scrollTop += 1;
+    const answer = element.scrollTop == saved_scrollTop;
+    element.scrollTop = saved_scrollTop;
+    return answer;
+  };
+  const zeropad = (n,minwidth) => n.toString().padStart(minwidth,'0');
+
+  const myconsole = {
     log : (...args) => {
 
       const now = new Date();
@@ -14,35 +29,12 @@ const MyConsole = () => {
       const ss = now.getSeconds();
       const ms = now.getSeconds();
 
-      const zeropad = (n,minwidth) => {
-        return n.toString().padStart(minwidth,'0');
-      };
+      let message = args[0] + args.slice(1).map(s=>JSON.stringify(s)).join(' ');
+      let thingToAdd = ""+hh+":"+zeropad(mm,2)+":"+zeropad(ss,2)+"."+zeropad(ms,3)+" [LOG] "+message+'\n';
+      if (!buffered) thingToAdd = "[unbuffered] "+thingToAdd;
+      bufferedOutput += thingToAdd;
 
-      let thingToAdd = ""+hh+":"+zeropad(mm,2)+":"+zeropad(ss,2)+"."+zeropad(ms,3)+" [LOG] "+args.join(' ')+"\n";
-
-      // None of the answers on the web for this work.  Seriously.
-      const isScrolledToBottom = (element) => {
-        const saved_scrollTop = element.scrollTop;
-        element.scrollTop += 1;
-        const answer = element.scrollTop == saved_scrollTop;
-        element.scrollTop = saved_scrollTop;
-        return answer;
-      };
-
-      const wasAtBottom = isScrolledToBottom(element);
-      // Append at bottom
-      if (false) {
-        if (wasAtBottom) {
-          thingToAdd = '[was at bottom] '+thingToAdd;
-        } else {
-          thingToAdd = '[was not at bottom] '+thingToAdd;
-        }
-      }
-      element.innerText += thingToAdd;
-      if (wasAtBottom) {
-        // Scroll to bottom
-        element.scrollTop = 1e9;  // a billion pixels.  gets clamped.
-      }
+      if (!buffered) myconsole.flush();
     },
     info : (...args) => {
       element.innerText += "[INFO] "+args.join(' ')+"\n";
@@ -60,11 +52,47 @@ const MyConsole = () => {
       //console.clear(...args);
       element.innerText = '';
     },
-    attachToElement : (element) => {
-      this.element = element;
-    }
+    attachToElement : (elementToAttachTo) => {
+      element = elementToAttachTo;
+    },
+    flush : () => {
+      const wasAtBottom = isScrolledToBottom(element);
+      // Append at bottom
+      if (false) {
+        if (wasAtBottom) {
+          bufferedOutput += '[scrolling to bottom]\n';
+        } else {
+          bufferedOutput += '[not scrolling to bottom]\n';
+        }
+      }
+      element.innerText += bufferedOutput;
+      bufferedOutput = '';
+      if (wasAtBottom) {
+        // Scroll to bottom
+        element.scrollTop = 1e9;  // a billion pixels.  gets clamped.
+      }
+    },
+    // Callers actually shouldn't use this; use doWhileBuffered instead,
+    // which is exception-safe and nests properly.
+    setBuffered : (newBuffered) => {
+      buffered = newBuffered;
+      if (!buffered) {
+        myconsole.flush();
+      }
+    },
+    doWhileBuffered : (fun) => {
+      stack.push(buffered);
+      myconsole.setBuffered(true);
+      let answer = null;
+      try {
+        answer = fun();
+      } finally {
+        myconsole.setBuffered(stack.pop());
+      }
+      return answer;
+    },
   };
-  return answer;
+  return myconsole;
 };  // MyConsole
 
 const TestMyConsole = (myconsole) => {
