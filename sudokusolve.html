@@ -164,7 +164,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
  <head>
   <style>
    .myconsole {
-     height:200px;
+     height:300px;
      border:1px solid black;
      overflow: auto;
      font-size:small;  /* seems to be same size as console font */
@@ -262,9 +262,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
       <tr>
        <td>
          Row-column fish:
-         <input class="fish1" type="button" value="1" onmouseover="fishButtonMouseOver(1)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(1)" onmouseup="anyButtonMouseUp()">
+         <input class="fish1" type="button" value="1" title="every 1-fish can be obtained by simply baring a hidden single and propagating from it, I think" onmouseover="fishButtonMouseOver(1)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(1)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish1scount"></span></small></small>
-         <input class="fish2" type="button" value="2" onmouseover="fishButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
+         <input class="fish2" type="button" value="2" title="2-fishes are the same as x-wings... I think" onmouseover="fishButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish2scount"></span></small></small>
          <input class="fish3" type="button" value="3" onmouseover="fishButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish3scount"></span></small></small>
@@ -296,6 +296,7 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    <input type="button" value="Clear log" onmousedown="myconsole.clear()"></input>
    <input type="button" value="Log separator" onmousedown="myconsole.log('------------------------------------------------------------------------------------------------------------')"></input>
    <pre id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></pre>
+   <span id="myconsolelinecount" class="myconsolelinecount">0</span> log lines
  </body>
  <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script src="myconsole.js"></script>
@@ -803,11 +804,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
    console.log("in script");
 
    const myconsole = MyConsole();
-
-   //myconsole.log("hey! this is to myconsole: ",[1,2]);
-   myconsole.attachToElement(window.myconsole, window.myconsole);
-   myconsole.log("test message to myconsole with stuff", "<div></div>");
-   myconsole.log("test message to myconsole with stuff", "<div></div>");
+   myconsole.attachToElement(window.myconsole, window.myconsolelinecount);
 
    myconsole.doWhileBuffered(()=>{
      try {
@@ -1200,9 +1197,10 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        };  // CachedRowColumnFishDecompose
 
 
-       const doFishes = (max_fish_size, n, oldState) => {
+       const doFishes = (min_fish_size, max_fish_size, n, oldState) => {
          const verbose_level = 1;
          if (verbose_level >= 1) myconsole.log("        in doFishes(max_fish_size="+max_fish_size+", n="+n+", state)");
+         CHECK_EQ(typeof(min_fish_size), 'number');
          CHECK_EQ(typeof(max_fish_size), 'number');
          CHECK_EQ(typeof(n), 'number');
          CHECK(Array.isArray(oldState));
@@ -1229,18 +1227,61 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            if (verbose_level >= 1) myconsole.log("          digit = "+digit);
            const decomposition = CachedRowColumnFishDecompose(digit, max_fish_size, n, oldState);
 
-           // Simplest way to do this that I can think of is to clear the digit
-           // from all cells that aren't in any of the fishes.
-           const cells_to_clear = new Set(range(n*n*n*n));
-           for (const [fish_rows,fish_cols] of decomposition) {
-             for (const row of fish_rows) {
-               for (const col of fish_cols) {
-                 cells_to_clear.delete(row*(n*n) + col);
+           if (false) {  // assumes we want to use all the parts, which isn't true
+             // Simplest way to do this that I can think of is to clear the digit
+             // from all cells that aren't in any of the fishes.
+             const cells_to_clear = new Set(range(n*n*n*n));
+             for (const [fish_rows,fish_cols] of decomposition) {
+               for (const row of fish_rows) {
+                 for (const col of fish_cols) {
+                   cells_to_clear.delete(row*(n*n) + col);
+                 }
                }
              }
-           }
-           for (const cell of cells_to_clear) {
-             removeIf(newState[cell], x => x===digit);
+             for (const cell of cells_to_clear) {
+               removeIf(newState[cell], x => x===digit);
+             }
+           } else {
+             for (const [fish_rows,fish_cols] of decomposition) {
+               if (fish_rows.length >= min_fish_size && fish_rows.length <= max_fish_size) {
+                 const non_fish_rows = new Set(range(n*n));
+                 for (const fish_row of fish_rows) non_fish_rows.delete(fish_row);
+                 const non_fish_cols = new Set(range(n*n));
+                 for (const fish_col of fish_cols) non_fish_cols.delete(fish_col);
+
+                 let might_be_a_row_fish = true;
+                 let might_be_a_col_fish = true;
+                 for (const row of fish_rows) {
+                   for (const col of non_fish_cols) {
+                     if (oldState[row*(n*n)+col].includes(digit)) {
+                       might_be_a_row_fish = false;
+                       break;
+                     }
+                   }
+                 }
+                 for (const row of non_fish_rows) {
+                   for (const col of fish_cols) {
+                     if (oldState[row*(n*n)+col].includes(digit)) {
+                       might_be_a_col_fish = false;
+                       break;
+                     }
+                   }
+                 }
+                 if (might_be_a_row_fish && !might_be_a_col_fish) {
+                   for (const row of non_fish_rows) {
+                     for (const col of fish_cols) {
+                       removeIf(newState[row*(n*n)+col], x => x===digit);
+                     }
+                   }
+                 } else if (might_be_a_col_fish && !might_be_a_row_fish) {
+                   for (const row of non_fish_rows) {
+                     for (const col of fish_cols) {
+                       removeIf(newState[row*(n*n)+col], x => x===digit);
+                     }
+                   }
+                 }
+               }
+             }
            }
          }
          if (verbose_level >= 1) myconsole.log("              XXXmax_ever_ksets = "+XXXmax_ever_ksets);
@@ -1646,10 +1687,10 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
          const nDoHiddenQuads = howManyTimesStateWillChange(state, scratchState=>doHiddenTuples(4,n,scratchState));
          const nDoOmissions = howManyTimesStateWillChange(state, scratchState=>doOmissions(n,scratchState));
          const nDoXwings = howManyTimesStateWillChange(state, scratchState=>doXwings(n,scratchState));
-         const nDoFish1s = howManyTimesStateWillChange(state, scratchState=>doFishes(1,n,scratchState));
-         const nDoFish2s = howManyTimesStateWillChange(state, scratchState=>doFishes(2,n,scratchState));
-         const nDoFish3s = howManyTimesStateWillChange(state, scratchState=>doFishes(3,n,scratchState));
-         const nDoFish4s = howManyTimesStateWillChange(state, scratchState=>doFishes(4,n,scratchState));
+         const nDoFish1s = howManyTimesStateWillChange(state, scratchState=>doFishes(1,1,n,scratchState));
+         const nDoFish2s = howManyTimesStateWillChange(state, scratchState=>doFishes(2,2,n,scratchState));
+         const nDoFish3s = howManyTimesStateWillChange(state, scratchState=>doFishes(3,3,n,scratchState));
+         const nDoFish4s = howManyTimesStateWillChange(state, scratchState=>doFishes(4,4,n,scratchState));
 
          propagateSinglesButton.disabled = nPropagates===0;
          hiddenSinglesButton.disabled = nDoHiddenSingles===0;
@@ -1774,14 +1815,8 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
          }
        };  // updateUiFromStatePair
 
-
-       // XXX wait a minute, do I want the loop?  I don't think so!  Argh, need to distinguish between penned single and pencilled single
-       while (true) {
-         const newState = doPropagateSingles(n, state);
-         if (deepEquals(newState, state)) break;
-         state = newState;
-       }
-
+       // CBB: really need to distinguish between penned and pencilled single!
+       state = doPropagateSingles(n, state);
        updateUiFromStatePair(state,state);
        updateUndoRedoButtons();
 
@@ -1998,7 +2033,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        window.fishButtonMouseOver = (fish_size) => {
          myconsole.log("    in fishButtonMouseOver");
          myconsole.doWhileBuffered(()=>{
-           const scratchState = doFishes(fish_size, n, state);
+           const scratchState = doFishes(fish_size,fish_size, n, state);
            updateUiFromStatePair(state,scratchState);
            myconsole.log("    out fishButtonMouseOver");
          });
@@ -2009,7 +2044,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
            myconsole.log("      before: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
            redoStack.length = 0;  // clear
            undoStack.push(state);
-           state = doFishes(fish_size, n, state);
+           state = doFishes(fish_size,fish_size, n, state);
            updateUiFromStatePair(Last(undoStack),state);
            myconsole.log("      after: undoStack.length = "+undoStack.length+" redoStack.length = "+redoStack.length);
            myconsole.log("    out fishButtonMouseDown");
@@ -2215,6 +2250,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        //myconsole.log("  file_contents = ",file_contents);
      } catch (error) {
        console.error("ARGH, caught error: ",error);
+       // CBB: oh this isn't good... output leading up to it gets lost now as we throw away the page.
        CHECK(false);
      }
    });

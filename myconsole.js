@@ -6,8 +6,10 @@ console.log("in myconsole.js");
 
 const MyConsole = () => {
   let element = null;
+  let countElement = null;
   let buffered = false;
   let bufferedOutput = '';
+  let numLinesOutput = 0;
   const stack = [];
 
   // None of the answers on the web for this work.  Seriously.
@@ -51,9 +53,12 @@ const MyConsole = () => {
     clear : (...args) => {
       //console.clear(...args);
       element.innerText = '';
+      numLinesOutput = 0;
+      countElement.innerHTML = ''+numLinesOutput;
     },
-    attachToElement : (elementToAttachTo) => {
+    attachToElement : (elementToAttachTo,countElementToAttachTo) => {
       element = elementToAttachTo;
+      countElement = countElementToAttachTo;
     },
     flush : () => {
       const wasAtBottom = isScrolledToBottom(element);
@@ -66,11 +71,13 @@ const MyConsole = () => {
         }
       }
       element.innerText += bufferedOutput;
+      numLinesOutput += bufferedOutput.split('\n').length - 1;  // CBB: not really right I don't think, and inefficient
       bufferedOutput = '';
       if (wasAtBottom) {
         // Scroll to bottom
         element.scrollTop = 1e9;  // a billion pixels.  gets clamped.
       }
+      countElement.innerHTML = ''+numLinesOutput;
     },
     // Callers actually shouldn't use this; use doWhileBuffered instead,
     // which is exception-safe and nests properly.
