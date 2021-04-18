@@ -168,6 +168,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
      border:1px solid black;
      overflow: auto;
      font-size:small;  /* seems to be same size as console font */
+     /* act like pre, but use div instead of pre since pre adds unfriendly extra space afterwards */
+     font-family:monospace;
+     white-space:pre;
    }
    table.toplevel_table {
     border:5px solid black;
@@ -266,9 +269,9 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
          <small><small><span class="dofish1scount"></span></small></small>
          <input class="fish2" type="button" value="2" title="2-fishes are the same as x-wings... I think" onmouseover="fishButtonMouseOver(2)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(2)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish2scount"></span></small></small>
-         <input class="fish3" type="button" value="3" onmouseover="fishButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
+         <input class="fish3" type="button" value="3" title="3-fishes are swordfish" onmouseover="fishButtonMouseOver(3)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(3)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish3scount"></span></small></small>
-         <input class="fish4" type="button" value="4" onmouseover="fishButtonMouseOver(4)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(4)" onmouseup="anyButtonMouseUp()">
+         <input class="fish4" type="button" value="4" title="4-fishes are jellyfish" onmouseover="fishButtonMouseOver(4)" onmouseout="anyButtonMouseOut()" onmousedown="fishButtonMouseDown(4)" onmouseup="anyButtonMouseUp()">
          <small><small><span class="dofish4scount"></span></small></small>
 
       <tr>
@@ -295,8 +298,8 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    <br>
    <input type="button" value="Clear log" onmousedown="myconsole.clear()"></input>
    <input type="button" value="Log separator" onmousedown="myconsole.log('------------------------------------------------------------------------------------------------------------')"></input>
-   <pre id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></pre>
-   <span id="myconsolelinecount" class="myconsolelinecount">0</span> log lines
+   <div id="myconsole" class="myconsole">DEBUGGING CONSOLE<br></div>
+   <small><small><span id="myconsolelinecount" class="myconsolelinecount">0</span> log lines</small></small>
  </body>
  <script src="projecteuler_p096_sudoku.txt.js"></script>
  <script src="myconsole.js"></script>
@@ -2109,29 +2112,33 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
        window.mouseOverCell = (event,icell) => {
          const verbose_level = 0;
          if (verbose_level >= 1) myconsole.log("    in mouseOverCell");
-         if (verbose_level >= 1) myconsole.log("      event = ",event);
-         if (verbose_level >= 1) myconsole.log("      icell = ",icell);
-         let newDigitToHighlight = null;
-         if (state[icell].length == 1) {
-           newDigitToHighlight = state[icell][0];
-         }
-         if (newDigitToHighlight != digitToHighlight) {
-           digitToHighlight = newDigitToHighlight;
-           updateUiFromStatePair(state,state);
-         }
-         if (verbose_level >= 1) myconsole.log("    out mouseOverCell");
+         myconsole.doWhileBuffered(()=>{
+           if (verbose_level >= 1) myconsole.log("      event = ",event);
+           if (verbose_level >= 1) myconsole.log("      icell = ",icell);
+           let newDigitToHighlight = null;
+           if (state[icell].length == 1) {
+             newDigitToHighlight = state[icell][0];
+           }
+           if (newDigitToHighlight != digitToHighlight) {
+             digitToHighlight = newDigitToHighlight;
+             updateUiFromStatePair(state,state);
+           }
+           if (verbose_level >= 1) myconsole.log("    out mouseOverCell");
+         });
        };  // mouseOverCell
        window.mouseOutCell = (event,icell) => {
          const verbose_level = 0;
          if (verbose_level >= 1) myconsole.log("    in mouseOutCell");
-         if (verbose_level >= 1) myconsole.log("      event = ",event);
-         if (verbose_level >= 1) myconsole.log("      icell = ",icell);
-         let newDigitToHighlight = null;
-         if (newDigitToHighlight != digitToHighlight) {
-           digitToHighlight = newDigitToHighlight;
-           updateUiFromStatePair(state,state);
-         }
-         if (verbose_level >= 1) myconsole.log("    out mouseOutCell");
+         myconsole.doWhileBuffered(()=>{
+           if (verbose_level >= 1) myconsole.log("      event = ",event);
+           if (verbose_level >= 1) myconsole.log("      icell = ",icell);
+           let newDigitToHighlight = null;
+           if (newDigitToHighlight != digitToHighlight) {
+             digitToHighlight = newDigitToHighlight;
+             updateUiFromStatePair(state,state);
+           }
+           if (verbose_level >= 1) myconsole.log("    out mouseOutCell");
+         });
        };  // mouseOutCell
 
        window.processPastedInput = pastedInput => {
@@ -2203,48 +2210,54 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
 
        window.resetButtonClicked = () => {
          myconsole.log("    in resetButtonClicked");
+         myconsole.doWhileBuffered(()=>{
 
-         //const prefill_string = '1300020000300004';
+           //const prefill_string = '1300020000300004';
 
-         const prefill_input = document.getElementById("prefill");
-         myconsole.log("      prefill_input = ",prefill_input);
-         CHECK(prefill_input != null);
-         myconsole.log("      prefill_input.value = ",prefill_input.value);
+           const prefill_input = document.getElementById("prefill");
+           myconsole.log("      prefill_input = ",prefill_input);
+           CHECK(prefill_input != null);
+           myconsole.log("      prefill_input.value = ",prefill_input.value);
 
-         processPastedInput(prefill_input.value);
+           processPastedInput(prefill_input.value);
 
-         myconsole.log("    out resetButtonClicked");
+           myconsole.log("    out resetButtonClicked");
+         });
        };  // resetButtonClicked
 
        window.inputKeyDown = (event) => {
          myconsole.log("    in inputKeyDown");
-         myconsole.log("      event = ",event);
-         // XXX TODO: which of these do I want? evidently both work
-         //const element = event.srcElement;
-         const element = event.target;
-         if (EQ(event.key, "Enter")) {
-           //processPastedInput(document.getElementById("prefill").value);
-           processPastedInput(element.value);
-         }
-         myconsole.log("    out inputKeyDown");
+         myconsole.doWhileBuffered(()=>{
+           myconsole.log("      event = ",event);
+           // XXX TODO: which of these do I want? evidently both work
+           //const element = event.srcElement;
+           const element = event.target;
+           if (EQ(event.key, "Enter")) {
+             //processPastedInput(document.getElementById("prefill").value);
+             processPastedInput(element.value);
+           }
+           myconsole.log("    out inputKeyDown");
+         });
        };  // inputKeyDown
        window.inputPasted = event => {
          myconsole.log("    in inputPasted");
-         myconsole.log("      event = ",event);
-         // XXX TODO: which of these do I want? evidently both work
-         //const element = event.srcElement;
-         const element = event.target;
-         myconsole.log("      event.clipboardData = ",event.clipboardData);
-         myconsole.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
-         const theData = event.clipboardData.getData('text/plain');
-         myconsole.log("      theData.length = ",theData.length);
-         if (theData.length >= 1000) {
-           myconsole.log('      preventing default to avoid choking!');
-           event.preventDefault();
-           element.value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
-           processPastedInput(theData);
-         }
-         myconsole.log("    out inputPasted");
+         myconsole.doWhileBuffered(()=>{
+           myconsole.log("      event = ",event);
+           // XXX TODO: which of these do I want? evidently both work
+           //const element = event.srcElement;
+           const element = event.target;
+           myconsole.log("      event.clipboardData = ",event.clipboardData);
+           myconsole.log("      event.clipboardData.getData() = ",event.clipboardData.getData('text/plain'));
+           const theData = event.clipboardData.getData('text/plain');
+           myconsole.log("      theData.length = ",theData.length);
+           if (theData.length >= 1000) {
+             myconsole.log('      preventing default to avoid choking!');
+             event.preventDefault();
+             element.value = "[[[paste of size "+theData.length+" accepted but CENSORED to avoid choking]]]";
+             processPastedInput(theData);
+           }
+           myconsole.log("    out inputPasted");
+         });
        };
 
        //myconsole.log("  file_contents = ",file_contents);
