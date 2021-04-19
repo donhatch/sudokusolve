@@ -33,7 +33,9 @@ const MyConsole = () => {
 
       let message = args[0] + args.slice(1).map(s=>JSON.stringify(s)).join(' ');
       let thingToAdd = ""+hh+":"+zeropad(mm,2)+":"+zeropad(ss,2)+"."+zeropad(ms,3)+" [LOG] "+message+'\n';
-      if (!buffered) thingToAdd = "[unbuffered] "+thingToAdd;
+      if (false) {  // nah, the separator at the end of flush looks cleaner
+        if (!buffered) thingToAdd = "[unbuffered] "+thingToAdd;  // 
+      }
       bufferedOutput += thingToAdd;
 
       if (!buffered) myconsole.flush();
@@ -70,7 +72,7 @@ const MyConsole = () => {
           bufferedOutput += '[not scrolling to bottom]\n';
         }
       }
-      element.innerText += bufferedOutput;
+      element.innerText += bufferedOutput + "-----------------\n";
       numLinesOutput += bufferedOutput.split('\n').length - 1;  // CBB: not really right I don't think, and inefficient
       bufferedOutput = '';
       if (wasAtBottom) {
