@@ -1,5 +1,7 @@
 <!--
 
+TODO: should not require clicking in order to paste; give the thing focus automatically on mouseover (or something)
+
 TODO: can I put the myconsole in a separate window, instead of fighting with it in the same window?
 
 TODO: sometimes there are prefills that do not include some digit,
@@ -33,7 +35,7 @@ TODO: get fish size ui sorted out, it's very confusing and not very usable.
 TODO: http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html consensus seems to be that TTHsieh's
       second proposal has an xwing, not a swordfish.  which is weird because my program
       does *not* seem to think it's an xwing, wtf?
-      That thread didn't seem to pan out :-(
+      That thread didn't seem to pan out :-( )
       Oh wait, maybe it did, there is more than one page...
 
 TODO: http://hodoku.sourceforge.net/en/show_example.php?file=bf301&tech=Swordfish says "The following representation can be pasted in most Soduku programs:"
@@ -478,6 +480,15 @@ TODO: find a way to input puzzles from sites such as https://1sudoku.com/sudoku-
    const Div = (a,b) => Math.floor(a/b);
    const Sub = (arr,indices) => Array.isArray(indices) ? indices.map(i=>Sub(arr,i)) : arr[indices]
 
+   const Join = (sep,strings) => {
+     let answer = "";
+     for (const string of strings) {
+       if (!EQ(answer.length, 0)) answer += sep;
+       answer += string;
+     }
+     return answer;
+   };
+
    const IsSubsetOf = (a,b) => {
      CHECK(a instanceof Set);
      CHECK(b instanceof Set);
@@ -803,6 +814,33 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      </div>'
      */
    }
+
+   // e.g. [12,14,21] => "r1c35,r2c3"
+   // TODO: produces r13c9,r3c8, should be r1c9,r3c89
+   const cellset2terse = (n,cells) => {
+     //return Stringify(cells);
+     const groups = [];
+     for (const cell of [...cells].sort((a,b)=>a-b)) {
+       let pushed = false;
+       for (const group of groups) {
+         // if group all in same row or col as cell, add to group
+         if (group.every(groupcell => EQ(Div(groupcell,n*n), Div(cell,n*n))) ||
+             group.every(groupcell => EQ(groupcell%(n*n), cell%(n*n)))) {
+           group.push(cell);
+           pushed = true;
+           break;
+         }
+       }
+       if (!pushed) groups.push([cell]);
+     }
+     //return Stringify(groups);
+     const group_strings = [];
+     for (const group of groups) {
+       group_strings.push('r'+Join('',new Set(group.map(cell=>''+(Div(cell,n*n)+1))))+
+                          'c'+Join('',new Set(group.map(cell=>''+(cell%(n*n)+1)))));
+     }
+     return Join(',', group_strings);
+   };  // cellset2terse
 
    console.log("in script");
 
@@ -1302,11 +1340,11 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
          const newState = deepCopy(oldState);
 
          // What is a naked pair?  It's when two cells in a house
-         // have the exact same candidates.  In this case we can eliminate
+         // have the exact same two candidates.  In this case we can eliminate
          // those two candidates from the rest of the house.
 
          // What is a naked triple?  It's when three cells in a house
-         // have the same three candidates, although it may be that only
+         // have only three candidates among them, although it may be that only
          // two of them occur at a time.  E.g.
          //   123 123 12
          //   12 13 23
@@ -1336,15 +1374,25 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
                }
              }
              if (union.size == tuplicity) {
-               if (verbose_level >= 2) myconsole.log("                    found naked "+tuplicity+"-tuple "+Stringify(union)+" in house "+ihouse+" non-single positions "+Stringify(kset));
+               if (verbose_level >= 2) myconsole.log("                    found naked "+tuplicity+"-tuple "+Stringify(union)+" in house "+houseNames[ihouse]+" non-single positions "+Stringify(kset));
                // remove the digits in the union from the rest of this house.
+               const removed_list = [];
                for (let i = 0; i < iindicesOfNonSingles.length; ++i) {
                  if (!kset.includes(i)) {
                    const iinhouse = iindicesOfNonSingles[i];
                    const cell = house2cells[ihouse][iinhouse];
+
+                   for (const x of oldState[cell]) {
+                     if (union.has(x)) {
+                       removed_list.push(cell);
+                       break;
+                     }
+                   }
                    removeIf(newState[cell], x => union.has(x));
                  }
                }
+               if (verbose_level >= 2) myconsole.log("                        removed_list = "+Stringify(removed_list));
+               if (verbose_level >= 1) myconsole.log("                        "+houseNames[ihouse]+": "+cellset2terse(n,kset.map(i=>house2cells[ihouse][iindicesOfNonSingles[i]]))+" => "+cellset2terse(n,removed_list)+"<>"+Join('',union));
              }
            }
 
@@ -1469,13 +1517,22 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
                  if (verbose_level >= 2) myconsole.log("              Hey! every occurrance of digit "+digit+" in house "+ihouse0+" is also in "+ihouse1);
                  if (verbose_level >= 2) myconsole.log("                  cells0 = "+Array.from(cells0));
                  if (verbose_level >= 2) myconsole.log("                  cells1 = "+Array.from(cells1));
+
+                 const actually_did_stuff = [];
                  // Remove all other occurrances of digit in house1.
                  for (const cell of house2cells[ihouse1]) {
                    if (oldState[cell].includes(digit) &&
                        !cell2houses[cell].includes(ihouse0)) {
                      if (verbose_level >= 2) myconsole.log("                      so can remove the "+digit+" at position "+Stringify(cell));
+                     if (oldState[cell].includes(digit)) {
+                       actually_did_stuff.push(cell);
+                     }
                      removeIf(newState[cell], x => x===digit);
                    }
+                 }
+                 if (actually_did_stuff.length > 0) {
+                   if (verbose_level >= 2) myconsole.log("                  actually_did_stuff = "+Stringify(actually_did_stuff));
+                   if (verbose_level >= 1) myconsole.log("                  "+cellset2terse(n,cells0)+" => "+cellset2terse(n,actually_did_stuff)+"<>"+digit);
                  }
                }
              }
