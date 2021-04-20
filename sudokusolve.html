@@ -822,7 +822,7 @@ And from http://forum.enjoysudoku.com/a-pure-swordfish-collection-t5775.html
      const groups = [];
      for (const cell of [...cells].sort((a,b)=>a-b)) {
        let pushed = false;
-       for (const group of groups) {
+       for (const group of [...groups].reverse()) {  // search backwards, so we get r1c9,r3c89 instead of r13c9,r3c8
          // if group all in same row or col as cell, add to group
          if (group.every(groupcell => EQ(Div(groupcell,n*n), Div(cell,n*n))) ||
              group.every(groupcell => EQ(groupcell%(n*n), cell%(n*n)))) {
