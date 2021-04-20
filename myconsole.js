@@ -72,7 +72,8 @@ const MyConsole = () => {
           bufferedOutput += '[not scrolling to bottom]\n';
         }
       }
-      element.innerText += bufferedOutput + "-----------------\n";
+      if (element.innerText.length != 0) bufferedOutput = "-----------------\n" + bufferedOutput;
+      element.innerText += bufferedOutput;
       numLinesOutput += bufferedOutput.split('\n').length - 1;  // CBB: not really right I don't think, and inefficient
       bufferedOutput = '';
       if (wasAtBottom) {
